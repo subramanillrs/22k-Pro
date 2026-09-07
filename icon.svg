@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- Premium dark slate background -->
+  <rect width="128" height="128" rx="28" fill="#0F172A"/>
+  
+  <!-- Outer edge of the coin (Flat dark amber) -->
+  <circle cx="64" cy="64" r="44" fill="#D97706"/>
+  
+  <!-- Main flat gold surface -->
+  <circle cx="64" cy="64" r="40" fill="#FBBF24"/>
+  
+  <!-- Rising tracker arrow subtly integrated into the background of the coin -->
+  <path d="M 36 74 L 52 56 L 64 66 L 82 46" fill="none" stroke="#D97706" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+  <polyline points="72,46 82,46 82,56" fill="none" stroke="#D97706" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+  
+  <!-- Bold, high-contrast primary text -->
+  <text x="64" y="70" text-anchor="middle" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="32" font-weight="900" fill="#451A03" letter-spacing="0.5">22K</text>
+  
+  <!-- Clean, tracked-out subtitle -->
+  <text x="64" y="88" text-anchor="middle" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="700" fill="#78350F" letter-spacing="2">TRACKER</text>
+</svg>

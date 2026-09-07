@@ -1,0 +1,245 @@
+[
+  {
+    "date": "2026-06-15",
+    "time": "09:53:53",
+    "rate_22k": 14070,
+    "session": "AM",
+    "type": "external_seed",
+    "source": "LiveChennai",
+    "source_url": "https://www.livechennai.com/news_viewall_psk.asp?catid=29&orderby=&page=6"
+  },
+  {
+    "date": "2026-06-16",
+    "time": "09:47:09",
+    "rate_22k": 14060,
+    "session": "AM",
+    "type": "external_seed",
+    "source": "LiveChennai",
+    "source_url": "https://www.livechennai.com/news_viewall_psk.asp?catid=29&orderby=&page=6"
+  },
+  {
+    "date": "2026-06-17",
+    "time": "09:49:26",
+    "rate_22k": 14030,
+    "session": "AM",
+    "type": "external_seed",
+    "source": "LiveChennai",
+    "source_url": "https://www.livechennai.com/news_viewall_psk.asp?catid=29&orderby=&page=6"
+  },
+  {
+    "date": "2026-06-18",
+    "time": "09:55:19",
+    "rate_22k": 14030,
+    "session": "AM",
+    "type": "external_seed",
+    "source": "LiveChennai",
+    "source_url": "https://www.livechennai.com/news_viewall_psk.asp?catid=29&orderby=&page=6"
+  },
+  {
+    "date": "2026-06-18",
+    "time": "17:00:58",
+    "rate_22k": 13650,
+    "session": "PM",
+    "type": "external_seed",
+    "source": "LiveChennai",
+    "source_url": "https://www.livechennai.com/news_viewall_psk.asp?catid=29&orderby=&page=6"
+  },
+  {
+    "date": "2026-06-19",
+    "time": "10:02:06",
+    "rate_22k": 13650,
+    "session": "AM",
+    "type": "external_seed",
+    "source": "LiveChennai",
+    "source_url": "https://www.livechennai.com/news_viewall_psk.asp?catid=29&orderby=&page=6"
+  },
+  {
+    "date": "2026-07-18",
+    "time": "09:53:02",
+    "rate_22k": 13160,
+    "session": "AM",
+    "type": "external_seed",
+    "source": "LiveChennai",
+    "source_url": "https://www.livechennai.com/news_viewall_psk.asp?catid=29&orderby=&page=29"
+  },
+  {
+    "date": "2026-07-20",
+    "time": "09:52:03",
+    "rate_22k": 13150,
+    "session": "AM",
+    "type": "external_seed",
+    "source": "LiveChennai",
+    "source_url": "https://www.livechennai.com/news_viewall_psk.asp?catid=29&orderby=&page=29"
+  },
+  {
+    "date": "2026-07-21",
+    "time": "09:53:40",
+    "rate_22k": 13220,
+    "session": "AM",
+    "type": "external_seed",
+    "source": "LiveChennai",
+    "source_url": "https://www.livechennai.com/news_viewall_psk.asp?catid=29&orderby=&page=29"
+  },
+  {
+    "date": "2026-07-22",
+    "time": "09:48:22",
+    "rate_22k": 13430,
+    "session": "AM",
+    "type": "external_seed",
+    "source": "LiveChennai",
+    "source_url": "https://www.livechennai.com/news_viewall_psk.asp?catid=29&orderby=&page=29"
+  },
+  {
+    "date": "2026-07-23",
+    "time": "09:53:50",
+    "rate_22k": 13500,
+    "session": "AM",
+    "type": "external_seed",
+    "source": "LiveChennai",
+    "source_url": "https://www.livechennai.com/news_viewall_psk.asp?catid=29&orderby=&page=29"
+  },
+  {
+    "date": "2026-07-24",
+    "time": "09:46:51",
+    "rate_22k": 13230,
+    "session": "AM",
+    "type": "external_seed",
+    "source": "LiveChennai",
+    "source_url": "https://www.livechennai.com/news_viewall_psk.asp?catid=29&orderby=&page=29"
+  },
+  {
+    "date": "2026-07-25",
+    "time": "09:44:11",
+    "rate_22k": 13285,
+    "session": "AM",
+    "type": "external_seed",
+    "source": "LiveChennai",
+    "source_url": "https://www.livechennai.com/news_viewall_psk.asp?catid=29&orderby=&page=29"
+  },
+  {
+    "date": "2026-07-27",
+    "time": "09:54:33",
+    "rate_22k": 13370,
+    "session": "AM",
+    "type": "external_seed",
+    "source": "LiveChennai",
+    "source_url": "https://www.livechennai.com/news_viewall_psk.asp?catid=29&orderby=&page=29"
+  },
+  {
+    "date": "2026-07-28",
+    "time": "09:52:03",
+    "rate_22k": 13215,
+    "session": "AM",
+    "type": "external_seed",
+    "source": "LiveChennai",
+    "source_url": "https://www.livechennai.com/news_viewall_psk.asp?catid=29&orderby=&page=29"
+  },
+  {
+    "date": "2026-07-29",
+    "time": "09:55:32",
+    "rate_22k": 13155,
+    "session": "AM",
+    "type": "external_seed",
+    "source": "LiveChennai",
+    "source_url": "https://www.livechennai.com/news_viewall_psk.asp?page=77"
+  },
+  {
+    "date": "2026-08-21",
+    "time": "09:53:48",
+    "rate_22k": 14940,
+    "session": "AM",
+    "type": "external_seed",
+    "source": "LiveChennai",
+    "source_url": "https://www.livechennai.com/news_viewall_psk.asp?KW=&PN=39&catid=15&orderby="
+  },
+  {
+    "date": "2026-08-21",
+    "time": "16:03:07",
+    "rate_22k": 14999,
+    "session": "PM",
+    "type": "external_seed",
+    "source": "LiveChennai",
+    "source_url": "https://www.livechennai.com/news_viewall_psk.asp?KW=&PN=39&catid=15&orderby="
+  },
+  {
+    "date": "2026-08-22",
+    "time": "10:04:58",
+    "rate_22k": 15030,
+    "session": "AM",
+    "type": "external_seed",
+    "source": "LiveChennai",
+    "source_url": "https://www.livechennai.com/news_viewall_psk.asp?KW=&PN=39&catid=15&orderby="
+  },
+  {
+    "date": "2026-08-24",
+    "time": "09:48:03",
+    "rate_22k": 15030,
+    "session": "AM",
+    "type": "external_seed",
+    "source": "LiveChennai",
+    "source_url": "https://www.livechennai.com/news_viewall_psk.asp?KW=&PN=39&catid=15&orderby="
+  },
+  {
+    "date": "2026-08-25",
+    "time": "09:59:05",
+    "rate_22k": 15010,
+    "session": "AM",
+    "type": "external_seed",
+    "source": "LiveChennai",
+    "source_url": "https://www.livechennai.com/news_viewall_psk.asp?catid=29&orderby=&page=1"
+  },
+  {
+    "date": "2026-08-26",
+    "time": "09:46:06",
+    "rate_22k": 15010,
+    "session": "AM",
+    "type": "external_seed",
+    "source": "LiveChennai",
+    "source_url": "https://www.livechennai.com/news_viewall_psk.asp?catid=29&orderby=&page=1"
+  },
+  {
+    "date": "2026-08-27",
+    "time": "09:51:29",
+    "rate_22k": 14940,
+    "session": "AM",
+    "type": "external_seed",
+    "source": "LiveChennai",
+    "source_url": "https://www.livechennai.com/news_viewall_psk.asp?catid=29&orderby=&page=1"
+  },
+  {
+    "date": "2026-08-27",
+    "time": "16:00:49",
+    "rate_22k": 14725,
+    "session": "PM",
+    "type": "external_seed",
+    "source": "LiveChennai",
+    "source_url": "https://www.livechennai.com/news_viewall_psk.asp?KW=&PN=29&catid=29&orderby="
+  },
+  {
+    "date": "2026-08-28",
+    "time": "09:48:03",
+    "rate_22k": 14650,
+    "session": "AM",
+    "type": "external_seed",
+    "source": "LiveChennai",
+    "source_url": "https://www.livechennai.com/Gold_Rate_news_chennai.asp"
+  },
+  {
+    "date": "2026-08-28",
+    "time": "17:07:55",
+    "rate_22k": 14800,
+    "session": "PM",
+    "type": "external_seed",
+    "source": "LiveChennai",
+    "source_url": "https://www.livechennai.com/Gold_Rate_news_chennai.asp"
+  },
+  {
+    "date": "2026-08-29",
+    "time": "10:26:09",
+    "rate_22k": 14505,
+    "session": "AM",
+    "type": "external_seed",
+    "source": "LiveChennai",
+    "source_url": "https://www.livechennai.com/Gold_Rate_news_chennai.asp"
+  }
+]

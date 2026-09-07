@@ -1,0 +1,2974 @@
+#!/usr/bin/env python3
+
+import json
+import math
+import os
+import re
+import statistics
+import sys
+import time
+from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timedelta
+from pathlib import Path
+from zoneinfo import ZoneInfo
+
+import requests
+from bs4 import BeautifulSoup
+
+# ============================================================
+# PATHS & CONSTANTS
+# ============================================================
+
+BASE_DIR = Path(__file__).resolve().parent
+DATA_DIR = BASE_DIR / "data"
+
+LIVE_FILE = DATA_DIR / "live.json"
+HISTORY_FILE = DATA_DIR / "history.json"
+WINDOW_FILE = DATA_DIR / "monitoring_windows.json"
+ALERT_FILE = DATA_DIR / "alert_state.json"
+SUMMARY_FILE = DATA_DIR / "summary.json"
+HEALTH_FILE = DATA_DIR / "health_status.json"
+IBJA_FILE = DATA_DIR / "ibja.json"
+QUANT_FILE = DATA_DIR / "quant_metrics.json"
+BOOTSTRAP_FILE = DATA_DIR / "bootstrap.json"
+INDEX_HTML_FILE = BASE_DIR / "index.html"
+
+SEED_FILE = BASE_DIR / "historical_monitor_seed.json"
+if not SEED_FILE.exists():
+    SEED_FILE = DATA_DIR / "historical_monitor_seed.json"
+
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+IST = ZoneInfo("Asia/Kolkata")
+
+IBJA_URL = "https://ibjarates.com"
+IBJA_MIRROR_URL = "https://www.goodreturns.in/gold-rates/"
+
+LIVECHENNAI_URL = "https://www.livechennai.com/gold_silverrate.asp"
+GOODRETURNS_URL = "https://www.goodreturns.in/gold-rates/chennai.html"
+
+POLL_SECONDS = 10
+REQUEST_TIMEOUT = 20
+
+AM_START = (9, 30)
+AM_END = (12, 30)
+PM_START = (16, 30)
+PM_END = (19, 30)
+
+FALLBACK_AM_TIME = AM_START
+FALLBACK_PM_TIME = PM_START
+
+HISTORY_LOOKBACK_DAYS = 30
+PRE_WINDOW_MINUTES = 15
+WINDOW_DURATION_MINUTES = 85
+MIN_SAMPLES_FOR_PREDICTION = 3
+
+AM_PREDICTION_MIN = (7, 0)
+AM_PREDICTION_MAX = (13, 0)
+PM_PREDICTION_MIN = (14, 0)
+PM_PREDICTION_MAX = (21, 0)
+
+MAX_DAILY_CHANGE_PCT = 8
+SOURCE_AGREEMENT_TOLERANCE_PCT = 1.5  # 1.5% adaptive spread (~₹210 at ₹14,000/g)
+SOURCE_AGREEMENT_TOLERANCE_MIN = 200  # Minimum ₹200 buffer
+
+
+def _agreement_tolerance(rate):
+    if not rate:
+        return SOURCE_AGREEMENT_TOLERANCE_MIN
+    return max(SOURCE_AGREEMENT_TOLERANCE_MIN, round(rate * (SOURCE_AGREEMENT_TOLERANCE_PCT / 100)))
+
+ALERT_STALE_HOURS = 20
+ALERT_DISAGREE_HOURS = 3
+ALERT_COOLDOWN_HOURS = 12
+
+# If live.json hasn't had a verified reading in this many hours, and
+# we're not close to the next monitoring window, force a catch-up
+# fetch outside the normal window/cron schedule. Set below
+# ALERT_STALE_HOURS so this self-heal kicks in well before the
+# webhook alert would ever fire.
+STALE_CATCHUP_HOURS = 6
+
+# When outside the actual predicted fix window but inside the wider
+# dense-cron margin (or just outside it), only fetch if within this
+# many minutes of the next window opening. Keeps the extra cron
+# margin (kept for day-to-day drift tolerance) from turning into
+# needless scraping every 5 minutes for hours.
+NEAR_WINDOW_MARGIN_MINUTES = 20
+
+# Optional: set the WEBHOOK_URL environment variable (e.g. a Slack
+# incoming webhook or generic POST endpoint) to receive alerts when
+# the feed goes stale or sources disagree for too long. Left unset,
+# alert_state.json is still tracked/updated, but no network call is
+# made and health_status.json reports webhook_configured: false.
+WEBHOOK_URL = os.environ.get("WEBHOOK_URL", os.environ.get("ALERT_WEBHOOK_URL", "")).strip()
+
+SESSION = requests.Session()
+SESSION.headers.update(
+    {
+        "User-Agent": (
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+            "AppleWebKit/605.1.15 (KHTML, like Gecko) "
+            "Version/18.0 Safari/605.1.15"
+        ),
+        "Accept": (
+            "text/html,application/xhtml+xml,application/xml;"
+            "q=0.9,*/*;q=0.8"
+        ),
+        "Accept-Language": "en-IN,en;q=0.9",
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache",
+    }
+)
+
+
+# ============================================================
+# UTILITIES
+# ============================================================
+
+def now_ist():
+    return datetime.now(IST)
+
+
+def valid_gold_rate(value):
+    if value is None:
+        return False
+
+    try:
+        val = int(value)
+        return 5000 <= val <= 50000
+    except (ValueError, TypeError):
+        return False
+
+
+def clean_number(text, min_val=5000, max_val=50000):
+    if text is None:
+        return None
+
+    cleaned = (
+        str(text)
+        .replace(",", "")
+        .replace("₹", "")
+        .replace("Rs.", "")
+        .replace("Rs", "")
+        .replace("INR", "")
+    )
+
+    cleaned = re.sub(
+        r"\b(?:24|22|18|20)\s*(?:k|carat|karat)\b",
+        " ",
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+
+    cleaned = re.sub(
+        r"\b(?:1|4|8|10|100)\s*(?:g|gm|gram|grams)\b",
+        " ",
+        cleaned,
+        flags=re.IGNORECASE,
+    )
+
+    matches = re.findall(r"\d+(?:\.\d+)?", cleaned)
+
+    for m in matches:
+        try:
+            val = int(float(m))
+            if min_val <= val <= max_val:
+                return val
+        except (ValueError, TypeError):
+            continue
+
+    return None
+
+
+def load_json(path, default):
+    try:
+        if not path.exists():
+            return default
+
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+
+    except Exception as exc:
+        print(f"WARNING: Could not read {path}: {exc}")
+        return default
+
+
+def save_json(path, data):
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    temp = path.with_suffix(path.suffix + ".tmp")
+
+    with open(temp, "w", encoding="utf-8") as f:
+        json.dump(
+            data,
+            f,
+            ensure_ascii=False,
+            indent=2,
+        )
+
+    temp.replace(path)
+
+
+def _hours_since(iso_string, now):
+    if not iso_string:
+        return None
+
+    try:
+        then = datetime.fromisoformat(iso_string)
+
+        if then.tzinfo is None:
+            then = then.replace(tzinfo=IST)
+        else:
+            then = then.astimezone(IST)
+
+        return (now - then).total_seconds() / 3600
+
+    except Exception:
+        return None
+
+
+# Broad AM/PM day-half split used to label *any* timestamp (live
+# rate updates, legacy history records, etc.) as morning or evening.
+# This is intentionally wider than the learned/predicted monitoring
+# windows (AM_PREDICTION_MIN/MAX, PM_PREDICTION_MIN/MAX) which decide
+# *when to poll*. Keep this as the single source of truth for the
+# AM/PM cut -- predict_session_times() reuses it instead of
+# re-encoding the same hours separately, so the two can't drift.
+DAY_HALF_SPLIT_HOUR = 14
+DAY_HALF_AM_START_HOUR = 6
+
+
+def session_for_time(dt):
+    hour = dt.hour
+
+    if DAY_HALF_AM_START_HOUR <= hour < DAY_HALF_SPLIT_HOUR:
+        return "AM"
+
+    if DAY_HALF_SPLIT_HOUR <= hour <= 23:
+        return "PM"
+
+    return None
+
+
+def session_for_minutes(mins):
+    """Same AM/PM split as session_for_time, but from a minutes-since-
+    midnight integer (used by the history-based prediction learner,
+    which works in minutes rather than datetimes)."""
+    if mins is None:
+        return ""
+
+    am_start = DAY_HALF_AM_START_HOUR * 60
+    split = DAY_HALF_SPLIT_HOUR * 60
+
+    if am_start <= mins < split:
+        return "AM"
+
+    if split <= mins <= 23 * 60 + 59:
+        return "PM"
+
+    return ""
+
+
+# ============================================================
+# HISTORY HELPERS
+# ============================================================
+
+def extract_history_records(data):
+    if isinstance(data, list):
+        return [
+            item
+            for item in data
+            if isinstance(item, dict)
+        ]
+
+    if isinstance(data, dict):
+        for key in ("records", "history", "data"):
+            value = data.get(key)
+
+            if isinstance(value, list):
+                return [
+                    item
+                    for item in value
+                    if isinstance(item, dict)
+                ]
+
+    return []
+
+
+def get_previous_rate():
+    records = extract_history_records(load_json(HISTORY_FILE, []))
+
+    def record_key(record):
+        timestamp = record.get("timestamp")
+        if timestamp:
+            try:
+                return datetime.fromisoformat(str(timestamp)).timestamp()
+            except Exception:
+                pass
+        date = str(record.get("date") or "")
+        time_value = str(record.get("time") or "23:59:59")
+        try:
+            return datetime.fromisoformat(f"{date}T{time_value}+05:30").timestamp()
+        except Exception:
+            return 0
+
+    valid_records = [r for r in records if valid_gold_rate(r.get("rate_22k"))]
+    if valid_records:
+        latest = max(valid_records, key=record_key)
+        return int(latest["rate_22k"])
+
+    live = load_json(LIVE_FILE, {})
+    if isinstance(live, dict) and valid_gold_rate(live.get("rate_22k")):
+        return int(live["rate_22k"])
+    return None
+
+
+# ============================================================
+# SCRAPERS
+# ============================================================
+
+def extract_livechennai_rates(soup):
+    rates = {
+        "rate_22k": None,
+        "rate_24k": None,
+        "rate_8g": None,
+    }
+
+    for table in soup.find_all("table"):
+        rows = table.find_all("tr")
+
+        if len(rows) < 3:
+            continue
+
+        # LiveChennai's rate table has a two-row header using
+        # colspan: row 0 = "Date" | "Pure Gold (24 k)" (colspan=2)
+        # | "Standard Gold (22 K)" (colspan=2); row 1 = "" | "1 Gm"
+        # | "8 Gm" | "1 Gm" | "8 Gm". Expand colspans on row 0 so
+        # its column positions line up with the real data columns,
+        # then use row 1 to pick the "22K, 1 Gm", "24K, 1 Gm", and
+        # "22K, 8 Gm" columns precisely.
+        def expanded_header(row):
+            cells = row.find_all(["th", "td"])
+            out = []
+            for c in cells:
+                span = int(c.get("colspan", 1) or 1)
+                text = c.get_text(" ", strip=True).lower()
+                out.extend([text] * span)
+            return out
+
+        top = expanded_header(rows[0])
+        sub = expanded_header(rows[1])
+
+        # If row 0 had a Date cell with rowspan (spanning rows 0 and 1),
+        # row 1 will have fewer cells than top. Prepend empty slots so
+        # the subheader columns align with the main header columns.
+        if len(top) > len(sub):
+            sub = ([""] * (len(top) - len(sub))) + sub
+
+        col_22k_idx = -1
+        col_24k_idx = -1
+        col_8g_idx = -1
+
+        for idx in range(min(len(top), len(sub))):
+            t = top[idx]
+            s = sub[idx]
+            if (
+                ("22" in t or "standard" in t)
+                and "24" not in t
+                and ("1" in s and "8" not in s)
+            ):
+                col_22k_idx = idx
+            elif (
+                ("22" in t or "standard" in t)
+                and "24" not in t
+                and ("8" in s)
+            ):
+                col_8g_idx = idx
+            elif (
+                ("24" in t or "pure" in t)
+                and "22" not in t
+                and ("1" in s and "8" not in s)
+            ):
+                col_24k_idx = idx
+
+        if col_22k_idx != -1:
+            for r in rows[2:]:
+                cells = r.find_all(["td", "th"])
+
+                if col_22k_idx < len(cells):
+                    val = clean_number(
+                        cells[col_22k_idx].get_text(
+                            " ",
+                            strip=True,
+                        )
+                    )
+
+                    if valid_gold_rate(val):
+                        rates["rate_22k"] = val
+                        if col_24k_idx != -1 and col_24k_idx < len(cells):
+                            val_24k = clean_number(
+                                cells[col_24k_idx].get_text(
+                                    " ",
+                                    strip=True,
+                                )
+                            )
+                            if val_24k and val_24k > 0:
+                                rates["rate_24k"] = val_24k
+                        if col_8g_idx != -1 and col_8g_idx < len(cells):
+                            val_8g = clean_number(
+                                cells[col_8g_idx].get_text(
+                                    " ",
+                                    strip=True,
+                                ),
+                                min_val=40000,
+                                max_val=500000,
+                            )
+                            if val_8g and val_8g > 0:
+                                rates["rate_8g"] = val_8g
+                        return rates
+
+        for row in rows:
+            row_text = row.get_text(
+                " ",
+                strip=True,
+            ).lower()
+
+            if (
+                (
+                    "22 k" in row_text
+                    or "22k" in row_text
+                    or "22 carat" in row_text
+                )
+                and "24" not in row_text
+            ):
+                for cell in row.find_all(
+                    ["td", "th"]
+                ):
+                    val = clean_number(
+                        cell.get_text(
+                            " ",
+                            strip=True,
+                        )
+                    )
+
+                    if valid_gold_rate(val):
+                        rates["rate_22k"] = val
+                        return rates
+
+    page_text = re.sub(
+        r"\s+",
+        " ",
+        soup.get_text(
+            " ",
+            strip=True,
+        ),
+    )
+
+    patterns = [
+        r"Today(?:'s)?\s+22\s*K\s*(?:Rate|Gold)?"
+        r"[^0-9\r\n]{0,30}"
+        r"(?:₹|Rs\.?|INR)?\s*([\d,]+)",
+
+        r"22\s*K(?:arat|orat)?\s*"
+        r"(?:\(1\s*g\)|1\s*gm?|1\s*gram|Gold|Rate)?"
+        r"[^0-9\r\n]{0,30}"
+        r"(?:₹|Rs\.?|INR)?\s*([\d,]+)",
+
+        r"22\s*Carat\s+gold\s+rate"
+        r"[^0-9\r\n]{0,30}"
+        r"(?:₹|Rs\.?|INR)?\s*([\d,]+)",
+
+        r"1\s*Gram\s*(?:\(22\s*K\)|22\s*K)"
+        r"[^0-9\r\n]{0,30}"
+        r"(?:₹|Rs\.?|INR)?\s*([\d,]+)",
+    ]
+
+    for pattern in patterns:
+        for match in re.finditer(
+            pattern,
+            page_text,
+            flags=re.IGNORECASE,
+        ):
+            val = clean_number(match.group(1))
+
+            if valid_gold_rate(val):
+                rates["rate_22k"] = val
+                return rates
+
+    return rates
+
+
+def extract_livechennai_22k(soup):
+    rates = extract_livechennai_rates(soup)
+    return rates.get("rate_22k") if rates else None
+
+
+def fetch_livechennai():
+    try:
+        res = SESSION.get(
+            LIVECHENNAI_URL,
+            timeout=REQUEST_TIMEOUT,
+        )
+
+        res.raise_for_status()
+
+        soup = BeautifulSoup(
+            res.text,
+            "html.parser",
+        )
+
+        rates = extract_livechennai_rates(soup)
+
+        if rates and rates.get("rate_22k"):
+            r22 = int(rates["rate_22k"])
+            r24 = (
+                int(rates["rate_24k"])
+                if rates.get("rate_24k")
+                else round(r22 * 24 / 22)
+            )
+            r8g = (
+                int(rates["rate_8g"])
+                if rates.get("rate_8g")
+                else r22 * 8
+            )
+            return {
+                "source": "LiveChennai",
+                "rate_22k": r22,
+                "rate_24k": r24,
+                "rate_8g": r8g,
+                "url": LIVECHENNAI_URL,
+                "fetched_at": now_ist().isoformat(),
+            }
+
+    except Exception as exc:
+        print(
+            f"LiveChennai scrape error: {exc}"
+        )
+
+    return None
+
+
+def extract_goodreturns_22k(soup):
+    for table in soup.find_all("table"):
+        rows = table.find_all("tr")
+
+        if len(rows) < 2:
+            continue
+
+        # GoodReturns' "Today Gold Price Per Gram" table is
+        # transposed from LiveChennai's: rows are gram weights
+        # (1, 8, 10, 100...) and columns are karats (24K, 22K, 18K).
+        # Find the 22K column from the header row, then the "1 gram"
+        # data row, and read that cell.
+        header_cells = rows[0].find_all(["th", "td"])
+        header_text = [
+            c.get_text(" ", strip=True).lower()
+            for c in header_cells
+        ]
+
+        col_22k_idx = -1
+        for idx, h in enumerate(header_text):
+            if "22" in h and "24" not in h and "18" not in h:
+                col_22k_idx = idx
+                break
+
+        if col_22k_idx != -1:
+            for r in rows[1:]:
+                cells = r.find_all(["td", "th"])
+                if not cells:
+                    continue
+
+                row_label = cells[0].get_text(" ", strip=True).lower()
+                is_one_gram_row = row_label in ("1", "1g", "1 g", "1gm", "1 gm", "1 gram")
+
+                if is_one_gram_row and col_22k_idx < len(cells):
+                    val = clean_number(
+                        cells[col_22k_idx].get_text(" ", strip=True)
+                    )
+                    if valid_gold_rate(val):
+                        return val
+
+        table_context = ""
+
+        prev = table.find_previous(
+            [
+                "h1",
+                "h2",
+                "h3",
+                "h4",
+                "caption",
+                "div",
+            ]
+        )
+
+        if prev:
+            table_context = prev.get_text(
+                " ",
+                strip=True,
+            ).lower()
+
+        table_text = table.get_text(
+            " ",
+            strip=True,
+        ).lower()
+
+        is_22k_table = (
+            ("22" in table_context or "22" in table_text)
+            and "24" not in table_context
+        )
+
+        for row in table.find_all("tr"):
+            row_text = row.get_text(
+                " ",
+                strip=True,
+            ).lower()
+
+            condition_1 = (
+                is_22k_table
+                and (
+                    "1 gram" in row_text
+                    or "1g" in row_text
+                    or "1 gm" in row_text
+                )
+            )
+
+            condition_2 = (
+                (
+                    "22 k" in row_text
+                    or "22k" in row_text
+                    or "22 carat" in row_text
+                )
+                and "8" not in row_text
+            )
+
+            if condition_1 or condition_2:
+                for cell in row.find_all(
+                    ["td", "th"]
+                ):
+                    val = clean_number(
+                        cell.get_text(
+                            " ",
+                            strip=True,
+                        )
+                    )
+
+                    if valid_gold_rate(val):
+                        return val
+
+    page_text = re.sub(
+        r"\s+",
+        " ",
+        soup.get_text(
+            " ",
+            strip=True,
+        ),
+    )
+
+    patterns = [
+        r"22\s*K\s+Gold\s*/\s*g"
+        r"[^0-9\r\n]{0,30}"
+        r"(?:₹|Rs\.?|INR)?\s*([\d,]+)",
+
+        r"22\s*(?:K|Carat|Karat)\s*Gold"
+        r"[^0-9\r\n]{0,50}"
+        r"(?:₹|Rs\.?|INR)?\s*([\d,]+)",
+
+        r"1\s*Gram"
+        r"[^0-9\r\n]{0,30}"
+        r"(?:₹|Rs\.?|INR)?\s*([\d,]+)",
+    ]
+
+    for pattern in patterns:
+        for match in re.finditer(
+            pattern,
+            page_text,
+            flags=re.IGNORECASE,
+        ):
+            val = clean_number(match.group(1))
+
+            if valid_gold_rate(val):
+                return val
+
+    return None
+
+
+def fetch_goodreturns():
+    try:
+        res = SESSION.get(
+            GOODRETURNS_URL,
+            timeout=REQUEST_TIMEOUT,
+        )
+
+        res.raise_for_status()
+
+        soup = BeautifulSoup(
+            res.text,
+            "html.parser",
+        )
+
+        rate = extract_goodreturns_22k(soup)
+
+        if rate:
+            return {
+                "source": "GoodReturns",
+                "rate_22k": int(rate),
+                "url": GOODRETURNS_URL,
+                "fetched_at": now_ist().isoformat(),
+            }
+
+    except Exception as exc:
+        print(
+            f"GoodReturns scrape error: {exc}"
+        )
+
+    return None
+
+
+def extract_ibja_rates_from_soup(soup):
+    """
+    Extract 24K (999) and 22K (916) AM & PM fix rates from IBJA HTML soup.
+    IBJA rates are quoted per 10 grams ex-GST.
+    """
+    tbl = soup.find("table", {"id": re.compile(r"TodayRatesTableDataYes|ctrate", re.I)})
+    if not tbl:
+        for t in soup.find_all("table"):
+            txt = t.get_text()
+            if "999" in txt and "916" in txt:
+                tbl = t
+                break
+    if not tbl:
+        return None
+
+    rates = {}
+    for tr in tbl.find_all("tr"):
+        cells = [td.get_text(strip=True) for td in tr.find_all(["td", "th"])]
+        if not cells or len(cells) < 2:
+            continue
+        row_str = " ".join(cells).upper()
+        nums = []
+        for c in cells[1:]:
+            clean_c = re.sub(r"[^\d.]", "", c)
+            if clean_c:
+                try:
+                    val = float(clean_c)
+                    if 10000 <= val <= 300000:
+                        nums.append(val)
+                except ValueError:
+                    pass
+        if not nums:
+            continue
+
+        if "999" in row_str or "24" in row_str:
+            rates["24k_am_10g"] = nums[0]
+            rates["24k_pm_10g"] = nums[1] if len(nums) > 1 else nums[0]
+        elif "916" in row_str or "22" in row_str:
+            rates["22k_am_10g"] = nums[0]
+            rates["22k_pm_10g"] = nums[1] if len(nums) > 1 else nums[0]
+
+    if "22k_am_10g" in rates or "22k_pm_10g" in rates:
+        return rates
+    return None
+
+
+def extract_ibja_from_mirror(soup):
+    """
+    Extract wholesale / IBJA benchmark rates from GoodReturns national gold-rates page.
+    """
+    for tbl in soup.find_all("table"):
+        txt = tbl.get_text()
+        if "24K" in txt and "22K" in txt:
+            for tr in tbl.find_all("tr"):
+                cells = [td.get_text(strip=True) for td in tr.find_all(["td", "th"])]
+                if len(cells) >= 3:
+                    first = cells[0].strip()
+                    if first in ("1", "10", "Mumbai", "Chennai"):
+                        num_24 = clean_number(cells[1], min_val=5000, max_val=200000)
+                        num_22 = clean_number(cells[2], min_val=5000, max_val=200000)
+                        if num_22 and num_24:
+                            if first == "10":
+                                return {
+                                    "22k_am_10g": float(num_22),
+                                    "22k_pm_10g": float(num_22),
+                                    "24k_am_10g": float(num_24),
+                                    "24k_pm_10g": float(num_24),
+                                }
+                            else:
+                                return {
+                                    "22k_am_10g": float(num_22) * 10,
+                                    "22k_pm_10g": float(num_22) * 10,
+                                    "24k_am_10g": float(num_24) * 10,
+                                    "24k_pm_10g": float(num_24) * 10,
+                                }
+    return None
+
+
+def fetch_ibja():
+    """
+    Retrieve official IBJA rates (24K 999 and 22K 916, both AM and PM fixes
+    per 10g converted to 1g ex-GST). Provides robust multi-endpoint fallback
+    mirrors and safe default anchors so it operates resiliently even if network
+    endpoints fluctuate.
+    """
+    now = now_ist()
+
+    # 1. Primary: ibjarates.com
+    try:
+        r = SESSION.get(IBJA_URL, timeout=REQUEST_TIMEOUT)
+        if r.status_code == 200:
+            soup = BeautifulSoup(r.text, "html.parser")
+            raw = extract_ibja_rates_from_soup(soup)
+            if raw:
+                pm_22 = raw.get("22k_pm_10g") or raw.get("22k_am_10g")
+                am_22 = raw.get("22k_am_10g") or pm_22
+                pm_24 = raw.get("24k_pm_10g") or raw.get("24k_am_10g")
+                am_24 = raw.get("24k_am_10g") or pm_24
+
+                active_22_10g = pm_22 if (now.hour >= 14 and pm_22) else am_22
+                active_24_10g = pm_24 if (now.hour >= 14 and pm_24) else am_24
+
+                data = {
+                    "date": now.strftime("%Y-%m-%d"),
+                    "rate_22k": round(active_22_10g / 10.0),
+                    "rate_24k": round(active_24_10g / 10.0),
+                    "rate_22k_10g": round(active_22_10g),
+                    "rate_24k_10g": round(active_24_10g),
+                    "am_22k": round(am_22 / 10.0),
+                    "pm_22k": round(pm_22 / 10.0),
+                    "am_24k": round(am_24 / 10.0),
+                    "pm_24k": round(pm_24 / 10.0),
+                    "am_22k_10g": round(am_22),
+                    "pm_22k_10g": round(pm_22),
+                    "am_24k_10g": round(am_24),
+                    "pm_24k_10g": round(pm_24),
+                    "unit": "1g",
+                    "purity_22k": "916",
+                    "purity_24k": "999",
+                    "source": "IBJA Official (ibjarates.com)",
+                    "url": IBJA_URL,
+                    "fetched_at": now.isoformat(),
+                    "status": "success",
+                    "is_fallback": False,
+                }
+                save_json(IBJA_FILE, data)
+                return data
+    except Exception as exc:
+        print(f"IBJA primary endpoint notice: {exc}")
+
+    # 2. Secondary Mirror: GoodReturns National/Mumbai Wholesale table
+    try:
+        r = SESSION.get(IBJA_MIRROR_URL, timeout=REQUEST_TIMEOUT)
+        if r.status_code == 200:
+            soup = BeautifulSoup(r.text, "html.parser")
+            raw = extract_ibja_from_mirror(soup)
+            if raw:
+                pm_22 = raw.get("22k_pm_10g") or raw.get("22k_am_10g")
+                am_22 = raw.get("22k_am_10g") or pm_22
+                pm_24 = raw.get("24k_pm_10g") or raw.get("24k_am_10g")
+                am_24 = raw.get("24k_am_10g") or pm_24
+
+                active_22_10g = pm_22 if (now.hour >= 14 and pm_22) else am_22
+                active_24_10g = pm_24 if (now.hour >= 14 and pm_24) else am_24
+
+                # Wholesale ex-GST basis adjustment (~0.988 ratio to retail)
+                adj_22_10g = active_22_10g * 0.99
+                adj_24_10g = active_24_10g * 0.99
+
+                data = {
+                    "date": now.strftime("%Y-%m-%d"),
+                    "rate_22k": round(adj_22_10g / 10.0),
+                    "rate_24k": round(adj_24_10g / 10.0),
+                    "rate_22k_10g": round(adj_22_10g),
+                    "rate_24k_10g": round(adj_24_10g),
+                    "am_22k": round(adj_22_10g / 10.0),
+                    "pm_22k": round(adj_22_10g / 10.0),
+                    "am_24k": round(adj_24_10g / 10.0),
+                    "pm_24k": round(adj_24_10g / 10.0),
+                    "unit": "1g",
+                    "purity_22k": "916",
+                    "purity_24k": "999",
+                    "source": "IBJA Benchmark Mirror (GoodReturns National)",
+                    "url": IBJA_MIRROR_URL,
+                    "fetched_at": now.isoformat(),
+                    "status": "degraded_mirror",
+                    "is_fallback": True,
+                }
+                save_json(IBJA_FILE, data)
+                return data
+    except Exception as exc:
+        print(f"IBJA mirror endpoint notice: {exc}")
+
+    # 3. Tertiary: Cached file fallback anchor
+    cached = load_json(IBJA_FILE, None)
+    if isinstance(cached, dict) and valid_gold_rate(cached.get("rate_22k")):
+        cached["is_fallback"] = True
+        cached["status"] = "cached_anchor"
+        return cached
+
+    # 4. Safe Default Anchor (derived from previous verified rate)
+    prev = get_previous_rate()
+    if prev and valid_gold_rate(prev):
+        derived_22 = round(prev / 1.0145)
+        derived_24 = round(derived_22 * 24 / 22)
+        return {
+            "date": now.strftime("%Y-%m-%d"),
+            "rate_22k": derived_22,
+            "rate_24k": derived_24,
+            "rate_22k_10g": derived_22 * 10,
+            "rate_24k_10g": derived_24 * 10,
+            "am_22k": derived_22,
+            "pm_22k": derived_22,
+            "am_24k": derived_24,
+            "pm_24k": derived_24,
+            "unit": "1g",
+            "purity_22k": "916",
+            "purity_24k": "999",
+            "source": "IBJA Synthetic Anchor (Basis Derived)",
+            "url": IBJA_URL,
+            "fetched_at": now.isoformat(),
+            "status": "synthetic_anchor",
+            "is_fallback": True,
+        }
+
+    return None
+
+
+def compute_chennai_premium(rate_22k, ibja_rate_22k):
+    """
+    Compute real-time Chennai Retail Premium / Arbitrage Spread:
+    chennai_premium_amount = rate_22k - ibja_rate_22k
+    chennai_premium_pct = (chennai_premium_amount / ibja_rate_22k) * 100
+    """
+    if not rate_22k or not ibja_rate_22k or ibja_rate_22k <= 0:
+        return None, None
+    diff = int(rate_22k) - int(ibja_rate_22k)
+    pct = round((diff / float(ibja_rate_22k)) * 100, 2)
+    return diff, pct
+
+
+def fetch_all_sources():
+    with ThreadPoolExecutor(
+        max_workers=3
+    ) as executor:
+
+        f_live = executor.submit(
+            fetch_livechennai
+        )
+
+        f_good = executor.submit(
+            fetch_goodreturns
+        )
+
+        f_ibja = executor.submit(
+            fetch_ibja
+        )
+
+        return (
+            f_live.result(),
+            f_good.result(),
+            f_ibja.result(),
+        )
+
+
+# ============================================================
+# CONSENSUS & VALIDATION
+# ============================================================
+
+def _rate_is_plausible(
+    rate,
+    previous_rate,
+):
+    if (
+        not isinstance(
+            previous_rate,
+            (int, float),
+        )
+        or previous_rate <= 0
+    ):
+        return True
+
+    return (
+        abs(rate - previous_rate)
+        / previous_rate
+        * 100
+    ) <= MAX_DAILY_CHANGE_PCT
+
+
+def calculate_bayesian_consensus(sources, previous_rate=None):
+    """
+    Bayesian multi-source consensus pricing:
+    Weights: LiveChennai (0.50), GoodReturns (0.30), IBJA retail-implied (0.20).
+    Includes outlier filtering using Modified Z-score (MAD).
+    Outputs consensus price, confidence score (0-100%), and agreement breakdown.
+    """
+    base_weights = {
+        "livechennai": 0.50,
+        "goodreturns": 0.30,
+        "ibja": 0.20,
+    }
+
+    candidates = {}
+    lc = sources.get("livechennai")
+    if isinstance(lc, dict) and valid_gold_rate(lc.get("rate_22k")):
+        candidates["livechennai"] = float(lc["rate_22k"])
+
+    gr = sources.get("goodreturns")
+    if isinstance(gr, dict) and valid_gold_rate(gr.get("rate_22k")):
+        candidates["goodreturns"] = float(gr["rate_22k"])
+
+    ib = sources.get("ibja")
+    if isinstance(ib, dict) and valid_gold_rate(ib.get("rate_22k")):
+        ibja_raw = float(ib["rate_22k"])
+        # Retail implied rate:
+        ratio = 1.0145
+        if previous_rate and (1.00 <= float(previous_rate) / ibja_raw <= 1.05):
+            ratio = float(previous_rate) / ibja_raw
+        candidates["ibja"] = round(ibja_raw * ratio)
+
+    if not candidates:
+        return {
+            "consensus_rate": int(previous_rate) if previous_rate else None,
+            "confidence": 0,
+            "sources_count": 0,
+            "breakdown": {},
+            "valid": False,
+        }
+
+    vals = list(candidates.values())
+    med = statistics.median(vals)
+    diffs = [abs(v - med) for v in vals]
+    mad = statistics.median(diffs)
+    # Avoid division by zero when sources agree closely or identically
+    mad_eff = max(mad, med * 0.002, 10.0)
+
+    breakdown = {}
+    valid_sources = {}
+    for name, val in candidates.items():
+        mod_z = 0.6745 * abs(val - med) / mad_eff
+        is_outlier = mod_z > 3.5
+        if previous_rate and abs(val - previous_rate) / previous_rate > (MAX_DAILY_CHANGE_PCT / 100):
+            is_outlier = True
+
+        breakdown[name] = {
+            "rate": int(val),
+            "modified_z": round(mod_z, 2),
+            "is_outlier": is_outlier,
+            "base_weight": base_weights.get(name, 0.2),
+        }
+        if not is_outlier:
+            valid_sources[name] = val
+
+    if not valid_sources:
+        fallback_name = "livechennai" if "livechennai" in candidates else list(candidates.keys())[0]
+        valid_sources[fallback_name] = candidates[fallback_name]
+        breakdown[fallback_name]["is_outlier"] = False
+
+    total_w = sum(base_weights[name] for name in valid_sources)
+    norm_w = {name: base_weights[name] / total_w for name in valid_sources}
+
+    consensus = sum(val * norm_w[name] for name, val in valid_sources.items())
+    consensus_int = round(consensus)
+
+    max_dev_pct = 0.0
+    for name, info in breakdown.items():
+        rate = info["rate"]
+        dev = rate - consensus_int
+        dev_pct = (dev / consensus_int) * 100 if consensus_int else 0
+        info["deviation"] = dev
+        info["deviation_pct"] = round(dev_pct, 2)
+        info["effective_weight"] = round(norm_w.get(name, 0.0), 3)
+        if not info["is_outlier"]:
+            max_dev_pct = max(max_dev_pct, abs(dev_pct))
+
+    n = len(valid_sources)
+    if n == 3:
+        conf = 80 + (20 if max_dev_pct <= 0.3 else (10 if max_dev_pct <= 0.8 else (5 if max_dev_pct <= 1.5 else - (max_dev_pct - 1.5) * 20)))
+    elif n == 2:
+        conf = 65 + (20 if max_dev_pct <= 0.5 else (10 if max_dev_pct <= 1.5 else - (max_dev_pct - 1.5) * 20))
+    else:
+        conf = 55.0
+
+    conf = max(0, min(100, round(conf)))
+
+    return {
+        "consensus_rate": consensus_int,
+        "confidence": conf,
+        "sources_count": n,
+        "breakdown": breakdown,
+        "valid": True,
+    }
+
+
+def select_rate(
+    live,
+    good,
+    ibja=None,
+    previous_rate=None,
+):
+    # Support backward-compatible positional calling: select_rate(live, good, previous_rate)
+    if isinstance(ibja, (int, float)) and previous_rate is None:
+        previous_rate = ibja
+        ibja = None
+
+    consensus = calculate_bayesian_consensus(
+        {"livechennai": live, "goodreturns": good, "ibja": ibja},
+        previous_rate,
+    )
+
+    live_rate = (
+        live["rate_22k"]
+        if live
+        else None
+    )
+
+    good_rate = (
+        good["rate_22k"]
+        if good
+        else None
+    )
+
+    selected = None
+
+    # --------------------------------------------------------
+    # 1. PRIMARY: LiveChennai (Chennai MJDMA Official Benchmark)
+    # --------------------------------------------------------
+    if live_rate is not None and valid_gold_rate(live_rate):
+        if not _rate_is_plausible(live_rate, previous_rate) and previous_rate is not None:
+            if good_rate is not None and valid_gold_rate(good_rate) and _rate_is_plausible(good_rate, previous_rate):
+                selected = {
+                    "rate_22k": int(good_rate),
+                    "source": "GoodReturns (LiveChennai implausible)",
+                    "agreement": False,
+                    "livechennai": live,
+                    "goodreturns": good,
+                    "warning": "LiveChennai rate rejected because change exceeded plausibility threshold.",
+                }
+            else:
+                selected = {
+                    "rate_22k": int(previous_rate),
+                    "source": "Previous verified rate",
+                    "agreement": False,
+                    "livechennai": live,
+                    "goodreturns": good,
+                    "warning": "LiveChennai rate rejected because change exceeded plausibility threshold.",
+                }
+
+        if selected is None:
+            rate_24k = (
+                live.get("rate_24k")
+                if live and live.get("rate_24k")
+                else round(int(live_rate) * 24 / 22)
+            )
+            rate_8g = (
+                live.get("rate_8g")
+                if live and live.get("rate_8g")
+                else int(live_rate) * 8
+            )
+
+            if good_rate is not None and valid_gold_rate(good_rate):
+                diff = abs(live_rate - good_rate)
+                tolerance = _agreement_tolerance(live_rate)
+
+                if diff <= tolerance:
+                    selected = {
+                        "rate_22k": int(live_rate),
+                        "rate_24k": rate_24k,
+                        "rate_8g": rate_8g,
+                        "source": "LiveChennai (MJDMA verified)",
+                        "agreement": True,
+                        "livechennai": live,
+                        "goodreturns": good,
+                    }
+                else:
+                    selected = {
+                        "rate_22k": int(live_rate),
+                        "rate_24k": rate_24k,
+                        "rate_8g": rate_8g,
+                        "source": "LiveChennai (Primary)",
+                        "agreement": False,
+                        "livechennai": live,
+                        "goodreturns": good,
+                        "warning": f"GoodReturns diverged by ₹{diff} (tolerance: ₹{tolerance}); using LiveChennai official benchmark.",
+                    }
+            else:
+                selected = {
+                    "rate_22k": int(live_rate),
+                    "rate_24k": rate_24k,
+                    "rate_8g": rate_8g,
+                    "source": "LiveChennai (Primary)",
+                    "agreement": None,
+                    "livechennai": live,
+                    "goodreturns": good,
+                }
+
+    # --------------------------------------------------------
+    # 2. FALLBACK: GoodReturns (when LiveChennai unavailable)
+    # --------------------------------------------------------
+    elif good_rate is not None and valid_gold_rate(good_rate):
+        if previous_rate is None or _rate_is_plausible(good_rate, previous_rate):
+            selected = {
+                "rate_22k": int(good_rate),
+                "source": "GoodReturns (Fallback)",
+                "agreement": None,
+                "livechennai": live,
+                "goodreturns": good,
+                "warning": "LiveChennai unavailable; using GoodReturns as fallback.",
+            }
+
+    # --------------------------------------------------------
+    # 3. SAFETY FALLBACK: Previous rate
+    # --------------------------------------------------------
+    elif previous_rate is not None and valid_gold_rate(previous_rate):
+        selected = {
+            "rate_22k": int(previous_rate),
+            "source": "Previous verified rate",
+            "agreement": False,
+            "livechennai": live,
+            "goodreturns": good,
+            "warning": "No fresh valid rates available from either source.",
+        }
+
+    if selected is None:
+        return None
+
+    selected["ibja"] = ibja
+    selected["consensus"] = consensus
+    selected["bayesian_confidence"] = consensus.get("confidence")
+
+    if ibja and valid_gold_rate(ibja.get("rate_22k")):
+        diff, pct = compute_chennai_premium(selected["rate_22k"], ibja["rate_22k"])
+        selected["chennai_premium_amount"] = diff
+        selected["chennai_premium_pct"] = pct
+    else:
+        selected["chennai_premium_amount"] = None
+        selected["chennai_premium_pct"] = None
+
+    return selected
+
+
+# ============================================================
+# LIVE DATA
+# ============================================================
+
+def save_live(
+    rate,
+    selected,
+    changed,
+):
+    now = now_ist()
+
+    live_source = (
+        selected.get("livechennai")
+        or {}
+    )
+
+    good_source = (
+        selected.get("goodreturns")
+        or {}
+    )
+
+    ibja_source = (
+        selected.get("ibja")
+        or {}
+    )
+
+    data = load_json(
+        LIVE_FILE,
+        {},
+    )
+
+    if not isinstance(data, dict):
+        data = {}
+
+    previous_rate = data.get(
+        "rate_22k"
+    )
+
+    # BUGFIX: "updated_at"/"last_checked_at" get refreshed to `now` on
+    # *every* run, including runs where select_rate() fell back to the
+    # "Previous verified rate" (sources disagreed, or the reading was
+    # implausible) -- i.e. runs where nothing was actually confirmed.
+    # health_status.json's age_hours was computed from "updated_at",
+    # so a feed that's actually stuck (both sources broken, silently
+    # repeating the last good rate every run) always looked perfectly
+    # fresh and never tripped the stale alert. Track "verified_at"
+    # separately: it only advances when this run's reading is
+    # trustworthy (two sources agreeing, or a single source whose
+    # value passed the plausibility check) -- not on a bare fallback
+    # to the previous rate. run_health_check() uses this field.
+    is_verified_reading = selected.get("source") != "Previous verified rate"
+
+    data.update(
+        {
+            "date": now.strftime(
+                "%Y-%m-%d"
+            ),
+            "time": now.strftime(
+                "%H:%M:%S"
+            ),
+            "timestamp": now.isoformat(),
+            "rate_22k": int(rate),
+            "rate_24k": (
+                selected.get("rate_24k")
+                or round(int(rate) * 24 / 22)
+            ),
+            "rate_8g": (
+                selected.get("rate_8g")
+                or (int(rate) * 8)
+            ),
+            "weight_1g": int(rate),
+            "weight_8g": (
+                selected.get("rate_8g")
+                or (int(rate) * 8)
+            ),
+            "session": session_for_time(now),
+            "source": selected.get(
+                "source",
+                "Unknown",
+            ),
+            "agreement": selected.get(
+                "agreement"
+            ),
+            "changed": bool(changed),
+            "previous_rate_22k": (
+                previous_rate
+                if valid_gold_rate(
+                    previous_rate
+                )
+                else data.get(
+                    "previous_rate_22k"
+                )
+            ),
+            "livechennai_rate": live_source.get(
+                "rate_22k"
+            ),
+            "goodreturns_rate": good_source.get(
+                "rate_22k"
+            ),
+            "livechennai_fetched_at": live_source.get(
+                "fetched_at"
+            ),
+            "goodreturns_fetched_at": good_source.get(
+                "fetched_at"
+            ),
+            "livechennai_url": live_source.get(
+                "url"
+            ),
+            "goodreturns_url": good_source.get(
+                "url"
+            ),
+            "updated_at": now.isoformat(),
+            "last_checked_at": now.isoformat(),
+            "last_checked": now.isoformat(),
+            "verified_at": (
+                now.isoformat()
+                if is_verified_reading
+                else data.get("verified_at")
+            ),
+            "change": (int(rate) - int(previous_rate)) if valid_gold_rate(previous_rate) else 0,
+            "sources": {
+                "livechennai": live_source or None,
+                "goodreturns": good_source or None,
+                "ibja": ibja_source or None,
+            },
+            "source_rates": [
+                int(v) for v in (live_source.get("rate_22k"), good_source.get("rate_22k"), ibja_source.get("rate_22k"))
+                if valid_gold_rate(v)
+            ],
+            "source_update_times": [
+                v for v in (live_source.get("fetched_at"), good_source.get("fetched_at"), ibja_source.get("fetched_at"))
+                if v
+            ],
+            "sources_agree": selected.get("agreement"),
+            "ibja": selected.get("ibja"),
+            "ibja_rate_22k": ibja_source.get("rate_22k"),
+            "ibja_rate_24k": ibja_source.get("rate_24k"),
+            "chennai_premium_amount": selected.get("chennai_premium_amount"),
+            "chennai_premium_pct": selected.get("chennai_premium_pct"),
+            "consensus": selected.get("consensus"),
+        }
+    )
+
+    save_json(
+        LIVE_FILE,
+        data,
+    )
+
+
+# ============================================================
+# HISTORY
+# ============================================================
+
+def save_history(
+    rate,
+    selected,
+    changed,
+):
+    existing = load_json(
+        HISTORY_FILE,
+        [],
+    )
+
+    records = extract_history_records(
+        existing
+    )
+
+    current = now_ist()
+    today = current.strftime(
+        "%Y-%m-%d"
+    )
+
+    current_session = session_for_time(
+        current
+    )
+
+    rate = int(rate)
+
+    live_source = (
+        selected.get("livechennai")
+        or {}
+    )
+
+    good_source = (
+        selected.get("goodreturns")
+        or {}
+    )
+
+    ibja_source = (
+        selected.get("ibja")
+        or {}
+    )
+
+    source_urls = [
+        source.get("url")
+        for source in (
+            live_source,
+            good_source,
+            ibja_source,
+        )
+        if source.get("url")
+    ]
+
+    rec = {
+        "date": today,
+        "time": current.strftime(
+            "%H:%M:%S"
+        ),
+        "timestamp": current.isoformat(),
+        "session": current_session,
+        "rate_22k": rate,
+
+        # Legacy-compatible fields
+        "rate_24k": (
+            selected.get("rate_24k")
+            or round(rate * 24 / 22)
+        ),
+        "weight_1g": rate,
+        "weight_8g": (
+            selected.get("rate_8g")
+            or (rate * 8)
+        ),
+
+        # Current fields
+        "rate_8g": (
+            selected.get("rate_8g")
+            or (rate * 8)
+        ),
+        "changed": bool(changed),
+        "source": selected.get(
+            "source",
+            "Unknown",
+        ),
+        "source_url": (
+            source_urls[0]
+            if source_urls
+            else None
+        ),
+        "type": "intraday",
+        "agreement": selected.get(
+            "agreement"
+        ),
+        "livechennai_rate": live_source.get(
+            "rate_22k"
+        ),
+        "goodreturns_rate": good_source.get(
+            "rate_22k"
+        ),
+        "ibja_rate_22k": ibja_source.get(
+            "rate_22k"
+        ),
+        "chennai_premium_amount": selected.get("chennai_premium_amount"),
+        "chennai_premium_pct": selected.get("chennai_premium_pct"),
+    }
+
+    should_append = False
+
+    if not records:
+        should_append = True
+
+    else:
+        last = (
+            records[-1]
+            if isinstance(
+                records[-1],
+                dict,
+            )
+            else {}
+        )
+
+        last_date = last.get(
+            "date"
+        )
+
+        last_session = last.get(
+            "session"
+        )
+
+        # Legacy records may not contain
+        # an explicit session.
+        if (
+            not last_session
+            and last.get("time")
+        ):
+            try:
+                hour = int(
+                    str(
+                        last["time"]
+                    ).split(":")[0]
+                )
+
+                last_session = (
+                    "AM"
+                    if 6 <= hour < 14
+                    else "PM"
+                )
+
+            except Exception:
+                last_session = None
+
+        should_append = (
+            last_date != today
+            or last_session
+            != current_session
+            or last.get("rate_22k")
+            != rate
+        )
+
+    if should_append:
+        records.append(rec)
+    else:
+        # Refresh the current observation's timing fields, but never
+        # let a less-verified reading (e.g. a single source, or
+        # sources disagreeing) downgrade a record that was already
+        # confirmed by both sources agreeing. The rate is identical
+        # either way (that's why should_append is False) -- only the
+        # verification metadata could regress.
+        existing_rec = (
+            records[-1]
+            if isinstance(records[-1], dict)
+            else {}
+        )
+
+        was_agreed = existing_rec.get("agreement") is True
+        now_agreed = rec.get("agreement") is True
+
+        if was_agreed and not now_agreed:
+            # Keep the stronger verification info, just bump the
+            # timestamp/time so the record reflects it was re-checked.
+            existing_rec["time"] = rec["time"]
+            existing_rec["timestamp"] = rec["timestamp"]
+            records[-1] = existing_rec
+        else:
+            existing_rec.update(rec)
+            records[-1] = existing_rec
+
+    if isinstance(existing, dict):
+        existing["records"] = records
+        save_json(
+            HISTORY_FILE,
+            existing,
+        )
+    else:
+        save_json(
+            HISTORY_FILE,
+            records,
+        )
+
+
+# ============================================================
+# HEALTH CHECK
+# ============================================================
+
+def run_health_check():
+    now = now_ist()
+
+    live = load_json(
+        LIVE_FILE,
+        {},
+    )
+
+    if not isinstance(live, dict):
+        live = {}
+
+    live_rate = live.get(
+        "livechennai_rate"
+    )
+
+    good_rate = live.get(
+        "goodreturns_rate"
+    )
+
+    ibja_rate = live.get(
+        "ibja_rate_22k"
+    ) or (live.get("ibja") or {}).get("rate_22k")
+
+    source_count = sum(
+        1
+        for value in (
+            live_rate,
+            good_rate,
+            ibja_rate,
+        )
+        if valid_gold_rate(value)
+    )
+
+    agreement = live.get(
+        "agreement"
+    )
+
+    updated_at = live.get(
+        "updated_at"
+    )
+
+    # BUGFIX: use "verified_at" (last genuinely-confirmed reading),
+    # not "updated_at" (last time the script *ran*), so a feed stuck
+    # on repeated "Previous verified rate" fallbacks is correctly
+    # reported as aging/stale instead of looking fresh every run.
+    # Older live.json files won't have "verified_at" yet -- fall back
+    # to "updated_at" for those rather than treating them as infinitely
+    # stale.
+    verified_at = live.get(
+        "verified_at"
+    ) or updated_at
+
+    age_hours = _hours_since(
+        verified_at,
+        now,
+    )
+
+    status = "offline"
+
+    # No usable sources.
+    if source_count == 0:
+        status = "offline"
+
+    # Data exists but is too old.
+    elif (
+        age_hours is not None
+        and age_hours > ALERT_STALE_HOURS
+    ):
+        status = "stale"
+
+    # Two sources agreeing = healthy.
+    elif (
+        source_count >= 2
+        and agreement is True
+    ):
+        status = "ok"
+
+    # LiveChennai (authoritative Chennai benchmark) is active and fresh.
+    elif (
+        valid_gold_rate(live_rate)
+        and live.get("source") != "Previous verified rate"
+    ):
+        status = "ok"
+
+    # Fallback source active or previous verified fallback.
+    else:
+        status = "degraded"
+
+    health = {
+        "status": status,
+        "checked_at": now.isoformat(),
+        "updated_at": updated_at,
+        "verified_at": verified_at,
+        "age_hours": (
+            round(age_hours, 2)
+            if age_hours is not None
+            else None
+        ),
+        "source_count": source_count,
+        "single_source": source_count == 1,
+        "agreement": agreement,
+        "livechennai_rate": (
+            int(live_rate)
+            if valid_gold_rate(live_rate)
+            else None
+        ),
+        "goodreturns_rate": (
+            int(good_rate)
+            if valid_gold_rate(good_rate)
+            else None
+        ),
+        "rate_22k": (
+            live.get("rate_22k")
+            if valid_gold_rate(
+                live.get("rate_22k")
+            )
+            else None
+        ),
+    }
+
+    health["webhook_configured"] = bool(WEBHOOK_URL)
+
+    save_json(
+        HEALTH_FILE,
+        health,
+    )
+
+    return health
+
+
+# ============================================================
+# ALERTING
+# ============================================================
+
+def send_webhook_alert(message, health):
+    """POST a short alert payload to WEBHOOK_URL, if configured.
+
+    Failures here are logged and swallowed -- alerting must never
+    take down the main fetch pipeline.
+    """
+    if not WEBHOOK_URL:
+        return False
+
+    payload = {
+        "text": message,
+        "status": health.get("status"),
+        "age_hours": health.get("age_hours"),
+        "source_count": health.get("source_count"),
+        "agreement": health.get("agreement"),
+        "rate_22k": health.get("rate_22k"),
+        "checked_at": health.get("checked_at"),
+    }
+
+    try:
+        resp = SESSION.post(
+            WEBHOOK_URL,
+            json=payload,
+            timeout=REQUEST_TIMEOUT,
+        )
+        resp.raise_for_status()
+        return True
+
+    except Exception as exc:
+        print(f"Webhook alert failed: {exc}")
+        return False
+
+
+def run_alert_check(health):
+    """Track staleness/disagreement over time and fire cooldown-gated
+    webhook alerts. Always updates alert_state.json so the frontend
+    (or a future dashboard) can show alert history even without a
+    webhook configured.
+    """
+    now = now_ist()
+
+    state = load_json(
+        ALERT_FILE,
+        {
+            "disagree_since": None,
+            "last_disagree_alert_at": None,
+            "last_stale_alert_at": None,
+        },
+    )
+
+    if not isinstance(state, dict):
+        state = {
+            "disagree_since": None,
+            "last_disagree_alert_at": None,
+            "last_stale_alert_at": None,
+        }
+
+    status = health.get("status")
+    agreement = health.get("agreement")
+    source_count = health.get("source_count", 0)
+
+    # --------------------------------------------------------
+    # Disagreement tracking: only "degraded due to disagreement"
+    # (both sources up, values differ) counts -- a single-source
+    # or offline state is a different failure mode and shouldn't
+    # extend a disagreement streak.
+    # --------------------------------------------------------
+    is_disagreeing = (
+        status == "degraded"
+        and source_count >= 2
+        and agreement is False
+    )
+
+    if is_disagreeing:
+        if not state.get("disagree_since"):
+            state["disagree_since"] = now.isoformat()
+    else:
+        state["disagree_since"] = None
+
+    disagree_hours = _hours_since(
+        state.get("disagree_since"),
+        now,
+    )
+
+    cooldown_ok_disagree = True
+    last_disagree_alert = state.get("last_disagree_alert_at")
+    if last_disagree_alert:
+        since_last = _hours_since(last_disagree_alert, now)
+        cooldown_ok_disagree = (
+            since_last is None
+            or since_last >= ALERT_COOLDOWN_HOURS
+        )
+
+    if (
+        is_disagreeing
+        and disagree_hours is not None
+        and disagree_hours >= ALERT_DISAGREE_HOURS
+        and cooldown_ok_disagree
+    ):
+        sent = send_webhook_alert(
+            f"Gold rate sources have disagreed for "
+            f"{disagree_hours:.1f}h (LiveChennai vs GoodReturns).",
+            health,
+        )
+        state["last_disagree_alert_at"] = now.isoformat()
+        if not WEBHOOK_URL:
+            print(
+                "ALERT (no webhook configured): sources disagree "
+                f"for {disagree_hours:.1f}h"
+            )
+        elif not sent:
+            print("ALERT: disagree webhook attempt failed")
+
+    # --------------------------------------------------------
+    # Staleness alerting, independent of disagreement.
+    # --------------------------------------------------------
+    cooldown_ok_stale = True
+    last_stale_alert = state.get("last_stale_alert_at")
+    if last_stale_alert:
+        since_last = _hours_since(last_stale_alert, now)
+        cooldown_ok_stale = (
+            since_last is None
+            or since_last >= ALERT_COOLDOWN_HOURS
+        )
+
+    if status == "stale" and cooldown_ok_stale:
+        age = health.get("age_hours")
+        sent = send_webhook_alert(
+            f"Gold rate feed is stale "
+            f"({age if age is not None else '?'}h since last update).",
+            health,
+        )
+        state["last_stale_alert_at"] = now.isoformat()
+        if not WEBHOOK_URL:
+            print(
+                "ALERT (no webhook configured): feed stale "
+                f"({age}h)"
+            )
+        elif not sent:
+            print("ALERT: stale webhook attempt failed")
+
+    save_json(ALERT_FILE, state)
+    return state
+
+
+# ============================================================
+# QUANTITATIVE RISK ENGINE & SUMMARY
+# ============================================================
+
+def compute_quant_metrics(history_records, live_record, ibja_record=None):
+    """
+    Quantitative Risk Engine:
+    - 30-day realized annualized volatility: std(daily log returns) * sqrt(252)
+    - 1-day 95% Parametric Value-at-Risk (VaR): 1.645 * (volatility / sqrt(252)) * rate_22k
+    - Chennai Retail Premium / Arbitrage Spread against IBJA
+    - Max drawdown over the 30-day window
+    Saves to data/quant_metrics.json.
+    """
+    now = now_ist()
+    rate_22k = None
+    if isinstance(live_record, dict) and valid_gold_rate(live_record.get("rate_22k")):
+        rate_22k = float(live_record["rate_22k"])
+
+    daily_rates = {}
+    if isinstance(history_records, list):
+        for r in history_records:
+            if isinstance(r, dict) and r.get("date") and valid_gold_rate(r.get("rate_22k")):
+                daily_rates[r["date"]] = float(r["rate_22k"])
+
+    if rate_22k and isinstance(live_record, dict) and live_record.get("date"):
+        daily_rates[live_record["date"]] = rate_22k
+
+    sorted_dates = sorted(daily_rates.keys())
+    recent_dates = sorted_dates[-31:] if len(sorted_dates) >= 31 else sorted_dates
+    prices = [daily_rates[d] for d in recent_dates]
+
+    if not rate_22k:
+        rate_22k = prices[-1] if prices else 14190.0
+
+    log_returns = []
+    if len(prices) > 1:
+        for i in range(1, len(prices)):
+            if prices[i - 1] > 0 and prices[i] > 0:
+                log_returns.append(math.log(prices[i] / prices[i - 1]))
+
+    if len(log_returns) >= 2:
+        daily_vol = statistics.stdev(log_returns)
+    else:
+        daily_vol = 0.010
+
+    annualized_vol = daily_vol * math.sqrt(252)
+    var_95_1d = 1.645 * (annualized_vol / math.sqrt(252)) * rate_22k
+    var_95_1d_pct = (var_95_1d / rate_22k) * 100
+
+    max_dd = 0.0
+    if len(prices) > 1:
+        peak = prices[0]
+        for p in prices:
+            if p > peak:
+                peak = p
+            dd = (peak - p) / peak * 100
+            if dd > max_dd:
+                max_dd = dd
+
+    premium_amt = None
+    premium_pct = None
+    ibja_22k = None
+    if isinstance(ibja_record, dict) and valid_gold_rate(ibja_record.get("rate_22k")):
+        ibja_22k = float(ibja_record["rate_22k"])
+        premium_amt = int(round(rate_22k - ibja_22k))
+        premium_pct = round((premium_amt / ibja_22k) * 100, 2)
+
+    metrics = {
+        "calculated_at": now.isoformat(),
+        "rate_22k": int(round(rate_22k)),
+        "rate_8g": int(round(rate_22k * 8)),
+        "volatility_30d_annualized": round(annualized_vol, 4),
+        "volatility_30d_pct": round(annualized_vol * 100, 2),
+        "volatility_daily_pct": round(daily_vol * 100, 3),
+        "var_95_1d_amount": round(var_95_1d, 2),
+        "var_95_1d_pct": round(var_95_1d_pct, 2),
+        "var_95_1d_8g_amount": round(var_95_1d * 8, 2),
+        "var_95_1d_lower_bound": round(rate_22k - var_95_1d),
+        "var_95_1d_upper_bound": round(rate_22k + var_95_1d),
+        "max_drawdown_30d_pct": round(max_dd, 2),
+        "chennai_premium_amount": premium_amt,
+        "chennai_premium_pct": premium_pct,
+        "ibja_benchmark_rate": int(round(ibja_22k)) if ibja_22k else None,
+        "sample_points": len(log_returns),
+    }
+
+    save_json(QUANT_FILE, metrics)
+    return metrics
+
+
+def compute_and_save_summary():
+    existing = load_json(
+        HISTORY_FILE,
+        [],
+    )
+
+    records = extract_history_records(
+        existing
+    )
+
+    valid = [
+        (
+            r["date"],
+            int(r["rate_22k"]),
+        )
+        for r in records
+        if (
+            isinstance(r, dict)
+            and valid_gold_rate(
+                r.get("rate_22k")
+            )
+            and r.get("date")
+        )
+    ]
+
+    if not valid:
+        return
+
+    now = now_ist()
+
+    current_month = now.strftime(
+        "%Y-%m"
+    )
+
+    current_year = now.strftime(
+        "%Y"
+    )
+
+    hi = max(
+        valid,
+        key=lambda x: x[1],
+    )
+
+    lo = min(
+        valid,
+        key=lambda x: x[1],
+    )
+
+    month_vals = [
+        v
+        for d, v in valid
+        if d.startswith(current_month)
+    ]
+
+    year_vals = [
+        v
+        for d, v in valid
+        if d.startswith(current_year)
+    ]
+
+    daily = {}
+    for d, v in valid:
+        daily[d] = v
+    recent_30 = [v for d, v in sorted(daily.items())[-30:]]
+
+    def bucket(vals):
+        if not vals:
+            return {
+                "average_22k": None,
+                "high": None,
+                "low": None,
+            }
+
+        return {
+            "average_22k": round(
+                sum(vals) / len(vals)
+            ),
+            "high": max(vals),
+            "low": min(vals),
+        }
+
+    quant_metrics = load_json(QUANT_FILE, {})
+
+    save_json(
+        SUMMARY_FILE,
+        {
+            "generated_at": now.isoformat(),
+
+            "all_time_high": {
+                "rate_22k": hi[1],
+                "date": hi[0],
+            },
+
+            "all_time_low": {
+                "rate_22k": lo[1],
+                "date": lo[0],
+            },
+
+            "current_month": {
+                "month": current_month,
+                **bucket(month_vals),
+            },
+
+            "current_year": {
+                "year": current_year,
+                **bucket(year_vals),
+            },
+
+            "last_30_records": bucket(
+                recent_30
+            ),
+
+            "total_records": len(valid),
+            "quant": quant_metrics,
+        },
+    )
+
+
+def bake_instant_bootstrap(live_data, history_data, quant_metrics, ibja_data):
+    """
+    Pre-bakes the latest gold state, quant metrics, and IBJA benchmark
+    into <script id="gold-bootstrap" type="application/json"> inside index.html
+    and saves data/bootstrap.json for 0ms instant-load rendering.
+    """
+    now = now_ist()
+    clean_history = []
+    if isinstance(history_data, list):
+        clean_history = extract_history_records(history_data)
+        if len(clean_history) > 60:
+            clean_history = clean_history[-60:]
+
+    payload = {
+        "baked_at": now.isoformat(),
+        "live": live_data,
+        "history": clean_history,
+        "quant": quant_metrics,
+        "ibja": ibja_data,
+    }
+
+    save_json(BOOTSTRAP_FILE, payload)
+
+    if INDEX_HTML_FILE.exists():
+        try:
+            html_content = INDEX_HTML_FILE.read_text(encoding="utf-8")
+            serialized = json.dumps(payload, ensure_ascii=False)
+            script_tag = f'<script id="gold-bootstrap" type="application/json">\n{serialized}\n</script>'
+
+            pattern = re.compile(
+                r'<script id="gold-bootstrap" type="application/json">.*?</script>',
+                re.DOTALL
+            )
+            if pattern.search(html_content):
+                updated_html = pattern.sub(script_tag, html_content, count=1)
+            else:
+                if "</head>" in html_content:
+                    updated_html = html_content.replace("</head>", f"{script_tag}\n</head>", 1)
+                else:
+                    updated_html = script_tag + "\n" + html_content
+
+            INDEX_HTML_FILE.write_text(updated_html, encoding="utf-8")
+            print(f"Pre-baked instant bootstrap cache into {INDEX_HTML_FILE} ({len(serialized)} bytes)")
+        except Exception as exc:
+            print(f"Warning: Failed to bake bootstrap into index.html: {exc}")
+
+    return payload
+
+
+# ============================================================
+# MONITORING WINDOW PREDICTION
+# ============================================================
+
+def _parse_time_to_minutes(time_str):
+    try:
+        parts = str(
+            time_str
+        ).split(":")
+
+        return (
+            int(parts[0]) * 60
+            + int(parts[1])
+        )
+
+    except Exception:
+        return None
+
+
+def _median(values):
+    if not values:
+        return None
+
+    s = sorted(values)
+    n = len(s)
+    mid = n // 2
+
+    if n % 2 == 0:
+        return (
+            s[mid - 1]
+            + s[mid]
+        ) / 2
+
+    return s[mid]
+
+
+def _clamp_hm(
+    hm,
+    lo,
+    hi,
+):
+    minutes = (
+        hm[0] * 60
+        + hm[1]
+    )
+
+    clamped = max(
+        lo[0] * 60 + lo[1],
+        min(
+            hi[0] * 60 + hi[1],
+            minutes,
+        ),
+    )
+
+    return (
+        clamped // 60,
+        clamped % 60,
+    )
+
+
+def predict_session_times(
+    now=None
+):
+    now = now or now_ist()
+
+    cutoff = (
+        now
+        - timedelta(
+            days=HISTORY_LOOKBACK_DAYS
+        )
+    ).date()
+
+    records = extract_history_records(
+        load_json(
+            HISTORY_FILE,
+            [],
+        )
+    )
+
+    am_m = []
+    pm_m = []
+
+    for r in records:
+        if not isinstance(r, dict):
+            continue
+
+        try:
+            record_date = (
+                datetime.fromisoformat(
+                    str(
+                        r.get("date")
+                    )
+                ).date()
+            )
+        except Exception:
+            record_date = None
+
+        if (
+            record_date is not None
+            and record_date < cutoff
+        ):
+            continue
+
+        session = str(
+            r.get("session")
+            or ""
+        ).upper()
+
+        mins = _parse_time_to_minutes(
+            r.get("time")
+        )
+
+        # Older records may not have a
+        # "time" field, but can have timestamp.
+        if (
+            mins is None
+            and r.get("timestamp")
+        ):
+            try:
+                dt = datetime.fromisoformat(
+                    str(
+                        r["timestamp"]
+                    )
+                )
+
+                mins = (
+                    dt.hour * 60
+                    + dt.minute
+                )
+
+                if not session:
+                    session = session_for_time(
+                        dt
+                    )
+
+            except Exception:
+                pass
+
+        if mins is None:
+            continue
+
+        # Historical records before the session
+        # field was introduced are still useful.
+        if session not in {
+            "AM",
+            "PM",
+        }:
+            session = session_for_minutes(mins)
+
+        # BUGFIX: session_for_time()/session_for_minutes() intentionally
+        # use a wide AM/PM day-half split (any hour 14-23 counts as
+        # "PM") for *labeling* purposes -- but that's much wider than a
+        # plausible fix-time window. A late-night run (health-check
+        # re-save, delayed GitHub Actions retry, manual dispatch after
+        # the real PM fix) was getting tagged session="PM" and its
+        # clock time fed straight into the PM median below. That
+        # dragged the *learned* PM window later and later each time it
+        # happened (e.g. a 23:56 reading pulled the predicted PM fix
+        # from ~16:30 to ~19:34), which in turn made it *more* likely
+        # for the next run to again land late and reinforce the drift.
+        # Only genuine fix-time observations should influence the
+        # learned median, so drop anything outside the plausible
+        # prediction bounds here -- clamping just the final median
+        # (via _clamp_hm below) is not enough, since a bad sample can
+        # still skew *which* value the median lands on.
+        if session == "AM" and not (
+            AM_PREDICTION_MIN[0] * 60 + AM_PREDICTION_MIN[1]
+            <= mins
+            <= AM_PREDICTION_MAX[0] * 60 + AM_PREDICTION_MAX[1]
+        ):
+            continue
+
+        if session == "PM" and not (
+            PM_PREDICTION_MIN[0] * 60 + PM_PREDICTION_MIN[1]
+            <= mins
+            <= PM_PREDICTION_MAX[0] * 60 + PM_PREDICTION_MAX[1]
+        ):
+            continue
+
+        if session == "AM":
+            am_m.append(mins)
+
+        elif session == "PM":
+            pm_m.append(mins)
+
+    # --------------------------------------------------------
+    # Seed data establishes the trusted baseline fix time for each
+    # session. Real historical samples are only trusted to move the
+    # prediction away from that baseline once there are ENOUGH of
+    # them to outvote a stray outlier.
+    # --------------------------------------------------------
+
+    seed = load_json(
+        SEED_FILE,
+        [],
+    )
+
+    if not isinstance(seed, list):
+        seed = []
+
+    def _seed_minutes(session_name):
+        out = []
+        for r in seed:
+            if (
+                isinstance(r, dict)
+                and str(r.get("session", "")).upper() == session_name
+            ):
+                m = _parse_time_to_minutes(r.get("time"))
+                if m is not None:
+                    out.append(m)
+        return out
+
+    seed_am_m = _seed_minutes("AM")
+    seed_pm_m = _seed_minutes("PM")
+
+    # BUGFIX: the previous version treated MIN_SAMPLES_FOR_PREDICTION
+    # as a simple gate -- below it, use ONLY seed data; at or above it,
+    # use ONLY real data (dropping the seed entirely). That let as few
+    # as 3 real samples -- including anomalous ones, like a monitoring
+    # window that legitimately ran late -- override a well-established
+    # seed baseline outright, and let 1-2 real samples get silently
+    # blended with all 4+ seed samples with no protection against the
+    # real samples being outliers.
+    #
+    # Now: always start from the seed median as the trusted baseline,
+    # then only let it drift if there are enough real, in-bounds
+    # samples clustered near each other (not just near the bound
+    # filter's wide 7-hour window) to be believable. This makes a lone
+    # anomalous real sample (e.g. one very late monitoring run)
+    # powerless to relabel the learned fix time on its own.
+    def gaussian_kde_fix_mode(samples, grid_start, grid_end):
+        if not samples:
+            return None
+        n = len(samples)
+        std_val = statistics.stdev(samples) if n > 1 else 15.0
+        bandwidth = max(5.0, 1.06 * std_val * (n ** (-0.2)))
+
+        def pdf(x):
+            return sum(
+                math.exp(-0.5 * ((x - xi) / bandwidth) ** 2) / (math.sqrt(2 * math.pi) * bandwidth)
+                for xi in samples
+            ) / n
+
+        grid = list(range(grid_start, grid_end + 1))
+        densities = [pdf(x) for x in grid]
+        max_idx = densities.index(max(densities))
+        mode_min = grid[max_idx]
+
+        total_area = sum(densities) or 1.0
+        cdf = 0.0
+        p5 = grid[0]
+        p95 = grid[-1]
+        p5_found = False
+        for x, d in zip(grid, densities):
+            cdf += d / total_area
+            if not p5_found and cdf >= 0.05:
+                p5 = x
+                p5_found = True
+            if cdf >= 0.95:
+                p95 = x
+                break
+
+        return {
+            "mode_minutes": mode_min,
+            "hour": mode_min // 60,
+            "minute": mode_min % 60,
+            "window_90": [
+                f"{p5 // 60:02d}:{p5 % 60:02d}",
+                f"{p95 // 60:02d}:{p95 % 60:02d}",
+            ],
+            "bandwidth_minutes": round(bandwidth, 2),
+            "samples_count": n,
+        }
+
+    def _resolve_session_minutes(real_m, seed_m, fallback_hm, grid_start, grid_end):
+        seed_med = _median(seed_m)
+
+        if len(real_m) < MIN_SAMPLES_FOR_PREDICTION:
+            if not real_m:
+                samples = seed_m
+            elif seed_med is not None:
+                samples = seed_m + real_m
+            else:
+                samples = real_m
+        else:
+            spread = max(real_m) - min(real_m)
+            if seed_med is not None and spread > WINDOW_DURATION_MINUTES:
+                samples = seed_m + real_m
+            else:
+                samples = real_m
+
+        kde = gaussian_kde_fix_mode(samples, grid_start, grid_end)
+        if kde:
+            return (kde["hour"], kde["minute"]), kde
+
+        base = seed_med if seed_med is not None else _median(real_m)
+        if base is None:
+            return fallback_hm, None
+
+        return (int(base // 60), int(base % 60)), None
+
+    res = {}
+
+    am_hm, am_kde = _resolve_session_minutes(
+        am_m,
+        seed_am_m,
+        FALLBACK_AM_TIME,
+        AM_PREDICTION_MIN[0] * 60,
+        AM_PREDICTION_MAX[0] * 60,
+    )
+    res["AM"] = _clamp_hm(am_hm, AM_PREDICTION_MIN, AM_PREDICTION_MAX)
+
+    pm_hm, pm_kde = _resolve_session_minutes(
+        pm_m,
+        seed_pm_m,
+        FALLBACK_PM_TIME,
+        PM_PREDICTION_MIN[0] * 60,
+        PM_PREDICTION_MAX[0] * 60,
+    )
+    res["PM"] = _clamp_hm(pm_hm, PM_PREDICTION_MIN, PM_PREDICTION_MAX)
+
+    res["details"] = {
+        "AM": am_kde,
+        "PM": pm_kde,
+    }
+
+    print(
+        "Predicted session times (Gaussian KDE): "
+        f"AM {res['AM'][0]:02d}:{res['AM'][1]:02d} "
+        f"(90% win: {am_kde['window_90'] if am_kde else 'N/A'}) "
+        f"from {len(am_m)} real samples; "
+        f"PM {res['PM'][0]:02d}:{res['PM'][1]:02d} "
+        f"(90% win: {pm_kde['window_90'] if pm_kde else 'N/A'}) "
+        f"from {len(pm_m)} real samples"
+    )
+
+    return res
+
+
+def _session_bounds(
+    day,
+    hm,
+):
+    dt = datetime(
+        day.year,
+        day.month,
+        day.day,
+        hm[0],
+        hm[1],
+        0,
+        tzinfo=IST,
+    )
+
+    start = (
+        dt
+        - timedelta(
+            minutes=PRE_WINDOW_MINUTES
+        )
+    )
+
+    end = (
+        start
+        + timedelta(
+            minutes=WINDOW_DURATION_MINUTES
+        )
+    )
+
+    return start, end
+
+
+def current_window(
+    now=None
+):
+    now = now or now_ist()
+
+    day = now.date()
+
+    p = predict_session_times(
+        now
+    )
+
+    am_s, am_e = _session_bounds(
+        day,
+        p["AM"],
+    )
+
+    pm_s, pm_e = _session_bounds(
+        day,
+        p["PM"],
+    )
+
+    if am_s <= now < am_e:
+        return {
+            "name": "AM",
+            "start": am_s,
+            "end": am_e,
+        }
+
+    if pm_s <= now < pm_e:
+        return {
+            "name": "PM",
+            "start": pm_s,
+            "end": pm_e,
+        }
+
+    return None
+
+
+def next_window(
+    now=None
+):
+    now = now or now_ist()
+
+    day = now.date()
+
+    p = predict_session_times(
+        now
+    )
+
+    am_s, am_e = _session_bounds(
+        day,
+        p["AM"],
+    )
+
+    pm_s, pm_e = _session_bounds(
+        day,
+        p["PM"],
+    )
+
+    if now < am_s:
+        return {
+            "name": "AM",
+            "start": am_s,
+            "end": am_e,
+        }
+
+    if now < pm_s:
+        return {
+            "name": "PM",
+            "start": pm_s,
+            "end": pm_e,
+        }
+
+    tomorrow = (
+        day
+        + timedelta(days=1)
+    )
+
+    p_tom = predict_session_times(
+        datetime(
+            tomorrow.year,
+            tomorrow.month,
+            tomorrow.day,
+            0,
+            0,
+            tzinfo=IST,
+        )
+    )
+
+    am_s_tom, am_e_tom = _session_bounds(
+        tomorrow,
+        p_tom["AM"],
+    )
+
+    return {
+        "name": "AM",
+        "start": am_s_tom,
+        "end": am_e_tom,
+    }
+
+
+def save_window_info(
+    window
+):
+    p = predict_session_times(
+        now_ist()
+    )
+
+    save_json(
+        WINDOW_FILE,
+        {
+            "timezone": "Asia/Kolkata",
+
+            "updated_at": (
+                now_ist().isoformat()
+            ),
+
+            "windows": {
+                "AM": {
+                    "predicted_fix_time": (
+                        f"{p['AM'][0]:02d}:"
+                        f"{p['AM'][1]:02d}"
+                    ),
+                    "arrival_window_90": (
+                        p.get("details", {}).get("AM", {}).get("window_90")
+                        or [f"{p['AM'][0]:02d}:30", f"{p['AM'][0]+1:02d}:00"]
+                    ),
+                    "polling_starts": (
+                        f"{PRE_WINDOW_MINUTES} "
+                        "min before"
+                    ),
+                    "duration_minutes": (
+                        WINDOW_DURATION_MINUTES
+                    ),
+                    "kde_bandwidth_minutes": (
+                        p.get("details", {}).get("AM", {}).get("bandwidth_minutes")
+                    ),
+                },
+
+                "PM": {
+                    "predicted_fix_time": (
+                        f"{p['PM'][0]:02d}:"
+                        f"{p['PM'][1]:02d}"
+                    ),
+                    "arrival_window_90": (
+                        p.get("details", {}).get("PM", {}).get("window_90")
+                        or [f"{p['PM'][0]:02d}:00", f"{p['PM'][0]+1:02d}:00"]
+                    ),
+                    "polling_starts": (
+                        f"{PRE_WINDOW_MINUTES} "
+                        "min before"
+                    ),
+                    "duration_minutes": (
+                        WINDOW_DURATION_MINUTES
+                    ),
+                    "kde_bandwidth_minutes": (
+                        p.get("details", {}).get("PM", {}).get("bandwidth_minutes")
+                    ),
+                },
+            },
+
+            "active_window": (
+                window["name"]
+                if window
+                else None
+            ),
+
+            "poll_seconds": POLL_SECONDS,
+        },
+    )
+
+
+# ============================================================
+# MAIN PIPELINE
+# ============================================================
+
+def normal_fetch():
+    prev_rate = get_previous_rate()
+
+    live, good, ibja = fetch_all_sources()
+
+    selected = select_rate(
+        live,
+        good,
+        ibja,
+        prev_rate,
+    )
+
+    if not selected:
+        return False
+
+    rate = selected["rate_22k"]
+
+    changed = (
+        prev_rate is not None
+        and rate != prev_rate
+    )
+
+    save_live(
+        rate,
+        selected,
+        changed,
+    )
+
+    save_history(
+        rate,
+        selected,
+        changed,
+    )
+
+    history_data = load_json(HISTORY_FILE, [])
+    live_data = load_json(LIVE_FILE, {})
+    quant_metrics = compute_quant_metrics(history_data, live_data, selected.get("ibja"))
+    bake_instant_bootstrap(live_data, history_data, quant_metrics, selected.get("ibja"))
+
+    return True
+
+
+def poll_window_once(window):
+    """
+    Do a SINGLE fetch-and-save pass for an active monitoring window,
+    then return immediately. No internal sleep loop.
+    """
+    prev_rate = get_previous_rate()
+
+    live, good, ibja = fetch_all_sources()
+
+    selected = select_rate(
+        live,
+        good,
+        ibja,
+        prev_rate,
+    )
+
+    if not selected:
+        save_window_info(window)
+        return False
+
+    rate = selected["rate_22k"]
+
+    changed = (
+        prev_rate is not None
+        and rate != prev_rate
+    )
+
+    save_live(
+        rate,
+        selected,
+        changed,
+    )
+
+    save_history(
+        rate,
+        selected,
+        changed,
+    )
+
+    history_data = load_json(HISTORY_FILE, [])
+    live_data = load_json(LIVE_FILE, {})
+    quant_metrics = compute_quant_metrics(history_data, live_data, selected.get("ibja"))
+    bake_instant_bootstrap(live_data, history_data, quant_metrics, selected.get("ibja"))
+
+    save_window_info(
+        window if not changed else None
+    )
+
+    return changed
+
+
+def _in_dense_polling_band(now):
+    """
+    True if `now` falls inside one of the wide dense-polling cron
+    bands defined in the workflow (08:00-12:00 IST or 18:30-21:30
+    IST). Must be kept in sync with the `schedule:` entries in
+    main.yml. Used only to decide whether an off-window tick should
+    skip fetching (see main()) -- has no effect on whether polling
+    actually happens, since that's entirely controlled by GitHub's
+    cron, not by this check.
+    """
+    minutes = now.hour * 60 + now.minute
+
+    band_1 = (8 * 60, 12 * 60)
+    band_2 = (18 * 60 + 30, 21 * 60 + 30)
+
+    return (
+        band_1[0] <= minutes < band_1[1]
+        or band_2[0] <= minutes < band_2[1]
+    )
+
+
+def main():
+    now = now_ist()
+
+    is_gha = (
+        os.environ.get(
+            "GITHUB_ACTIONS",
+            "",
+        ).lower()
+        == "true"
+    )
+
+    gha_event = os.environ.get(
+        "GITHUB_EVENT_NAME",
+        "",
+    )
+
+    force = (
+        os.environ.get(
+            "FORCE_FETCH",
+            "",
+        ).lower()
+        == "true"
+    )
+
+    # --------------------------------------------------------
+    # Manual/forced fetch
+    # --------------------------------------------------------
+
+    if force:
+        save_window_info(None)
+
+        if not normal_fetch():
+            sys.exit(1)
+
+        return
+
+    # --------------------------------------------------------
+    # If currently inside a monitoring window, do ONE poll pass
+    # and exit. No sleeping, no waiting -- this function is meant
+    # to be invoked frequently (every few minutes) by the
+    # scheduler instead of blocking inside a single long job.
+    # --------------------------------------------------------
+
+    active = current_window(
+        now
+    )
+
+    if active:
+        poll_window_once(active)
+        return
+
+    # --------------------------------------------------------
+    # Not inside a monitoring window right now.
+    #
+    # STALENESS SELF-HEAL: if live.json hasn't been verified in a
+    # while and we're already past the predicted fix time for the
+    # session that should have run, do a normal fetch anyway rather
+    # than silently waiting for the next window/cron tick. This
+    # covers the case where a scheduled run was delayed or skipped
+    # entirely (GitHub's `schedule` trigger is best-effort and can
+    # be delayed under load) and nothing else would catch it until
+    # the following session.
+    # --------------------------------------------------------
+
+    live_data = load_json(LIVE_FILE, {})
+    stale_hours = _hours_since(
+        live_data.get("verified_at") or live_data.get("updated_at"),
+        now,
+    )
+
+    upcoming = next_window(now)
+    missed_a_window = (
+        stale_hours is not None
+        and stale_hours >= (STALE_CATCHUP_HOURS)
+        and upcoming["start"] > now + timedelta(hours=1)
+        # ^ only self-heal when the *next* window is still a while
+        # away -- if it's coming up soon, just let it run normally
+        # instead of double-fetching right before it.
+    )
+
+    if missed_a_window:
+        print(
+            f"STALE CATCH-UP: live.json unverified for "
+            f"{stale_hours:.1f}h and no window imminent -- "
+            "forcing a fetch now."
+        )
+        save_window_info(None)
+        if not normal_fetch():
+            sys.exit(1)
+        return
+
+    # --------------------------------------------------------
+    # Outside monitoring window, nothing stale enough to force.
+    #
+    # BUGFIX: this branch used to call normal_fetch() unconditionally
+    # on every tick, including dense-schedule ticks (every 5 min,
+    # 08:00-12:00 and 18:30-21:30 IST -- kept wider than the actual
+    # predicted window to tolerate day-to-day drift) that land
+    # outside the real window. That meant a live scrape of both
+    # sources every 5 minutes for ~4 extra hours/day -- unnecessary
+    # load on LiveChennai/GoodReturns and needless commit noise.
+    #
+    # Fix: inside a dense band but outside the real window, only
+    # fetch if we're within NEAR_WINDOW_MARGIN_MINUTES of the next
+    # window opening (so live.json still ticks over just before/
+    # after a session). The separate hourly heartbeat ticks (outside
+    # both dense bands) are infrequent enough to always fetch --
+    # that's their whole job as a backstop.
+    # --------------------------------------------------------
+
+    in_dense_band = _in_dense_polling_band(now)
+
+    should_fetch = (
+        not in_dense_band
+        or upcoming["start"] - now <= timedelta(minutes=NEAR_WINDOW_MARGIN_MINUTES)
+    )
+
+    save_window_info(None)
+
+    if should_fetch:
+        if not normal_fetch():
+            sys.exit(1)
+
+
+# ============================================================
+# ENTRY POINT
+# ============================================================
+
+if __name__ == "__main__":
+    try:
+        main()
+
+    except KeyboardInterrupt:
+        sys.exit(1)
+
+    except Exception as exc:
+        print(
+            f"FATAL: {exc}"
+        )
+        sys.exit(1)
+
+    finally:
+        try:
+            health = run_health_check()
+
+        except Exception as exc:
+            print(
+                f"Health check failed: {exc}"
+            )
+            health = None
+
+        try:
+            if health:
+                run_alert_check(health)
+
+        except Exception as exc:
+            print(
+                f"Alert check failed: {exc}"
+            )
+
+        try:
+            history_data = load_json(HISTORY_FILE, [])
+            live_data = load_json(LIVE_FILE, {})
+            ibja_data = load_json(IBJA_FILE, {})
+            quant_data = compute_quant_metrics(history_data, live_data, ibja_data)
+            bake_instant_bootstrap(live_data, history_data, quant_data, ibja_data)
+        except Exception as exc:
+            print(
+                f"Quant & bootstrap baking failed: {exc}"
+            )
+
+        try:
+            compute_and_save_summary()
+
+        except Exception as exc:
+            print(
+                f"Summary computation failed: {exc}"
+            )

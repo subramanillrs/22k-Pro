@@ -1,0 +1,298 @@
+name: Monitor and Update Chennai 22K Gold
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    # Dense polling (every 5 min) across two bands that cover the AM
+    # (~09:38-11:03 IST) and PM (~19:19-20:44 IST) predicted fix
+    # windows with a wide margin either side, in case the predicted
+    # times drift day to day. Expressed in UTC (IST = UTC+5:30):
+    #   08:00-12:00 IST = 02:30-06:30 UTC  (covers AM window)
+    #   18:30-21:30 IST = 13:00-16:00 UTC  (covers PM window)
+    # Each run is short (single fetch, no internal sleep/poll loop)
+    # and independently scheduled by GitHub -- so if one tick is
+    # delayed or skipped (GitHub's `schedule` trigger is best-effort,
+    # not guaranteed to the minute), the next tick 5 minutes later
+    # picks up where it left off instead of the whole session being
+    # pushed back, unlike the old design where a single job slept
+    # until the window then polled internally for up to 85 minutes.
+    - cron: "*/5 2-6 * * *"
+    - cron: "*/5 13-16 * * *"
+
+    # Hourly outside the two dense bands, as a low-cost heartbeat.
+    # This is what catches a session that GitHub delayed so badly it
+    # slipped past the dense polling bands above -- see the
+    # STALE_CATCHUP_HOURS self-heal in update_gold.py.
+    - cron: "0 7-12,17 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: chennai-gold-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+
+      # ----------------------------------------------------
+      # CHECKOUT
+      # ----------------------------------------------------
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      # ----------------------------------------------------
+      # PYTHON
+      # ----------------------------------------------------
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      # ----------------------------------------------------
+      # PIP CACHE
+      # ----------------------------------------------------
+      - name: Cache pip packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-requests-bs4
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      # ----------------------------------------------------
+      # DEPENDENCIES
+      # ----------------------------------------------------
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4
+
+      # ----------------------------------------------------
+      # DETERMINE FETCH MODE
+      # ----------------------------------------------------
+      - name: Determine fetch mode
+        id: mode
+        shell: bash
+        run: |
+          echo "Event: ${{ github.event_name }}"
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "force_fetch=true" >> "$GITHUB_OUTPUT"
+            echo "Manual Fetch button detected."
+          else
+            echo "force_fetch=false" >> "$GITHUB_OUTPUT"
+            echo "Scheduled run detected."
+          fi
+
+      # ----------------------------------------------------
+      # RUN (single pass, no internal sleep/poll loop)
+      # ----------------------------------------------------
+      - name: Update Chennai 22K rate
+        env:
+          GITHUB_ACTIONS: "true"
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          FORCE_FETCH: ${{ steps.mode.outputs.force_fetch }}
+          ALERT_WEBHOOK_URL: ${{ secrets.ALERT_WEBHOOK_URL }}
+        shell: bash
+        run: |
+          echo "============================================================"
+          echo "CHENNAI 22K GOLD RATE MONITOR"
+          echo "============================================================"
+          echo "Event: $GITHUB_EVENT_NAME"
+          echo "Force fetch: $FORCE_FETCH"
+          echo ""
+          echo "This job does ONE fetch-and-save pass then exits."
+          echo "Polling during a monitoring window is achieved by this"
+          echo "workflow re-running every 5 minutes, not by looping"
+          echo "inside a single job."
+          echo "============================================================"
+
+          python update_gold.py
+
+      # ----------------------------------------------------
+      # VERIFY DATA
+      # ----------------------------------------------------
+      - name: Verify generated data
+        shell: bash
+        run: |
+          echo "============================================================"
+          echo "VERIFYING GENERATED DATA"
+          echo "============================================================"
+
+          if [ -f data/live.json ]; then
+            echo "live.json: OK"
+          else
+            echo "ERROR: data/live.json is missing"
+            exit 1
+          fi
+
+          if [ -f data/history.json ]; then
+            echo "history.json: OK"
+          else
+            echo "history.json missing - creating empty file"
+            echo "[]" > data/history.json
+          fi
+
+          if [ -f data/monitoring_windows.json ]; then
+            echo "monitoring_windows.json: OK"
+          else
+            echo "monitoring_windows.json missing - creating file"
+            echo '{}' > data/monitoring_windows.json
+          fi
+
+          if [ -f data/summary.json ]; then
+            echo "summary.json: OK"
+          else
+            echo "summary.json missing - will be created once history exists"
+          fi
+
+          if [ -f data/alert_state.json ]; then
+            echo "alert_state.json: OK"
+          else
+            echo "alert_state.json missing - will be created on first health check"
+          fi
+
+          if [ -f data/health_status.json ]; then
+            echo "health_status.json: OK"
+          else
+            echo "health_status.json missing - will be created on first health check"
+          fi
+
+          if [ -f data/quant_metrics.json ]; then
+            echo "quant_metrics.json: OK"
+          else
+            echo "quant_metrics.json missing - will be created by quant engine"
+          fi
+
+          if [ -f data/bootstrap.json ]; then
+            echo "bootstrap.json: OK"
+          else
+            echo "bootstrap.json missing - will be created by instant cache generator"
+          fi
+
+          if [ -f data/ibja.json ]; then
+            echo "ibja.json: OK"
+          else
+            echo "ibja.json missing - will be created by IBJA fetcher"
+          fi
+
+      # ----------------------------------------------------
+      # SHOW LIVE DATA
+      # ----------------------------------------------------
+      - name: Show current live data
+        shell: bash
+        run: |
+          echo "============================================================"
+          echo "CURRENT LIVE DATA"
+          echo "============================================================"
+
+          cat data/live.json
+
+      # ----------------------------------------------------
+      # SHOW MONITORING WINDOW
+      # ----------------------------------------------------
+      - name: Show monitoring window
+        shell: bash
+        run: |
+          echo "============================================================"
+          echo "MONITORING WINDOW"
+          echo "============================================================"
+
+          cat data/monitoring_windows.json
+
+      # ----------------------------------------------------
+      # SHOW SUMMARY STATS
+      # ----------------------------------------------------
+      - name: Show summary stats
+        shell: bash
+        run: |
+          echo "============================================================"
+          echo "SUMMARY STATS"
+          echo "============================================================"
+
+          if [ -f data/summary.json ]; then
+            cat data/summary.json
+          else
+            echo "No summary.json yet."
+          fi
+
+      # ----------------------------------------------------
+      # SHOW HEALTH STATUS
+      # ----------------------------------------------------
+      - name: Show health status
+        shell: bash
+        run: |
+          echo "============================================================"
+          echo "HEALTH STATUS"
+          echo "============================================================"
+
+          if [ -f data/health_status.json ]; then
+            cat data/health_status.json
+          else
+            echo "No health_status.json yet."
+          fi
+
+      # ----------------------------------------------------
+      # SAVE UPDATED DATA
+      #
+      # Commit every run, not just on a rate change. Each run is
+      # cheap (single fetch) and only every 5 minutes, so this is a
+      # deliberate trade of slightly more commits for live.json's
+      # timestamp always reflecting the truth -- you can always tell
+      # from the repo/PWA whether the pipeline is actually running,
+      # instead of a silent internal loop hiding staleness for up to
+      # 85 minutes.
+      # ----------------------------------------------------
+      - name: Save updated data
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add data/live.json
+          git add data/history.json
+          git add data/monitoring_windows.json
+          git add data/summary.json 2>/dev/null || true
+          git add data/alert_state.json 2>/dev/null || true
+          git add data/health_status.json 2>/dev/null || true
+          git add data/bootstrap.json 2>/dev/null || true
+          git add data/quant_metrics.json 2>/dev/null || true
+          git add data/ibja.json 2>/dev/null || true
+          git add index.html 2>/dev/null || true
+
+          if git diff --cached --quiet; then
+            echo "No data changes to commit."
+          else
+            git commit -m "Update Chennai 22K gold data [skip ci]"
+
+            # Retry push with rebase-on-conflict, instead of silently
+            # swallowing a failed rebase with `|| true` and pushing
+            # whatever state that left behind. If a rebase actually
+            # conflicts, abort it cleanly and fail the step loudly
+            # rather than pushing something unpredictable -- the next
+            # scheduled run will pick this data up again.
+            attempt=1
+            max_attempts=3
+            until git push; do
+              if [ "$attempt" -ge "$max_attempts" ]; then
+                echo "ERROR: push failed after $attempt attempts, aborting."
+                git rebase --abort 2>/dev/null || true
+                exit 1
+              fi
+              echo "Push rejected (attempt $attempt/$max_attempts) - rebasing onto latest and retrying..."
+              if ! git pull --rebase origin HEAD; then
+                echo "ERROR: rebase failed (likely a real conflict). Aborting rebase."
+                git rebase --abort 2>/dev/null || true
+                exit 1
+              fi
+              attempt=$((attempt + 1))
+            done
+          fi

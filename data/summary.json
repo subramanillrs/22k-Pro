@@ -1,0 +1,47 @@
+{
+  "generated_at": "2026-09-07T20:41:40.167630+05:30",
+  "all_time_high": {
+    "rate_22k": 16800,
+    "date": "2026-01-29"
+  },
+  "all_time_low": {
+    "rate_22k": 5285,
+    "date": "2023-10-04"
+  },
+  "current_month": {
+    "month": "2026-09",
+    "average_22k": 14195,
+    "high": 14385,
+    "low": 13935
+  },
+  "current_year": {
+    "year": "2026",
+    "average_22k": 14108,
+    "high": 16800,
+    "low": 12440
+  },
+  "last_30_records": {
+    "average_22k": 14413,
+    "high": 15030,
+    "low": 13942
+  },
+  "total_records": 1160,
+  "quant": {
+    "calculated_at": "2026-09-07T20:41:39.596822+05:30",
+    "rate_22k": 14130,
+    "rate_8g": 113040,
+    "volatility_30d_annualized": 0.1584,
+    "volatility_30d_pct": 15.84,
+    "volatility_daily_pct": 0.998,
+    "var_95_1d_amount": 231.91,
+    "var_95_1d_pct": 1.64,
+    "var_95_1d_8g_amount": 1855.28,
+    "var_95_1d_lower_bound": 13898,
+    "var_95_1d_upper_bound": 14362,
+    "max_drawdown_30d_pct": 7.24,
+    "chennai_premium_amount": 141,
+    "chennai_premium_pct": 1.01,
+    "ibja_benchmark_rate": 13989,
+    "sample_points": 30
+  }
+}

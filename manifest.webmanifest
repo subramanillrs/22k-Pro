@@ -1,0 +1,27 @@
+{
+  "name": "Chennai 22K Gold Rate Tracker",
+  "short_name": "Chennai Gold",
+  "start_url": "./",
+  "display": "standalone",
+  "theme_color": "#a97f34",
+  "background_color": "#f8f4ea",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
