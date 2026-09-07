@@ -1,5 +1,5 @@
 {
-  "calculated_at": "2026-09-07T20:41:39.596822+05:30",
+  "calculated_at": "2026-09-07T22:37:36.092254+05:30",
   "rate_22k": 14130,
   "rate_8g": 113040,
   "volatility_30d_annualized": 0.1584,
@@ -11,8 +11,8 @@
   "var_95_1d_lower_bound": 13898,
   "var_95_1d_upper_bound": 14362,
   "max_drawdown_30d_pct": 7.24,
-  "chennai_premium_amount": 141,
-  "chennai_premium_pct": 1.01,
-  "ibja_benchmark_rate": 13989,
+  "chennai_premium_amount": 142,
+  "chennai_premium_pct": 1.02,
+  "ibja_benchmark_rate": 13988,
   "sample_points": 30
 }
