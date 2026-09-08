@@ -1,5 +1,5 @@
 {
-  "calculated_at": "2026-09-08T17:25:01.521408+05:30",
+  "calculated_at": "2026-09-08T19:29:02.796364+05:30",
   "rate_22k": 14270,
   "rate_8g": 114160,
   "volatility_30d_annualized": 0.1603,
@@ -11,8 +11,52 @@
   "var_95_1d_lower_bound": 14033,
   "var_95_1d_upper_bound": 14507,
   "max_drawdown_30d_pct": 7.24,
-  "chennai_premium_amount": 248,
-  "chennai_premium_pct": 1.77,
-  "ibja_benchmark_rate": 14022,
+  "chennai_premium_amount": 172,
+  "chennai_premium_pct": 1.22,
+  "ibja_benchmark_rate": 14098,
+  "macro_parity": {
+    "implied_comex_usd_oz": 4801.9,
+    "usd_inr_benchmark": 87.8,
+    "customs_duty_pct": 11.5,
+    "gst_pct": 3.0,
+    "import_parity_22k": 14270,
+    "physical_premium_amount": 0,
+    "physical_premium_pct": 0.0,
+    "parity_status": "Parity Aligned"
+  },
+  "volatility_cone": {
+    "horizon_7d": {
+      "lower": 13657,
+      "upper": 14911
+    },
+    "horizon_30d": {
+      "lower": 13029,
+      "upper": 15629
+    },
+    "prob_test_upper_pct": 5.0,
+    "prob_test_lower_pct": 5.0
+  },
+  "trade_standards": {
+    "plain_gold": {
+      "min_va_pct": 8.0,
+      "avg_va_pct": 10.5,
+      "max_va_pct": 14.0
+    },
+    "antique_kundan": {
+      "min_va_pct": 14.0,
+      "avg_va_pct": 17.5,
+      "max_va_pct": 22.0
+    },
+    "temple_design": {
+      "min_va_pct": 16.0,
+      "avg_va_pct": 19.0,
+      "max_va_pct": 25.0
+    },
+    "coins_bars": {
+      "min_va_pct": 1.0,
+      "avg_va_pct": 2.0,
+      "max_va_pct": 3.5
+    }
+  },
   "sample_points": 30
 }

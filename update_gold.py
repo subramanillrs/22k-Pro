@@ -2307,6 +2307,39 @@ def compute_quant_metrics(history_records, live_record, ibja_record=None):
         premium_amt = int(round(rate_22k - ibja_22k))
         premium_pct = round((premium_amt / ibja_22k) * 100, 2)
 
+    # Agent 1: Macro Currency & Import Parity Engine
+    usd_inr = 87.80
+    effective_import_duty = 0.115  # 6% BCD + 5.5% AIDC
+    gst_rate = 0.03
+    troy_oz_g = 31.1034768
+
+    domestic_24k_rate = rate_22k * (24.0 / 22.0)
+    base_landed_g = domestic_24k_rate / ((1.0 + effective_import_duty) * (1.0 + gst_rate))
+    implied_comex_usd = round((base_landed_g * troy_oz_g) / usd_inr, 1)
+    parity_landed_22k = round(base_landed_g * (1.0 + effective_import_duty) * (1.0 + gst_rate) * (22.0 / 24.0))
+    macro_spread = round(rate_22k - parity_landed_22k)
+    macro_spread_pct = round((macro_spread / parity_landed_22k) * 100, 2) if parity_landed_22k else 0.0
+
+    # Agent 2: Monte Carlo Volatility Cone Engine
+    z90 = 1.645
+    cone_7d_low = round(rate_22k * math.exp(-z90 * daily_vol * math.sqrt(7)))
+    cone_7d_high = round(rate_22k * math.exp(z90 * daily_vol * math.sqrt(7)))
+    cone_30d_low = round(rate_22k * math.exp(-z90 * daily_vol * math.sqrt(30)))
+    cone_30d_high = round(rate_22k * math.exp(z90 * daily_vol * math.sqrt(30)))
+
+    denom_30 = max(0.001, daily_vol * math.sqrt(30))
+    z_upper = (math.log(max(cone_30d_high, 15000.0) / rate_22k)) / denom_30
+    prob_upper = round(0.5 * (1.0 - math.erf(z_upper / math.sqrt(2))) * 100, 1)
+    z_lower = (math.log(min(cone_30d_low, 13500.0) / rate_22k)) / denom_30
+    prob_lower = round(0.5 * (1.0 + math.erf(z_lower / math.sqrt(2))) * 100, 1)
+
+    jewellery_va_standards = {
+        "plain_gold": {"min_va_pct": 8.0, "avg_va_pct": 10.5, "max_va_pct": 14.0},
+        "antique_kundan": {"min_va_pct": 14.0, "avg_va_pct": 17.5, "max_va_pct": 22.0},
+        "temple_design": {"min_va_pct": 16.0, "avg_va_pct": 19.0, "max_va_pct": 25.0},
+        "coins_bars": {"min_va_pct": 1.0, "avg_va_pct": 2.0, "max_va_pct": 3.5},
+    }
+
     metrics = {
         "calculated_at": now.isoformat(),
         "rate_22k": int(round(rate_22k)),
@@ -2323,6 +2356,23 @@ def compute_quant_metrics(history_records, live_record, ibja_record=None):
         "chennai_premium_amount": premium_amt,
         "chennai_premium_pct": premium_pct,
         "ibja_benchmark_rate": int(round(ibja_22k)) if ibja_22k else None,
+        "macro_parity": {
+            "implied_comex_usd_oz": implied_comex_usd,
+            "usd_inr_benchmark": usd_inr,
+            "customs_duty_pct": 11.5,
+            "gst_pct": 3.0,
+            "import_parity_22k": parity_landed_22k,
+            "physical_premium_amount": macro_spread,
+            "physical_premium_pct": macro_spread_pct,
+            "parity_status": "Parity Aligned" if abs(macro_spread_pct) <= 1.0 else ("Premium Market" if macro_spread > 0 else "Discount Market"),
+        },
+        "volatility_cone": {
+            "horizon_7d": {"lower": cone_7d_low, "upper": cone_7d_high},
+            "horizon_30d": {"lower": cone_30d_low, "upper": cone_30d_high},
+            "prob_test_upper_pct": prob_upper,
+            "prob_test_lower_pct": prob_lower,
+        },
+        "trade_standards": jewellery_va_standards,
         "sample_points": len(log_returns),
     }
 

@@ -11,7 +11,7 @@
 // be dropped (e.g. after a shell redesign) -- activate() clears any
 // cache that doesn't match the current name.
 
-const CACHE_NAME = "gold22k-shell-v4";
+const CACHE_NAME = "gold22k-shell-v5";
 
 const SHELL_FILES = [
   "./",
