@@ -39,8 +39,8 @@
     "var_95_1d_lower_bound": 14033,
     "var_95_1d_upper_bound": 14507,
     "max_drawdown_30d_pct": 7.24,
-    "chennai_premium_amount": 172,
-    "chennai_premium_pct": 1.22,
+    "chennai_premium_amount": 248,
+    "chennai_premium_pct": 1.77,
     "sowcarpet_wholesale_22k": 14225,
     "sowcarpet_discount_pct": -0.32,
     "retail_showroom_spread": 180,
@@ -150,7 +150,7 @@
         "description": "Gross margin between Sowcarpet wholesale raw bar cash rate and T. Nagar showroom retail price"
       }
     },
-    "ibja_benchmark_rate": 14098,
+    "ibja_benchmark_rate": 14022,
     "macro_parity": {
       "implied_comex_usd_oz": 4801.9,
       "usd_inr_benchmark": 87.8,
