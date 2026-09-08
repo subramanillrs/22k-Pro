@@ -42,6 +42,51 @@ def test_ibja_fetching_and_fallbacks():
     print("✓ IBJA fetch and premium calculation PASSED\n")
 
 
+def test_chennai_submarket_spreads():
+    print("Testing Chennai Sub-Market Basis & Wholesale Spread Engine...")
+    rate_22k = 14270
+    sub = update_gold.compute_submarket_spreads(rate_22k)
+    assert sub is not None, "compute_submarket_spreads returned None"
+    assert sub["sowcarpet_wholesale_22k"] == rate_22k - 45, f"Expected {rate_22k - 45}, got {sub['sowcarpet_wholesale_22k']}"
+    expected_sow_pct = round((-45.0 / rate_22k) * 100.0, 2)
+    assert sub["sowcarpet_discount_pct"] == expected_sow_pct, f"Expected {expected_sow_pct}, got {sub['sowcarpet_discount_pct']}"
+    assert sub["retail_showroom_spread"] == 180, f"Expected 180, got {sub['retail_showroom_spread']}"
+    assert sub["retail_showroom_rate_22k"] == rate_22k + 180, f"Expected {rate_22k + 180}, got {sub['retail_showroom_rate_22k']}"
+    expected_show_pct = round((180.0 / rate_22k) * 100.0, 2)
+    assert sub["retail_showroom_markup_pct"] == expected_show_pct, f"Expected {expected_show_pct}, got {sub['retail_showroom_markup_pct']}"
+
+    # Test Regional Basis Parity
+    payload = sub["submarket_spreads"]
+    assert "regional_parity" in payload
+    cbe = payload["regional_parity"]["coimbatore"]
+    assert cbe["rate_22k"] == rate_22k - 15
+    assert cbe["basis_spread"] == -15
+    assert cbe["parity_status"] == "Discount"
+
+    mad = payload["regional_parity"]["madurai"]
+    assert mad["rate_22k"] == rate_22k + 15
+    assert mad["basis_spread"] == 15
+    assert mad["parity_status"] == "Premium"
+
+    # Test Bullion-to-Retail Value Chain Arbitrage
+    arb = payload["value_chain_arbitrage"]
+    assert arb["gross_spread_amount"] == 180 - (-45)  # 225
+    expected_arb_pct = round((225.0 / (rate_22k - 45)) * 100.0, 2)
+    assert arb["gross_spread_pct"] == expected_arb_pct
+
+    # Test Edge cases
+    edge = update_gold.compute_submarket_spreads(0)
+    assert edge["sowcarpet_wholesale_22k"] is None
+    assert edge["retail_showroom_spread"] is None
+
+    print(f"  Sowcarpet Wholesale 22K: ₹{sub['sowcarpet_wholesale_22k']}/g ({sub['sowcarpet_discount_pct']}%)")
+    print(f"  T. Nagar Showroom Retail: ₹{sub['retail_showroom_rate_22k']}/g (+{sub['retail_showroom_markup_pct']}%)")
+    print(f"  Coimbatore Basis: ₹{cbe['rate_22k']}/g ({cbe['basis_spread']:+d}/g)")
+    print(f"  Madurai Basis: ₹{mad['rate_22k']}/g ({mad['basis_spread']:+d}/g)")
+    print(f"  Value Chain Arbitrage: ₹{arb['gross_spread_amount']}/g ({arb['gross_spread_pct']}%)")
+    print("✓ Chennai Sub-Market Basis & Wholesale Spread Engine PASSED\n")
+
+
 def test_bayesian_consensus():
     print("Testing Bayesian Multi-Source Consensus Engine...")
 
@@ -175,6 +220,10 @@ def test_full_pipeline_run():
     assert "consensus" in live_json, "consensus missing from live.json"
     assert "chennai_premium_amount" in live_json, "chennai_premium_amount missing from live.json"
     assert "chennai_premium_pct" in live_json, "chennai_premium_pct missing from live.json"
+    assert "sowcarpet_wholesale_22k" in live_json, "sowcarpet_wholesale_22k missing from live.json"
+    assert "sowcarpet_discount_pct" in live_json, "sowcarpet_discount_pct missing from live.json"
+    assert "retail_showroom_spread" in live_json, "retail_showroom_spread missing from live.json"
+    assert "submarket_spreads" in live_json, "submarket_spreads missing from live.json"
 
     # Verify monitoring_windows.json
     windows_json = update_gold.load_json(update_gold.WINDOW_FILE, {})
@@ -198,6 +247,7 @@ if __name__ == "__main__":
     print("RUNNING PIPELINE & DEEPTECH QUANT TEST SUITE")
     print("============================================================")
     test_ibja_fetching_and_fallbacks()
+    test_chennai_submarket_spreads()
     test_bayesian_consensus()
     test_quantitative_risk_engine()
     test_probabilistic_fix_timing()

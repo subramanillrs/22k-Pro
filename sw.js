@@ -89,3 +89,40 @@ async function networkFirst(request) {
     throw err;
   }
 }
+
+// --- Target Price Alarm Watchdog & Background Sync Bridge ---
+self.addEventListener("sync", (event) => {
+  if (event.tag === "gold-rate-sync" || event.tag === "check-gold-price") {
+    event.waitUntil(syncLiveRateAndNotify());
+  }
+});
+
+self.addEventListener("periodicsync", (event) => {
+  if (event.tag === "gold-rate-sync" || event.tag === "check-gold-price") {
+    event.waitUntil(syncLiveRateAndNotify());
+  }
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if ("focus" in client) return client.focus();
+      }
+      if (self.clients.openWindow) return self.clients.openWindow("./");
+    })
+  );
+});
+
+async function syncLiveRateAndNotify() {
+  try {
+    const res = await fetch("data/live.json", { cache: "no-store" });
+    if (!res || !res.ok) return;
+    const liveData = await res.json();
+    const clients = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+    clients.forEach((client) => {
+      client.postMessage({ type: "LIVE_RATE_HYDRATED", live: liveData, source: "background-sync" });
+    });
+  } catch (_) {}
+}

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-08T19:29:03.353358+05:30",
+  "generated_at": "2026-09-08T19:43:04.551820+05:30",
   "all_time_high": {
     "rate_22k": 16800,
     "date": "2026-01-29"
@@ -27,7 +27,7 @@
   },
   "total_records": 1163,
   "quant": {
-    "calculated_at": "2026-09-08T19:29:02.796364+05:30",
+    "calculated_at": "2026-09-08T19:43:03.429044+05:30",
     "rate_22k": 14270,
     "rate_8g": 114160,
     "volatility_30d_annualized": 0.1603,
@@ -41,6 +41,115 @@
     "max_drawdown_30d_pct": 7.24,
     "chennai_premium_amount": 172,
     "chennai_premium_pct": 1.22,
+    "sowcarpet_wholesale_22k": 14225,
+    "sowcarpet_discount_pct": -0.32,
+    "retail_showroom_spread": 180,
+    "retail_showroom_rate_22k": 14450,
+    "retail_showroom_markup_pct": 1.26,
+    "submarket_spreads": {
+      "calculated_at": "2026-09-08T19:43:03.429449+05:30",
+      "reference_mjdma_22k": 14270,
+      "reference_mjdma_24k": 15567,
+      "sowcarpet": {
+        "hub_name": "Sowcarpet Wholesale Bullion",
+        "locality": "Mint Street / NSC Bose Road",
+        "market_type": "wholesale_bullion",
+        "rate_22k": 14225,
+        "rate_24k": 15518,
+        "rate_8g": 113800,
+        "discount_per_g": -45,
+        "discount_pct": -0.32,
+        "discount_range": {
+          "min_discount": -65,
+          "max_discount": -35,
+          "benchmark_discount": -45
+        },
+        "rate_range": {
+          "min_rate_22k": 14205,
+          "max_rate_22k": 14235
+        },
+        "notes": "Raw bullion cast bars traded wholesale ex-GST, ex-making charges"
+      },
+      "t_nagar": {
+        "hub_name": "T. Nagar Showroom Retail",
+        "locality": "Usman Road / Panagal Park",
+        "market_type": "retail_showroom",
+        "rate_22k": 14450,
+        "rate_24k": 15764,
+        "rate_8g": 115600,
+        "retail_showroom_spread": 180,
+        "markup_pct": 1.26,
+        "markup_range": {
+          "min_spread": 150,
+          "max_spread": 220,
+          "benchmark_spread": 180
+        },
+        "notes": "MJDMA fix + retail showroom margin (+₹180/g average markup)"
+      },
+      "regional_parity": {
+        "coimbatore": {
+          "city": "Coimbatore",
+          "region": "Western Tamil Nadu",
+          "cluster_role": "Industrial Jewelry Manufacturing & Casting Cluster",
+          "rate_22k": 14255,
+          "rate_8g": 114040,
+          "basis_spread": -15,
+          "basis_pct": -0.11,
+          "basis_range": [
+            -15,
+            15
+          ],
+          "parity_status": "Discount"
+        },
+        "madurai": {
+          "city": "Madurai",
+          "region": "Southern Tamil Nadu",
+          "cluster_role": "Temple Jewelry & Southern Cultural Retail Hub",
+          "rate_22k": 14285,
+          "rate_8g": 114280,
+          "basis_spread": 15,
+          "basis_pct": 0.11,
+          "basis_range": [
+            -15,
+            15
+          ],
+          "parity_status": "Premium"
+        },
+        "trichy": {
+          "city": "Tiruchirappalli",
+          "region": "Central Tamil Nadu",
+          "cluster_role": "Central Transit & Regional Distribution Corridor",
+          "rate_22k": 14265,
+          "rate_8g": 114120,
+          "basis_spread": -5,
+          "basis_pct": -0.04,
+          "basis_range": [
+            -15,
+            15
+          ],
+          "parity_status": "Discount"
+        },
+        "salem": {
+          "city": "Salem",
+          "region": "North-Western Tamil Nadu",
+          "cluster_role": "Bullion Refining & Goldsmithing Cluster",
+          "rate_22k": 14260,
+          "rate_8g": 114080,
+          "basis_spread": -10,
+          "basis_pct": -0.07,
+          "basis_range": [
+            -15,
+            15
+          ],
+          "parity_status": "Discount"
+        }
+      },
+      "value_chain_arbitrage": {
+        "gross_spread_amount": 225,
+        "gross_spread_pct": 1.58,
+        "description": "Gross margin between Sowcarpet wholesale raw bar cash rate and T. Nagar showroom retail price"
+      }
+    },
     "ibja_benchmark_rate": 14098,
     "macro_parity": {
       "implied_comex_usd_oz": 4801.9,

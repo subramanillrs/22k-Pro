@@ -11879,8 +11879,8 @@
   },
   {
     "date": "2026-09-08",
-    "time": "19:28:58",
-    "timestamp": "2026-09-08T19:28:58.765122+05:30",
+    "time": "19:42:59",
+    "timestamp": "2026-09-08T19:42:59.969391+05:30",
     "session": "PM",
     "rate_22k": 14270,
     "rate_24k": 15567,
@@ -11896,6 +11896,8 @@
     "goodreturns_rate": 14270,
     "ibja_rate_22k": 14098,
     "chennai_premium_amount": 172,
-    "chennai_premium_pct": 1.22
+    "chennai_premium_pct": 1.22,
+    "sowcarpet_wholesale_22k": 14225,
+    "retail_showroom_spread": 180
   }
 ]

@@ -589,6 +589,375 @@ html[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
 .next-fix-line[hidden] { display: none !important; }
 .next-fix-line svg { width: 12px; height: 12px; flex-shrink: 0; }
 
+/* Intraday & Day-of-Week Fix Timing Heatmap Visualizer */
+.heatmap-card {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.heatmap-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.heatmap-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.heatmap-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.heatmap-title {
+  font-size: var(--fs-md);
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+.heatmap-tag {
+  font-size: var(--fs-2xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 2px 7px;
+  border-radius: var(--r-full);
+  background: var(--gold-tint);
+  color: var(--gold);
+  border: 1px solid var(--gold-line);
+}
+.heatmap-sub {
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+.heatmap-legend-mini {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--paper-sunken);
+  padding: 4px 8px;
+  border-radius: var(--r-full);
+  border: 1px solid var(--rule);
+}
+.hm-legend-label {
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.hm-legend-bar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  width: 54px;
+  height: 7px;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.hm-bar-seg { flex: 1; height: 100%; }
+.hm-bar-seg.s1 { background: rgba(169, 127, 52, 0.16); }
+.hm-bar-seg.s2 { background: rgba(212, 171, 99, 0.42); }
+.hm-bar-seg.s3 { background: rgba(212, 171, 99, 0.72); }
+.hm-bar-seg.s4 { background: var(--gold); box-shadow: 0 0 4px var(--gold-glow); }
+
+.heatmap-svg-container {
+  width: 100%;
+  position: relative;
+  border-radius: var(--r-sm);
+  background: var(--paper-sunken);
+  border: 1px solid var(--rule);
+  padding: 10px 8px 8px;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.04);
+}
+.hm-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+.hm-axis-text {
+  font-family: var(--font-sans);
+  font-size: 9px;
+  font-weight: 600;
+  fill: var(--ink-faint);
+  text-anchor: middle;
+  user-select: none;
+}
+.hm-day-text {
+  font-family: var(--font-sans);
+  font-size: 9.5px;
+  font-weight: 600;
+  fill: var(--ink-soft);
+  text-anchor: start;
+  user-select: none;
+  transition: fill var(--transition);
+}
+.hm-day-text.is-today {
+  font-weight: 800;
+  fill: var(--gold);
+}
+.hm-day-text.is-sunday {
+  fill: var(--ink-faint);
+  font-style: italic;
+}
+.hm-cell {
+  cursor: pointer;
+  stroke: transparent;
+  stroke-width: 1px;
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), stroke 0.18s ease, fill 0.18s ease, filter 0.18s ease;
+  transform-origin: center;
+}
+.hm-cell:hover {
+  transform: scale(1.08);
+  stroke: var(--gold-glow);
+  stroke-width: 1.5px;
+  filter: drop-shadow(0 2px 6px rgba(169, 127, 52, 0.35));
+}
+.hm-cell.is-selected {
+  stroke: var(--ink) !important;
+  stroke-width: 2px !important;
+  transform: scale(1.08);
+}
+.hm-cell-tier0 {
+  fill: rgba(28, 23, 18, 0.04);
+}
+@media (prefers-color-scheme: dark) {
+  .hm-cell-tier0 { fill: rgba(255, 255, 255, 0.04); }
+}
+html[data-theme="dark"] .hm-cell-tier0 {
+  fill: rgba(255, 255, 255, 0.04);
+}
+html[data-theme="oled"] .hm-cell-tier0 {
+  fill: #0c0c0c;
+  stroke: #161616;
+}
+.hm-cell-tier1 { fill: rgba(169, 127, 52, 0.16); }
+.hm-cell-tier2 { fill: rgba(212, 171, 99, 0.42); }
+.hm-cell-tier3 { fill: rgba(212, 171, 99, 0.72); }
+.hm-cell-tier4 {
+  fill: url(#hmPeakGrad);
+  filter: drop-shadow(0 1px 3px rgba(169, 127, 52, 0.25));
+}
+html[data-theme="oled"] .hm-cell-tier1 { fill: rgba(255, 215, 0, 0.18); }
+html[data-theme="oled"] .hm-cell-tier2 { fill: rgba(255, 215, 0, 0.45); }
+html[data-theme="oled"] .hm-cell-tier3 { fill: rgba(255, 215, 0, 0.75); }
+html[data-theme="oled"] .hm-cell-tier4 {
+  fill: #ffd700;
+  filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.5));
+}
+.hm-active-outline {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 2px;
+  stroke-dasharray: 3 1.5;
+  animation: hm-dash-crawl 10s linear infinite;
+}
+@keyframes hm-dash-crawl {
+  to { stroke-dashoffset: -24; }
+}
+.hm-radar-ring {
+  fill: none;
+  stroke: var(--good);
+  stroke-width: 1.5px;
+  opacity: 0.8;
+  transform-origin: center;
+  animation: hm-radar-ping 2.2s cubic-bezier(0.1, 0.7, 0.1, 1) infinite;
+}
+.hm-radar-core {
+  fill: var(--good);
+  box-shadow: 0 0 8px var(--good-glow);
+}
+@keyframes hm-radar-ping {
+  0% { transform: scale(0.6); opacity: 0.9; }
+  65% { transform: scale(2.4); opacity: 0; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+.hm-minute-needle {
+  stroke: var(--good);
+  stroke-width: 1.8px;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 3px var(--good-glow));
+}
+.heatmap-inspector {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: var(--r-sm);
+  background: var(--paper-raised);
+  border: 1px solid var(--rule);
+  transition: border-color var(--transition);
+}
+.hm-inspect-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.hm-inspect-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--gold-tint);
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.hm-inspect-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.hm-inspect-title {
+  font-size: var(--fs-sm2);
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hm-inspect-desc {
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hm-inspect-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+.hm-stat-val {
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  color: var(--gold-deep);
+  line-height: 1;
+}
+.hm-stat-lbl {
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.hm-window-pills {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.hm-window-pill {
+  padding: 8px 10px;
+  border-radius: var(--r-sm);
+  background: var(--paper-sunken);
+  border: 1px solid var(--rule);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+.hm-window-pill:hover {
+  border-color: var(--gold);
+  transform: translateY(-1px);
+}
+.hm-window-pill.active {
+  background: var(--paper-raised);
+  border-color: var(--gold);
+  box-shadow: 0 2px 8px rgba(169, 127, 52, 0.15);
+}
+.pill-head {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.pill-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.pill-dot.am-dot { background: var(--gold); box-shadow: 0 0 4px var(--gold-glow); }
+.pill-dot.pm-dot { background: #d48b38; box-shadow: 0 0 4px rgba(212, 139, 56, 0.6); }
+.pill-dot.sun-dot { background: var(--ink-faint); }
+.pill-title {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  color: var(--ink);
+}
+.pill-time {
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+.pill-prob {
+  font-size: var(--fs-2xs);
+  font-weight: 700;
+  color: var(--gold-deep);
+}
+.hm-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: var(--r-full);
+  font-size: var(--fs-2xs);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  background: var(--good-bg);
+  color: var(--good);
+  border: 1px solid var(--good);
+  text-transform: uppercase;
+}
+.hm-status-badge.live {
+  background: var(--good-bg);
+  color: var(--good);
+  border-color: var(--good);
+}
+.hm-status-badge.standby {
+  background: var(--gold-tint);
+  color: var(--gold);
+  border-color: var(--gold-line);
+}
+.hm-status-badge.closed {
+  background: var(--paper-sunken);
+  color: var(--ink-faint);
+  border-color: var(--rule);
+}
+.hm-pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 6px currentColor;
+  animation: hm-pulse-dot 1.8s ease-in-out infinite;
+}
+@keyframes hm-pulse-dot {
+  0%, 100% { transform: scale(0.9); opacity: 0.8; }
+  50% { transform: scale(1.3); opacity: 1; }
+}
+@media (max-width: 480px) {
+  .hm-window-pills { grid-template-columns: 1fr; gap: 6px; }
+  .heatmap-legend-mini { display: none; }
+}
+
+
 .chart-panel { display: flex; flex-direction: column; gap: 14px; }
 .segment-ctrl {
   display: grid; grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -978,33 +1347,97 @@ html[data-theme="dark"] body:after {
   background: var(--paper-raised);
   border: 1px solid var(--rule);
   border-radius: var(--r-md);
-  padding: 12px 14px;
+  padding: 14px 16px;
   margin: 6px 0 10px;
   box-shadow: var(--elev-2);
   transition: all 0.25s ease;
 }
 .target-card[hidden] { display: none; }
-.target-card-inner { display: flex; flex-direction: column; gap: 8px; }
+.target-card-inner { display: flex; flex-direction: column; gap: 10px; }
 .target-card-head { display: flex; justify-content: space-between; align-items: center; }
-.target-title { display: flex; align-items: center; gap: 6px; font-size: var(--fs-sm); font-weight: 700; color: var(--ink); }
+.target-title { display: flex; align-items: center; gap: 7px; font-size: var(--fs-sm); font-weight: 700; color: var(--ink); }
+.target-head-actions { display: flex; align-items: center; gap: 8px; }
+.target-notif-btn {
+  background: var(--paper-sunken); border: 1px solid var(--rule); border-radius: 12px;
+  padding: 3px 8px; font-size: 11px; font-weight: 600; color: var(--ink-soft);
+  cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s ease;
+}
+.target-notif-btn:hover { background: var(--paper-raised); color: var(--ink); }
+.target-notif-btn.granted { color: #10b981; border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.08); }
 .target-close { background: none; border: none; color: var(--ink-faint); cursor: pointer; font-size: var(--fs-lg); padding: 2px 6px; }
 .target-card-body label { font-size: var(--fs-xs2); color: var(--ink-soft); font-weight: 600; display: block; margin-bottom: 4px; }
+.target-controls-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.target-dir-group, .target-unit-group {
+  display: inline-flex; background: var(--paper-sunken); border: 1px solid var(--rule);
+  border-radius: var(--r-sm); padding: 2px; gap: 2px;
+}
+.target-seg-btn {
+  border: none; background: transparent; color: var(--ink-soft);
+  font-size: var(--fs-xs2); font-weight: 600; padding: 4px 9px; border-radius: 4px;
+  cursor: pointer; transition: all 0.15s ease;
+}
+.target-seg-btn.active { background: var(--paper-raised); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
+.target-seg-btn[data-dir="dip"].active { color: #10b981; }
+.target-seg-btn[data-dir="spike"].active { color: #f59e0b; }
 .target-input-row { display: flex; align-items: center; gap: 6px; }
 .target-curr { font-weight: 700; color: var(--ink-faint); }
-.target-input-row .calc-input { flex: 1; min-width: 0; height: 32px; padding: 0 8px; }
+.target-input-row .calc-input { flex: 1; min-width: 0; height: 34px; padding: 0 10px; font-weight: 600; }
 .btn-target {
-  height: 32px; padding: 0 12px; background: var(--gold); color: #fff;
+  height: 34px; padding: 0 12px; background: var(--gold); color: #fff;
   border: none; border-radius: var(--r-sm); font-weight: 600; font-size: var(--fs-xs); cursor: pointer;
+  transition: opacity 0.15s; white-space: nowrap;
 }
+.btn-target:hover { opacity: 0.9; }
 .btn-target-clear {
-  height: 32px; padding: 0 8px; background: var(--paper-sunken); color: var(--ink-soft);
+  height: 34px; padding: 0 8px; background: var(--paper-sunken); color: var(--ink-soft);
   border: 1px solid var(--rule); border-radius: var(--r-sm); font-size: var(--fs-xs); cursor: pointer;
+  white-space: nowrap;
 }
-.target-badge { font-size: var(--fs-xs); color: var(--gold-deep); font-weight: 600; margin-top: 4px; }
-html[data-theme="dark"] .target-badge { color: var(--gold); }
+.target-quick-chips { display: flex; align-items: center; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+.quick-chip-label { font-size: 11px; color: var(--ink-faint); font-weight: 600; }
+.quick-chip-btn {
+  background: var(--paper-sunken); border: 1px solid var(--rule); border-radius: 12px;
+  font-size: 11px; padding: 2px 8px; color: var(--ink-soft); cursor: pointer; transition: all 0.15s ease;
+}
+.quick-chip-btn:hover { background: var(--paper-raised); color: var(--ink); border-color: var(--gold-line); }
+.target-badge { font-size: var(--fs-xs); color: var(--gold-deep); font-weight: 600; margin-top: 6px; }
+html[data-theme="dark"] .target-badge, html[data-theme="oled"] .target-badge { color: var(--gold); }
+.target-alerts-container { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--rule); }
+.target-alerts-header {
+  font-size: 11px; font-weight: 700; color: var(--ink-soft); margin-bottom: 6px;
+  text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between;
+}
+.target-alerts-list { display: flex; flex-direction: column; gap: 6px; max-height: 170px; overflow-y: auto; }
+.target-alert-item {
+  display: flex; align-items: center; justify-content: space-between; padding: 6px 10px;
+  background: var(--paper-sunken); border: 1px solid var(--rule); border-radius: var(--r-sm);
+  font-size: var(--fs-xs); transition: all 0.2s ease;
+}
+.target-alert-item.is-breached {
+  border-color: var(--gold); background: rgba(212, 171, 99, 0.12);
+}
+.target-alert-left { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.alert-dir-pill {
+  padding: 1px 6px; border-radius: 4px; font-weight: 700; font-size: 10px; text-transform: uppercase;
+}
+.alert-dir-pill.dip { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+.alert-dir-pill.spike { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
+.alert-rate-val { font-weight: 700; color: var(--ink); white-space: nowrap; }
+.alert-distance { font-size: 10px; color: var(--ink-faint); white-space: nowrap; }
+.target-alert-right { display: flex; align-items: center; gap: 6px; }
+.alert-toggle-btn {
+  border: 1px solid var(--rule); border-radius: 10px; font-size: 10px; font-weight: 600;
+  padding: 1px 6px; cursor: pointer; background: var(--paper-raised); color: var(--ink-soft);
+}
+.alert-toggle-btn.on { background: rgba(16, 185, 129, 0.18); color: #10b981; border-color: #10b981; }
+.alert-del-btn {
+  border: none; background: transparent; color: var(--ink-faint); cursor: pointer;
+  font-size: 13px; padding: 2px 4px; border-radius: 4px; line-height: 1;
+}
+.alert-del-btn:hover { color: #ef4444; background: rgba(239, 68, 68, 0.1); }
 
 .target-alert-banner {
-  background: linear-gradient(135deg, rgba(212, 171, 99, 0.2), rgba(123, 211, 154, 0.2));
+  background: linear-gradient(135deg, rgba(212, 171, 99, 0.22), rgba(16, 185, 129, 0.18));
   border: 1px solid var(--gold);
   border-radius: var(--r-md);
   padding: 10px 14px;
@@ -1012,13 +1445,32 @@ html[data-theme="dark"] .target-badge { color: var(--gold); }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 10px;
   font-size: var(--fs-sm);
   color: var(--ink);
-  box-shadow: 0 4px 16px rgba(169, 127, 52, 0.15);
+  box-shadow: 0 4px 16px rgba(169, 127, 52, 0.18);
+  position: relative;
+  transition: all 0.3s ease;
 }
 .target-alert-banner[hidden] { display: none; }
-.banner-dismiss { background: none; border: none; font-size: var(--fs-lg); cursor: pointer; color: var(--ink); }
+.target-alert-banner.celebrating {
+  animation: alertPulse 2.5s infinite ease-in-out;
+  border-color: #fbbf24;
+}
+@keyframes alertPulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(245, 158, 11, 0.25); }
+  50% { box-shadow: 0 0 22px rgba(245, 158, 11, 0.55); }
+}
+.banner-content-wrap { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.banner-sparkle { font-size: 20px; animation: bounce 1.5s infinite alternate ease-in-out; }
+@keyframes bounce { 0% { transform: translateY(0) scale(1); } 100% { transform: translateY(-3px) scale(1.15); } }
+.banner-text-block { display: flex; flex-direction: column; gap: 2px; }
+.banner-heading { font-size: var(--fs-sm); color: var(--ink); font-weight: 700; }
+.banner-dismiss {
+  background: none; border: none; font-size: var(--fs-lg); cursor: pointer;
+  color: var(--ink-soft); padding: 2px 6px; border-radius: 4px;
+}
+.banner-dismiss:hover { color: var(--ink); background: rgba(0,0,0,0.05); }
 
 /* Receipt Print Actions */
 .receipt-actions-grid {
@@ -1784,27 +2236,61 @@ footer { padding: 20px 0 8px; font-size: var(--fs-xs2); opacity: 0.7; }
     <div class="target-card-inner">
       <div class="target-card-head">
         <div class="target-title">
-          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-          <span>Price Target Watcher</span>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span>Target Price Alarm Watchdog</span>
         </div>
-        <button class="target-close" id="targetCloseBtn" type="button" aria-label="Close alert setup">✕</button>
+        <div class="target-head-actions">
+          <button class="target-notif-btn" id="targetNotifPermBtn" type="button" title="Browser Notifications">
+            <span id="targetNotifIcon">🔔</span> <span id="targetNotifStatusText">Enable Push</span>
+          </button>
+          <button class="target-close" id="targetCloseBtn" type="button" aria-label="Close alert setup">✕</button>
+        </div>
       </div>
       <div class="target-card-body">
-        <label for="targetInput">Alert when 1 Sov (8g) falls to or below:</label>
+        <div class="target-controls-row">
+          <div class="target-dir-group" role="group" aria-label="Alarm Direction">
+            <button type="button" class="target-seg-btn active" id="dirDipBtn" data-dir="dip" title="Alert when price drops to or below target">📉 Dip (≤)</button>
+            <button type="button" class="target-seg-btn" id="dirSpikeBtn" data-dir="spike" title="Alert when price rises to or above target">📈 Spike (≥)</button>
+          </div>
+          <div class="target-unit-group" role="group" aria-label="Weight Unit">
+            <button type="button" class="target-seg-btn active" id="unit1gBtn" data-unit="1g">1g Rate</button>
+            <button type="button" class="target-seg-btn" id="unit8gBtn" data-unit="8g">8g Sov</button>
+          </div>
+        </div>
         <div class="target-input-row">
           <span class="target-curr">₹</span>
-          <input type="number" id="targetInput" class="calc-input" placeholder="e.g. 54000" step="100">
-          <button class="btn-target" id="setTargetBtn" type="button">Set Alert</button>
-          <button class="btn-target-clear" id="clearTargetBtn" type="button">Clear</button>
+          <input type="number" id="targetInput" class="calc-input" placeholder="e.g. 14200" step="50" inputmode="numeric">
+          <button class="btn-target" id="setTargetBtn" type="button">Set Alarm</button>
+          <button class="btn-target-clear" id="clearTargetBtn" type="button" title="Clear all alerts">Clear</button>
         </div>
-        <div class="target-badge" id="targetBadge">No price target active</div>
+        <div class="target-quick-chips" id="targetQuickChips">
+          <span class="quick-chip-label">Quick:</span>
+          <button type="button" class="quick-chip-btn" id="chipCurrentRate">Current</button>
+          <button type="button" class="quick-chip-btn" id="chipMinus100">-₹100 Dip</button>
+          <button type="button" class="quick-chip-btn" id="chipPlus100">+₹100 Spike</button>
+        </div>
+        <div class="target-badge" id="targetBadge">No price alarms active</div>
+        <div class="target-alerts-container" id="targetAlertsContainer" hidden>
+          <div class="target-alerts-header">
+            <span>Active Watchdog Alarms (<span id="targetAlertsCount">0</span>)</span>
+          </div>
+          <div class="target-alerts-list" id="targetAlertsList"></div>
+        </div>
       </div>
     </div>
   </div>
 
   <div class="target-alert-banner" id="targetAlertBanner" hidden>
-    <span>🎉 <strong>Target Reached!</strong> <span id="targetAlertText">1 Sovereign is currently ₹54,800</span></span>
-    <button class="banner-dismiss" id="targetAlertDismiss" type="button" aria-label="Dismiss banner">✕</button>
+    <div class="banner-content-wrap">
+      <span class="banner-sparkle" aria-hidden="true">🎉</span>
+      <div class="banner-text-block">
+        <strong class="banner-heading" id="targetAlertHeading">Target Price Reached!</strong>
+        <span id="targetAlertText">1 Sovereign is currently ₹1,14,160</span>
+      </div>
+    </div>
+    <div class="banner-actions">
+      <button class="banner-dismiss" id="targetAlertDismiss" type="button" aria-label="Dismiss banner">✕</button>
+    </div>
   </div>
 
   <details class="collapsible health-collapsible" id="healthCard" hidden>
@@ -1933,6 +2419,64 @@ footer { padding: 20px 0 8px; font-size: var(--fs-xs2); opacity: 0.7; }
     </div>
   </section>
 
+  <!-- Chennai Sub-Market Basis & Wholesale Spread Engine -->
+  <section class="spread-rail" id="submarketSpreadSection">
+    <div class="spread-card">
+      <div class="spread-header">
+        <div class="spread-title-wrap">
+          <div class="spread-badge-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+            <span>Chennai Sub-Market Basis & Regional Parity</span>
+          </div>
+          <span class="spread-subtitle">Sowcarpet Wholesale Bullion · T. Nagar Showroom Retail · TN Parity</span>
+        </div>
+        <div class="confidence-badge" id="submarketBadge" style="background: rgba(212, 175, 55, 0.15); border-color: rgba(212, 175, 55, 0.35); color: var(--gold);" title="Real-time physical sub-market basis spreads relative to Chennai MJDMA benchmark">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span id="submarketBadgeText">Live Basis Engine</span>
+        </div>
+      </div>
+
+      <div class="spread-grid">
+        <div class="spread-col">
+          <span class="spread-label">Sowcarpet Wholesale Bullion</span>
+          <div class="spread-val-group">
+            <span class="spread-primary-val" id="sowcarpetWholesaleVal">₹ 14,225</span>
+            <span class="spread-tag" style="background: rgba(51, 122, 76, 0.15); color: var(--good);" title="Mint Street / NSC Bose Rd cash raw bullion bar rate">Raw Bullion</span>
+          </div>
+          <div class="spread-sub-val" id="sowcarpetDiscountRow">
+            <span id="sowcarpetDiscountPct">-₹ 45/g (-0.32%) Bullion Discount</span>
+          </div>
+        </div>
+
+        <div class="spread-col spread-col-highlight">
+          <span class="spread-label">T. Nagar Showroom Retail</span>
+          <div class="spread-val-group">
+            <span class="spread-premium-val" id="retailShowroomVal">₹ 14,450</span>
+            <span class="spread-tag" style="background: rgba(212, 175, 55, 0.15); color: var(--gold);" title="Usman Road / Panagal Park retail showroom effective rate">Showroom</span>
+          </div>
+          <div class="spread-sub-val" id="retailShowroomSpreadRow">
+            <span id="retailShowroomSpreadVal">+₹ 180/g (+1.26%) Retail Markup</span>
+          </div>
+        </div>
+
+        <div class="spread-col">
+          <span class="spread-label">Regional Basis Parity</span>
+          <div class="spread-val-group" style="display:flex; flex-direction:column; gap:3px; align-items:flex-start;">
+            <div style="font-size: var(--fs-sm); font-weight: 600; color: var(--ink);">
+              <span>Coimbatore: </span><strong id="coimbatoreRateVal">₹ 14,255</strong> <small style="color:var(--good); font-weight:700;">(-₹15)</small>
+            </div>
+            <div style="font-size: var(--fs-sm); font-weight: 600; color: var(--ink);">
+              <span>Madurai: </span><strong id="maduraiRateVal">₹ 14,285</strong> <small style="color:var(--gold); font-weight:700;">(+₹15)</small>
+            </div>
+          </div>
+          <div class="spread-sub-val" style="margin-top:4px;">
+            <span id="arbitrageSpreadVal">Wholesale-to-Retail Spread: <strong>₹ 225/g</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="section" id="signalsSection">
     <div class="section-head">
       <h3>Quantitative Market Signals</h3>
@@ -2027,6 +2571,12 @@ footer { padding: 20px 0 8px; font-size: var(--fs-xs2); opacity: 0.7; }
   <section class="section" id="todayMarket">
     <div class="section-head">
       <h3>Today's market</h3>
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <span class="hm-status-badge live" id="timingStatusBadge">
+          <span class="hm-pulse-dot"></span>
+          <span id="timingStatusBadgeText">LIVE MONITORING</span>
+        </span>
+      </div>
     </div>
     <div class="panel">
       <div class="timeline-horizontal">
@@ -2050,6 +2600,79 @@ footer { padding: 20px 0 8px; font-size: var(--fs-xs2); opacity: 0.7; }
       <div class="next-fix-line" id="nextFixLine" hidden>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         <span id="nextFixText">—</span>
+      </div>
+
+      <!-- Intraday & Day-of-Week Fix Timing Heatmap Visualizer -->
+      <div class="heatmap-card" id="fixHeatmapCard">
+        <div class="heatmap-header">
+          <div class="heatmap-title-group">
+            <div class="heatmap-title-row">
+              <span class="heatmap-title">MJDMA Fix Timing Probability</span>
+              <span class="heatmap-tag">Heatmap</span>
+            </div>
+            <span class="heatmap-sub">Mon–Sat arrival clusters (AM 09:30–10:30 · PM 16:30–19:30) · Sunday market hold</span>
+          </div>
+          <div class="heatmap-legend-mini">
+            <span class="hm-legend-label">Low</span>
+            <div class="hm-legend-bar">
+              <span class="hm-bar-seg s1"></span>
+              <span class="hm-bar-seg s2"></span>
+              <span class="hm-bar-seg s3"></span>
+              <span class="hm-bar-seg s4"></span>
+            </div>
+            <span class="hm-legend-label">Peak</span>
+          </div>
+        </div>
+
+        <!-- SVG Heatmap Container -->
+        <div class="heatmap-svg-container" id="heatmapSvgWrap">
+          <!-- Dynamically populated SVG via renderFixHeatmap() -->
+        </div>
+
+        <!-- Interactive Inspector Card -->
+        <div class="heatmap-inspector" id="heatmapInspector">
+          <div class="hm-inspect-left">
+            <div class="hm-inspect-icon" id="hmInspectIcon">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="hm-inspect-details">
+              <div class="hm-inspect-title" id="hmInspectTitle">Active Session Window</div>
+              <div class="hm-inspect-desc" id="hmInspectDesc">Hover or tap any cell for arrival cluster probability</div>
+            </div>
+          </div>
+          <div class="hm-inspect-stat">
+            <span class="hm-stat-val" id="hmInspectProb">—</span>
+            <span class="hm-stat-lbl">Probability</span>
+          </div>
+        </div>
+
+        <!-- Probability Window Cluster Pills -->
+        <div class="hm-window-pills">
+          <div class="hm-window-pill" data-cluster="am">
+            <div class="pill-head">
+              <span class="pill-dot am-dot"></span>
+              <span class="pill-title">AM Window</span>
+            </div>
+            <span class="pill-time">09:30–10:30 IST</span>
+            <span class="pill-prob">~92% Peak Cluster</span>
+          </div>
+          <div class="hm-window-pill" data-cluster="pm">
+            <div class="pill-head">
+              <span class="pill-dot pm-dot"></span>
+              <span class="pill-title">PM Window</span>
+            </div>
+            <span class="pill-time">16:30–19:30 IST</span>
+            <span class="pill-prob">~85% Peak Cluster</span>
+          </div>
+          <div class="hm-window-pill" data-cluster="weekend">
+            <div class="pill-head">
+              <span class="pill-dot sun-dot"></span>
+              <span class="pill-title">Sunday Pattern</span>
+            </div>
+            <span class="pill-time">Market Closed</span>
+            <span class="pill-prob">Saturday Close Holds</span>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -2409,6 +3032,93 @@ footer { padding: 20px 0 8px; font-size: var(--fs-xs2); opacity: 0.7; }
     </div>
   </details>
 
+  <!-- 11-Month Jeweller Scheme (Chit) vs Direct Gold SIP Calculator -->
+  <details class="collapsible" id="goldSchemeBlock">
+    <summary>
+      <div class="summary-title">
+        <h3>11-Month Jeweller Scheme vs Gold SIP</h3>
+        <span>GRT / Lalitha / Tanishq vs Physical DCA</span>
+      </div>
+      <span class="chevron">▼</span>
+    </summary>
+    <div class="collapsible-content">
+      <div class="auditor-card">
+        <div class="auditor-grid">
+          <div class="auditor-input-box">
+            <label for="schemeMonthlyAmount">Monthly Installment (₹)</label>
+            <input type="number" id="schemeMonthlyAmount" class="calc-input" placeholder="e.g. 10000" value="10000" step="1000">
+          </div>
+          <div class="auditor-input-box">
+            <label for="schemeJewellerProfile">Jeweller Chit Scheme Model</label>
+            <select id="schemeJewellerProfile" class="calc-input">
+              <option value="grt">GRT Golden Eleven (Weight-based + 14% VA waiver)</option>
+              <option value="lalitha">Lalitha Jewellery 11-Mo (Weight-based + 14% VA waiver)</option>
+              <option value="tanishq">Tanishq Golden Harvest (Cash-based + 1-Month Bonus)</option>
+              <option value="kalyan">Kalyan Dhanvarsha (Cash-based + 1-Month Bonus)</option>
+            </select>
+          </div>
+          <div class="auditor-input-box">
+            <label for="schemeVaPct">Expected Jewellery VA / Making (%)</label>
+            <input type="number" id="schemeVaPct" class="calc-input" placeholder="e.g. 14.0" value="14.0" step="0.5">
+          </div>
+          <div class="auditor-input-box">
+            <label for="schemeGrowthPct">Projected Annual Gold Appreciation (%)</label>
+            <input type="number" id="schemeGrowthPct" class="calc-input" placeholder="e.g. 10.0" value="10.0" step="1">
+          </div>
+        </div>
+
+        <div class="meter-container">
+          <div class="meter-head">
+            <span class="meter-title">11-Month Yield & Accumulation Comparison</span>
+            <span class="meter-badge fair" id="schemeVerdictBadge">Weight Scheme Wins</span>
+          </div>
+
+          <div class="meter-breakdown">
+            <div class="meter-metric-item">
+              <span>Jeweller Scheme Gold</span>
+              <b id="schemeGoldGrams">7.86g</b>
+            </div>
+            <div class="meter-metric-item">
+              <span>Effective XIRR Yield</span>
+              <b id="schemeXirrVal" style="color: var(--gold);">30.8% p.a.</b>
+            </div>
+            <div class="meter-metric-item">
+              <span>Direct Gold Coin SIP</span>
+              <b id="schemeSipGrams">7.34g</b>
+            </div>
+            <div class="meter-metric-item">
+              <span>Coin SIP Liquid XIRR</span>
+              <b id="schemeSipXirr">14.2% p.a.</b>
+            </div>
+          </div>
+
+          <div class="meter-breakdown" style="margin-top: 10px; border-top: 1px dashed var(--rule); padding-top: 10px;">
+            <div class="meter-metric-item">
+              <span>Total Capital Paid</span>
+              <b id="schemeTotalPaid">₹ 1,10,000 (11 mo)</b>
+            </div>
+            <div class="meter-metric-item">
+              <span>Making Charge Savings</span>
+              <b id="schemeVaSavings" style="color: var(--good);">₹ 15,862</b>
+            </div>
+            <div class="meter-metric-item">
+              <span>Parity Breakeven Rate</span>
+              <b id="schemeBreakevenRate">₹ 17,420/g (+22%)</b>
+            </div>
+            <div class="meter-metric-item">
+              <span>Accumulation Advantage</span>
+              <b id="schemeAdvantageGrams" style="color: var(--gold);">+0.52g (+7.1%)</b>
+            </div>
+          </div>
+
+          <div class="bargain-tip" id="schemeVerdictTip">
+            ⚖️ <strong>Quantitative Verdict:</strong> For jewellery buyers, the <strong>Weight-based Scheme (GRT/Lalitha)</strong> outperforms Cash Bonus chits because you accumulate gold at each month's fix while securing a 100% making charge waiver up to 14% at maturity.
+          </div>
+        </div>
+      </div>
+    </div>
+  </details>
+
   <details class="collapsible" id="portfolioBlock">
     <summary>
       <div class="summary-title">
@@ -2524,7 +3234,7 @@ footer { padding: 20px 0 8px; font-size: var(--fs-xs2); opacity: 0.7; }
 <div class="toast" id="toast"></div>
 
 <script id="gold-bootstrap" type="application/json">
-{"baked_at": "2026-09-08T19:29:02.803317+05:30", "live": {"rate_22k": 14270, "rate_8g": 114160, "currency": "INR", "city": "Chennai", "purity": "22K", "date": "2026-09-08", "time": "19:28:58", "timestamp": "2026-09-08T19:28:58.761655+05:30", "changed": false, "previous_rate_22k": 14270, "change": 0, "sources": {"livechennai": {"source": "LiveChennai", "rate_22k": 14270, "rate_24k": 15567, "rate_8g": 114160, "url": "https://www.livechennai.com/gold_silverrate.asp", "fetched_at": "2026-09-08T19:28:58.761266+05:30"}, "goodreturns": {"source": "GoodReturns", "rate_22k": 14270, "url": "https://www.goodreturns.in/gold-rates/chennai.html", "fetched_at": "2026-09-08T19:28:58.538580+05:30"}, "ibja": {"date": "2026-09-08", "rate_22k": 14098, "rate_24k": 15380, "rate_22k_10g": 140976, "rate_24k_10g": 153796, "am_22k": 14098, "pm_22k": 14098, "am_24k": 15380, "pm_24k": 15380, "unit": "1g", "purity_22k": "916", "purity_24k": "999", "source": "IBJA Benchmark Mirror (GoodReturns National)", "url": "https://www.goodreturns.in/gold-rates/", "fetched_at": "2026-09-08T19:28:58.129330+05:30", "status": "degraded_mirror", "is_fallback": true}}, "source_update_times": ["2026-09-08T19:28:58.761266+05:30", "2026-09-08T19:28:58.538580+05:30", "2026-09-08T19:28:58.129330+05:30"], "source_rates": [14270, 14270, 14098], "sources_agree": true, "last_checked_at": "2026-09-08T19:28:58.761655+05:30", "source": "LiveChennai (MJDMA verified)", "last_checked": "2026-09-08T19:28:58.761655+05:30", "agreement": true, "session": "PM", "rate_24k": 15567, "weight_1g": 14270, "weight_8g": 114160, "livechennai_rate": 14270, "goodreturns_rate": 14270, "livechennai_fetched_at": "2026-09-08T19:28:58.761266+05:30", "goodreturns_fetched_at": "2026-09-08T19:28:58.538580+05:30", "livechennai_url": "https://www.livechennai.com/gold_silverrate.asp", "goodreturns_url": "https://www.goodreturns.in/gold-rates/chennai.html", "updated_at": "2026-09-08T19:28:58.761655+05:30", "verified_at": "2026-09-08T19:28:58.761655+05:30", "ibja": {"date": "2026-09-08", "rate_22k": 14098, "rate_24k": 15380, "rate_22k_10g": 140976, "rate_24k_10g": 153796, "am_22k": 14098, "pm_22k": 14098, "am_24k": 15380, "pm_24k": 15380, "unit": "1g", "purity_22k": "916", "purity_24k": "999", "source": "IBJA Benchmark Mirror (GoodReturns National)", "url": "https://www.goodreturns.in/gold-rates/", "fetched_at": "2026-09-08T19:28:58.129330+05:30", "status": "degraded_mirror", "is_fallback": true}, "ibja_rate_22k": 14098, "ibja_rate_24k": 15380, "chennai_premium_amount": 172, "chennai_premium_pct": 1.22, "consensus": {"consensus_rate": 14270, "confidence": 100, "sources_count": 3, "breakdown": {"livechennai": {"rate": 14270, "modified_z": 0.0, "is_outlier": false, "base_weight": 0.4, "reliability_weight": 0.4, "deviation": 0, "deviation_pct": 0.0, "effective_weight": 0.5}, "goodreturns": {"rate": 14270, "modified_z": 0.0, "is_outlier": false, "base_weight": 0.25, "reliability_weight": 0.25, "deviation": 0, "deviation_pct": 0.0, "effective_weight": 0.312}, "ibja": {"rate": 14270, "modified_z": 0.0, "is_outlier": false, "base_weight": 0.15, "reliability_weight": 0.15, "deviation": 0, "deviation_pct": 0.0, "effective_weight": 0.187}}, "valid": true}}, "history": [{"date": "2026-08-08", "rate_22k": 13965, "rate_24k": 15235, "weight_1g": 13965, "weight_8g": 111720, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-09", "rate_22k": 13965, "rate_24k": 15235, "weight_1g": 13965, "weight_8g": 111720, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-10", "rate_22k": 13950, "rate_24k": 15218, "weight_1g": 13950, "weight_8g": 111600, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-11", "rate_22k": 14150, "rate_24k": 15436, "weight_1g": 14150, "weight_8g": 113200, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-12", "rate_22k": 14200, "rate_24k": 15491, "weight_1g": 14200, "weight_8g": 113600, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-13", "rate_22k": 14220, "rate_24k": 15513, "weight_1g": 14220, "weight_8g": 113760, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-14", "rate_22k": 14200, "rate_24k": 15491, "weight_1g": 14200, "weight_8g": 113600, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-15", "rate_22k": 14220, "rate_24k": 15513, "weight_1g": 14220, "weight_8g": 113760, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-16", "rate_22k": 14220, "rate_24k": 15513, "weight_1g": 14220, "weight_8g": 113760, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-17", "rate_22k": 14270, "rate_24k": 15567, "weight_1g": 14270, "weight_8g": 114160, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-18", "rate_22k": 14290, "rate_24k": 15589, "weight_1g": 14290, "weight_8g": 114320, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-19", "rate_22k": 14400, "rate_24k": 15709, "weight_1g": 14400, "weight_8g": 115200, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-20", "rate_22k": 14600, "rate_24k": 15927, "weight_1g": 14600, "weight_8g": 116800, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-21", "rate_22k": 14850, "rate_24k": 16200, "weight_1g": 14850, "weight_8g": 118800, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-22", "rate_22k": 14950, "rate_24k": 16309, "weight_1g": 14950, "weight_8g": 119600, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-23", "rate_22k": 14950, "rate_24k": 16309, "weight_1g": 14950, "weight_8g": 119600, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-24", "rate_22k": 15030, "rate_24k": 16396, "weight_1g": 15030, "weight_8g": 120240, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-25", "rate_22k": 15010, "rate_24k": 16375, "weight_1g": 15010, "weight_8g": 120080, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-26", "rate_22k": 15010, "rate_24k": 16375, "weight_1g": 15010, "weight_8g": 120080, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-27", "rate_22k": 14725, "rate_24k": 16064, "weight_1g": 14725, "weight_8g": 117800, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-28", "rate_22k": 14800, "rate_24k": 16145, "weight_1g": 14800, "weight_8g": 118400, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-29", "rate_22k": 14505, "rate_24k": 15824, "weight_1g": 14505, "weight_8g": 116040, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-30", "time": "01:26:47", "timestamp": "2026-08-30T01:26:47.577934+05:30", "rate_22k": 14505, "rate_8g": 116040, "changed": false, "sources": ["GoodReturns"]}, {"date": "2026-08-30", "time": "01:30:15", "timestamp": "2026-08-30T01:30:15.991975+05:30", "rate_22k": 14505, "rate_8g": 116040, "changed": false, "sources": ["GoodReturns"]}, {"date": "2026-08-30", "time": "01:35:10", "timestamp": "2026-08-30T01:35:10.889759+05:30", "rate_22k": 14505, "rate_8g": 116040, "changed": false, "sources": ["LiveChennai", "GoodReturns"], "source_update_time": "29/08/2026 9:44:41 AM", "source_details": [{"source": "LiveChennai", "rate_22k": 14505, "update_time": "29/08/2026 9:44:41 AM", "url": "https://www.livechennai.com/gold_silverrate.asp", "fetched_at": "2026-08-30T01:35:10.716214+05:30"}, {"source": "GoodReturns", "rate_22k": 14505, "update_time": null, "url": "https://www.goodreturns.in/gold-rates/chennai.html", "fetched_at": "2026-08-30T01:35:10.885967+05:30"}]}, {"timestamp": "2026-08-30T01:48:16.242233+05:30", "date": "2026-08-30", "time": "01:48:16", "rate_22k": 14505, "rate_8g": 116040, "changed": false, "sources": ["LiveChennai", "GoodReturns"]}, {"date": "2026-08-31", "time": "00:07:10", "timestamp": "2026-08-31T00:07:10.812814+05:30", "rate_22k": 14505, "rate_8g": 116040, "changed": false, "source": "LiveChennai + GoodReturns", "agreement": true, "livechennai_rate": 14505, "goodreturns_rate": 14505}, {"date": "2026-08-31", "time": "10:00:20", "timestamp": "2026-08-31T10:00:20.730941+05:30", "rate_22k": 14370, "rate_8g": 114960, "changed": true, "source": "LiveChennai + GoodReturns", "agreement": true, "livechennai_rate": 14370, "goodreturns_rate": 14370}, {"date": "2026-09-01", "time": "00:06:40", "timestamp": "2026-09-01T00:06:40.161596+05:30", "rate_22k": 14370, "rate_8g": 114960, "changed": false, "source": "LiveChennai + GoodReturns", "agreement": true, "livechennai_rate": 14370, "goodreturns_rate": 14370}, {"date": "2026-09-01", "time": "13:43:50", "timestamp": "2026-09-01T13:43:50.044000+05:30", "session": null, "rate_22k": 14385, "rate_8g": 115080, "changed": true, "source": "LiveChennai + GoodReturns", "agreement": true, "livechennai_rate": 14385, "goodreturns_rate": 14385}, {"date": "2026-09-01", "time": "19:07:08", "timestamp": "2026-09-01T19:07:08.317318+05:30", "session": "PM", "rate_22k": 14175, "rate_8g": 113400, "changed": true, "source": "LiveChennai + GoodReturns", "agreement": true, "livechennai_rate": 14175, "goodreturns_rate": 14175}, {"date": "2026-09-02", "time": "00:31:46", "timestamp": "2026-09-02T00:31:46.184573+05:30", "session": null, "rate_22k": 14175, "rate_8g": 113400, "changed": false, "source": "LiveChennai + GoodReturns", "agreement": true, "livechennai_rate": 14175, "goodreturns_rate": 14175}, {"date": "2026-09-02", "time": "19:34:19", "timestamp": "2026-09-02T19:34:19.311675+05:30", "session": null, "rate_22k": 13935, "rate_8g": 111480, "changed": true, "source": "GoodReturns", "agreement": false, "livechennai_rate": null, "goodreturns_rate": 13935}, {"date": "2026-09-02", "time": "23:56:09", "timestamp": "2026-09-02T23:56:09.339614+05:30", "session": "PM", "rate_22k": 13942, "rate_8g": 111536, "changed": false, "source": "LiveChennai + GoodReturns", "agreement": true, "livechennai_rate": 13950, "goodreturns_rate": 13935, "rate_24k": 15209, "weight_1g": 13942, "weight_8g": 111536, "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday"}, {"date": "2026-09-03", "time": "01:13:23", "timestamp": "2026-09-03T01:13:23.401905+05:30", "session": null, "rate_22k": 13942, "rate_24k": 15209, "weight_1g": 13942, "weight_8g": 111536, "rate_8g": 111536, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 13950, "goodreturns_rate": 13935}, {"date": "2026-09-03", "time": "01:14:08", "timestamp": "2026-09-03T01:14:08.072945+05:30", "session": null, "rate_22k": 13942, "rate_24k": 15209, "weight_1g": 13942, "weight_8g": 111536, "rate_8g": 111536, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 13950, "goodreturns_rate": 13935}, {"date": "2026-09-03", "time": "01:14:52", "timestamp": "2026-09-03T01:14:52.764884+05:30", "session": null, "rate_22k": 13942, "rate_24k": 15209, "weight_1g": 13942, "weight_8g": 111536, "rate_8g": 111536, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 13950, "goodreturns_rate": 13935}, {"date": "2026-09-03", "time": "01:24:54", "timestamp": "2026-09-03T01:24:54.147857+05:30", "session": null, "rate_22k": 13942, "rate_24k": 15209, "weight_1g": 13942, "weight_8g": 111536, "rate_8g": 111536, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 13950, "goodreturns_rate": 13935}, {"date": "2026-09-03", "time": "01:26:59", "timestamp": "2026-09-03T01:26:59.639601+05:30", "session": null, "rate_22k": 13942, "rate_24k": 15209, "weight_1g": 13942, "weight_8g": 111536, "rate_8g": 111536, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 13950, "goodreturns_rate": 13935}, {"date": "2026-09-03", "time": "01:32:17", "timestamp": "2026-09-03T01:32:17.453527+05:30", "session": null, "rate_22k": 13942, "rate_24k": 15209, "weight_1g": 13942, "weight_8g": 111536, "rate_8g": 111536, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 13950, "goodreturns_rate": 13935}, {"date": "2026-09-03", "time": "01:34:37", "timestamp": "2026-09-03T01:34:37.429362+05:30", "session": null, "rate_22k": 13942, "rate_24k": 15209, "weight_1g": 13942, "weight_8g": 111536, "rate_8g": 111536, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 13950, "goodreturns_rate": 13935}, {"date": "2026-09-03", "time": "20:17:00", "timestamp": "2026-09-03T20:17:00.821942+05:30", "session": "PM", "rate_22k": 14240, "rate_24k": 15535, "weight_1g": 14240, "weight_8g": 113920, "rate_8g": 113920, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14240, "goodreturns_rate": 14240}, {"date": "2026-09-04", "time": "12:09:13", "timestamp": "2026-09-04T12:09:13.509202+05:30", "session": "AM", "rate_22k": 14360, "rate_24k": 15665, "weight_1g": 14360, "weight_8g": 114880, "rate_8g": 114880, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14360, "goodreturns_rate": 14360}, {"date": "2026-09-04", "time": "23:52:52", "timestamp": "2026-09-04T23:52:52.901559+05:30", "session": "PM", "rate_22k": 14360, "rate_24k": 15665, "weight_1g": 14360, "weight_8g": 114880, "rate_8g": 114880, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14360, "goodreturns_rate": 14360}, {"date": "2026-09-05", "time": "00:07:57", "timestamp": "2026-09-05T00:07:57.766422+05:30", "session": null, "rate_22k": 14360, "rate_24k": 15665, "weight_1g": 14360, "weight_8g": 114880, "rate_8g": 114880, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14360, "goodreturns_rate": 14360}, {"date": "2026-09-05", "time": "00:21:30", "timestamp": "2026-09-05T00:21:30.400227+05:30", "session": null, "rate_22k": 14360, "rate_24k": 15665, "weight_1g": 14360, "weight_8g": 114880, "rate_8g": 114880, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14360, "goodreturns_rate": 14360}, {"date": "2026-09-05", "time": "00:39:52", "timestamp": "2026-09-05T00:39:52.652706+05:30", "session": null, "rate_22k": 14360, "rate_24k": 15665, "weight_1g": 14360, "weight_8g": 114880, "rate_8g": 114880, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14360, "goodreturns_rate": 14360}, {"date": "2026-09-05", "time": "00:46:19", "timestamp": "2026-09-05T00:46:19.697979+05:30", "session": null, "rate_22k": 14360, "rate_24k": 15665, "weight_1g": 14360, "weight_8g": 114880, "rate_8g": 114880, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14360, "goodreturns_rate": 14360}, {"date": "2026-09-05", "time": "00:52:12", "timestamp": "2026-09-05T00:52:12.797545+05:30", "session": null, "rate_22k": 14360, "rate_24k": 15665, "weight_1g": 14360, "weight_8g": 114880, "rate_8g": 114880, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14360, "goodreturns_rate": 14360}, {"date": "2026-09-05", "time": "01:15:21", "timestamp": "2026-09-05T01:15:21.598727+05:30", "session": null, "rate_22k": 14360, "rate_24k": 15665, "weight_1g": 14360, "weight_8g": 114880, "rate_8g": 114880, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14360, "goodreturns_rate": 14360}, {"date": "2026-09-05", "time": "01:16:35", "timestamp": "2026-09-05T01:16:35.531212+05:30", "session": null, "rate_22k": 14360, "rate_24k": 15665, "weight_1g": 14360, "weight_8g": 114880, "rate_8g": 114880, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14360, "goodreturns_rate": 14360}, {"date": "2026-09-05", "time": "01:20:20", "timestamp": "2026-09-05T01:20:20.421873+05:30", "session": null, "rate_22k": 14360, "rate_24k": 15665, "weight_1g": 14360, "weight_8g": 114880, "rate_8g": 114880, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14360, "goodreturns_rate": 14360}, {"date": "2026-09-05", "time": "01:24:05", "timestamp": "2026-09-05T01:24:05.844300+05:30", "session": null, "rate_22k": 14360, "rate_24k": 15665, "weight_1g": 14360, "weight_8g": 114880, "rate_8g": 114880, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14360, "goodreturns_rate": 14360}, {"date": "2026-09-05", "time": "01:28:48", "timestamp": "2026-09-05T01:28:48.741417+05:30", "session": null, "rate_22k": 14360, "rate_24k": 15665, "weight_1g": 14360, "weight_8g": 114880, "rate_8g": 114880, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14360, "goodreturns_rate": 14360}, {"date": "2026-09-05", "time": "11:55:24", "timestamp": "2026-09-05T11:55:24.444532+05:30", "session": "AM", "rate_22k": 14190, "rate_24k": 15480, "weight_1g": 14190, "weight_8g": 113520, "rate_8g": 113520, "changed": true, "source": "LiveChennai (MJDMA verified)", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14190, "goodreturns_rate": 14361}, {"date": "2026-09-05", "time": "20:27:49", "timestamp": "2026-09-05T20:27:49.399271+05:30", "session": "PM", "rate_22k": 14190, "rate_24k": 15480, "weight_1g": 14190, "weight_8g": 113520, "rate_8g": 113520, "changed": false, "source": "LiveChennai (MJDMA verified)", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14190, "goodreturns_rate": 14361}, {"date": "2026-09-07", "time": "20:38:49", "timestamp": "2026-09-07T20:38:49.948033+05:30", "session": "PM", "rate_22k": 14130, "rate_24k": 15415, "weight_1g": 14130, "weight_8g": 113040, "rate_8g": 113040, "changed": true, "source": "LiveChennai (MJDMA verified)", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14130, "goodreturns_rate": 14130, "ibja_rate_22k": 13989, "chennai_premium_amount": 141, "chennai_premium_pct": 1.01}, {"date": "2026-09-08", "time": "08:58:13", "timestamp": "2026-09-08T08:58:13.853560+05:30", "session": "AM", "rate_22k": 14130, "rate_24k": 15415, "weight_1g": 14130, "weight_8g": 113040, "rate_8g": 113040, "changed": false, "source": "LiveChennai (MJDMA verified)", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14130, "goodreturns_rate": 14129, "ibja_rate_22k": 13988, "chennai_premium_amount": 142, "chennai_premium_pct": 1.02}, {"date": "2026-09-08", "time": "12:08:22", "timestamp": "2026-09-08T12:08:22.464518+05:30", "session": "AM", "rate_22k": 14270, "rate_24k": 15567, "weight_1g": 14270, "weight_8g": 114160, "rate_8g": 114160, "changed": true, "source": "LiveChennai (MJDMA verified)", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14270, "goodreturns_rate": 14270, "ibja_rate_22k": 14043, "chennai_premium_amount": 227, "chennai_premium_pct": 1.62}, {"date": "2026-09-08", "time": "19:28:58", "timestamp": "2026-09-08T19:28:58.765122+05:30", "session": "PM", "rate_22k": 14270, "rate_24k": 15567, "weight_1g": 14270, "weight_8g": 114160, "rate_8g": 114160, "changed": false, "source": "LiveChennai (MJDMA verified)", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14270, "goodreturns_rate": 14270, "ibja_rate_22k": 14098, "chennai_premium_amount": 172, "chennai_premium_pct": 1.22}], "quant": {"calculated_at": "2026-09-08T19:29:02.796364+05:30", "rate_22k": 14270, "rate_8g": 114160, "volatility_30d_annualized": 0.1603, "volatility_30d_pct": 16.03, "volatility_daily_pct": 1.01, "var_95_1d_amount": 236.98, "var_95_1d_pct": 1.66, "var_95_1d_8g_amount": 1895.87, "var_95_1d_lower_bound": 14033, "var_95_1d_upper_bound": 14507, "max_drawdown_30d_pct": 7.24, "chennai_premium_amount": 172, "chennai_premium_pct": 1.22, "ibja_benchmark_rate": 14098, "macro_parity": {"implied_comex_usd_oz": 4801.9, "usd_inr_benchmark": 87.8, "customs_duty_pct": 11.5, "gst_pct": 3.0, "import_parity_22k": 14270, "physical_premium_amount": 0, "physical_premium_pct": 0.0, "parity_status": "Parity Aligned"}, "volatility_cone": {"horizon_7d": {"lower": 13657, "upper": 14911}, "horizon_30d": {"lower": 13029, "upper": 15629}, "prob_test_upper_pct": 5.0, "prob_test_lower_pct": 5.0}, "trade_standards": {"plain_gold": {"min_va_pct": 8.0, "avg_va_pct": 10.5, "max_va_pct": 14.0}, "antique_kundan": {"min_va_pct": 14.0, "avg_va_pct": 17.5, "max_va_pct": 22.0}, "temple_design": {"min_va_pct": 16.0, "avg_va_pct": 19.0, "max_va_pct": 25.0}, "coins_bars": {"min_va_pct": 1.0, "avg_va_pct": 2.0, "max_va_pct": 3.5}}, "sample_points": 30}, "ibja": {"date": "2026-09-08", "rate_22k": 14098, "rate_24k": 15380, "rate_22k_10g": 140976, "rate_24k_10g": 153796, "am_22k": 14098, "pm_22k": 14098, "am_24k": 15380, "pm_24k": 15380, "unit": "1g", "purity_22k": "916", "purity_24k": "999", "source": "IBJA Benchmark Mirror (GoodReturns National)", "url": "https://www.goodreturns.in/gold-rates/", "fetched_at": "2026-09-08T19:29:02.429992+05:30", "status": "degraded_mirror", "is_fallback": true}, "signals": {"calculated_at": "2026-09-08T19:28:58.782650+05:30", "price_points_used": 30, "rsi": {"rsi_14": 31.24, "rsi_zone": "neutral", "rsi_signal": "HOLD"}, "ema_crossover": {"ema_9": 14292.12, "ema_21": 14370.74, "momentum": -78.61, "momentum_pct": -0.547, "signal": "bearish"}, "forecast": {"forecast_1d": 14161, "forecast_3d": 14104, "forecast_7d": 13990, "trend_direction": "down", "confidence": 0.82}, "support_resistance": {"support": 13942, "resistance": 15030, "pivot": 14414, "near_support": false, "near_resistance": false}, "sentiment": {"sentiment_score": 48, "sentiment_label": "Neutral", "action_hint": "High consolidation; maintain disciplined stop levels.", "components": {"rsi_score": 31.24, "momentum_score": 41.79, "var_risk_score": 68.0, "spread_score": 78.9}}}}
+{"baked_at": "2026-09-08T19:43:03.436193+05:30", "live": {"rate_22k": 14270, "rate_8g": 114160, "currency": "INR", "city": "Chennai", "purity": "22K", "date": "2026-09-08", "time": "19:42:59", "timestamp": "2026-09-08T19:42:59.966520+05:30", "changed": false, "previous_rate_22k": 14270, "change": 0, "sources": {"livechennai": {"source": "LiveChennai", "rate_22k": 14270, "rate_24k": 15567, "rate_8g": 114160, "url": "https://www.livechennai.com/gold_silverrate.asp", "fetched_at": "2026-09-08T19:42:59.966231+05:30"}, "goodreturns": {"source": "GoodReturns", "rate_22k": 14270, "url": "https://www.goodreturns.in/gold-rates/chennai.html", "fetched_at": "2026-09-08T19:42:59.760029+05:30"}, "ibja": {"date": "2026-09-08", "rate_22k": 14098, "rate_24k": 15380, "rate_22k_10g": 140976, "rate_24k_10g": 153796, "am_22k": 14098, "pm_22k": 14098, "am_24k": 15380, "pm_24k": 15380, "unit": "1g", "purity_22k": "916", "purity_24k": "999", "source": "IBJA Benchmark Mirror (GoodReturns National)", "url": "https://www.goodreturns.in/gold-rates/", "fetched_at": "2026-09-08T19:42:59.391610+05:30", "status": "degraded_mirror", "is_fallback": true}}, "source_update_times": ["2026-09-08T19:42:59.966231+05:30", "2026-09-08T19:42:59.760029+05:30", "2026-09-08T19:42:59.391610+05:30"], "source_rates": [14270, 14270, 14098], "sources_agree": true, "last_checked_at": "2026-09-08T19:42:59.966520+05:30", "source": "LiveChennai (MJDMA verified)", "last_checked": "2026-09-08T19:42:59.966520+05:30", "agreement": true, "session": "PM", "rate_24k": 15567, "weight_1g": 14270, "weight_8g": 114160, "livechennai_rate": 14270, "goodreturns_rate": 14270, "livechennai_fetched_at": "2026-09-08T19:42:59.966231+05:30", "goodreturns_fetched_at": "2026-09-08T19:42:59.760029+05:30", "livechennai_url": "https://www.livechennai.com/gold_silverrate.asp", "goodreturns_url": "https://www.goodreturns.in/gold-rates/chennai.html", "updated_at": "2026-09-08T19:42:59.966520+05:30", "verified_at": "2026-09-08T19:42:59.966520+05:30", "ibja": {"date": "2026-09-08", "rate_22k": 14098, "rate_24k": 15380, "rate_22k_10g": 140976, "rate_24k_10g": 153796, "am_22k": 14098, "pm_22k": 14098, "am_24k": 15380, "pm_24k": 15380, "unit": "1g", "purity_22k": "916", "purity_24k": "999", "source": "IBJA Benchmark Mirror (GoodReturns National)", "url": "https://www.goodreturns.in/gold-rates/", "fetched_at": "2026-09-08T19:42:59.391610+05:30", "status": "degraded_mirror", "is_fallback": true}, "ibja_rate_22k": 14098, "ibja_rate_24k": 15380, "chennai_premium_amount": 172, "chennai_premium_pct": 1.22, "consensus": {"consensus_rate": 14270, "confidence": 100, "sources_count": 3, "breakdown": {"livechennai": {"rate": 14270, "modified_z": 0.0, "is_outlier": false, "base_weight": 0.4, "reliability_weight": 0.4, "deviation": 0, "deviation_pct": 0.0, "effective_weight": 0.5}, "goodreturns": {"rate": 14270, "modified_z": 0.0, "is_outlier": false, "base_weight": 0.25, "reliability_weight": 0.25, "deviation": 0, "deviation_pct": 0.0, "effective_weight": 0.312}, "ibja": {"rate": 14270, "modified_z": 0.0, "is_outlier": false, "base_weight": 0.15, "reliability_weight": 0.15, "deviation": 0, "deviation_pct": 0.0, "effective_weight": 0.187}}, "valid": true}, "sowcarpet_wholesale_22k": 14225, "sowcarpet_discount_pct": -0.32, "retail_showroom_spread": 180, "retail_showroom_rate_22k": 14450, "retail_showroom_markup_pct": 1.26, "submarket_spreads": {"calculated_at": "2026-09-08T19:42:59.966508+05:30", "reference_mjdma_22k": 14270, "reference_mjdma_24k": 15567, "sowcarpet": {"hub_name": "Sowcarpet Wholesale Bullion", "locality": "Mint Street / NSC Bose Road", "market_type": "wholesale_bullion", "rate_22k": 14225, "rate_24k": 15518, "rate_8g": 113800, "discount_per_g": -45, "discount_pct": -0.32, "discount_range": {"min_discount": -65, "max_discount": -35, "benchmark_discount": -45}, "rate_range": {"min_rate_22k": 14205, "max_rate_22k": 14235}, "notes": "Raw bullion cast bars traded wholesale ex-GST, ex-making charges"}, "t_nagar": {"hub_name": "T. Nagar Showroom Retail", "locality": "Usman Road / Panagal Park", "market_type": "retail_showroom", "rate_22k": 14450, "rate_24k": 15764, "rate_8g": 115600, "retail_showroom_spread": 180, "markup_pct": 1.26, "markup_range": {"min_spread": 150, "max_spread": 220, "benchmark_spread": 180}, "notes": "MJDMA fix + retail showroom margin (+₹180/g average markup)"}, "regional_parity": {"coimbatore": {"city": "Coimbatore", "region": "Western Tamil Nadu", "cluster_role": "Industrial Jewelry Manufacturing & Casting Cluster", "rate_22k": 14255, "rate_8g": 114040, "basis_spread": -15, "basis_pct": -0.11, "basis_range": [-15, 15], "parity_status": "Discount"}, "madurai": {"city": "Madurai", "region": "Southern Tamil Nadu", "cluster_role": "Temple Jewelry & Southern Cultural Retail Hub", "rate_22k": 14285, "rate_8g": 114280, "basis_spread": 15, "basis_pct": 0.11, "basis_range": [-15, 15], "parity_status": "Premium"}, "trichy": {"city": "Tiruchirappalli", "region": "Central Tamil Nadu", "cluster_role": "Central Transit & Regional Distribution Corridor", "rate_22k": 14265, "rate_8g": 114120, "basis_spread": -5, "basis_pct": -0.04, "basis_range": [-15, 15], "parity_status": "Discount"}, "salem": {"city": "Salem", "region": "North-Western Tamil Nadu", "cluster_role": "Bullion Refining & Goldsmithing Cluster", "rate_22k": 14260, "rate_8g": 114080, "basis_spread": -10, "basis_pct": -0.07, "basis_range": [-15, 15], "parity_status": "Discount"}}, "value_chain_arbitrage": {"gross_spread_amount": 225, "gross_spread_pct": 1.58, "description": "Gross margin between Sowcarpet wholesale raw bar cash rate and T. Nagar showroom retail price"}}}, "history": [{"date": "2026-08-08", "rate_22k": 13965, "rate_24k": 15235, "weight_1g": 13965, "weight_8g": 111720, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-09", "rate_22k": 13965, "rate_24k": 15235, "weight_1g": 13965, "weight_8g": 111720, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-10", "rate_22k": 13950, "rate_24k": 15218, "weight_1g": 13950, "weight_8g": 111600, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-11", "rate_22k": 14150, "rate_24k": 15436, "weight_1g": 14150, "weight_8g": 113200, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-12", "rate_22k": 14200, "rate_24k": 15491, "weight_1g": 14200, "weight_8g": 113600, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-13", "rate_22k": 14220, "rate_24k": 15513, "weight_1g": 14220, "weight_8g": 113760, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-14", "rate_22k": 14200, "rate_24k": 15491, "weight_1g": 14200, "weight_8g": 113600, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-15", "rate_22k": 14220, "rate_24k": 15513, "weight_1g": 14220, "weight_8g": 113760, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-16", "rate_22k": 14220, "rate_24k": 15513, "weight_1g": 14220, "weight_8g": 113760, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-17", "rate_22k": 14270, "rate_24k": 15567, "weight_1g": 14270, "weight_8g": 114160, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-18", "rate_22k": 14290, "rate_24k": 15589, "weight_1g": 14290, "weight_8g": 114320, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-19", "rate_22k": 14400, "rate_24k": 15709, "weight_1g": 14400, "weight_8g": 115200, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-20", "rate_22k": 14600, "rate_24k": 15927, "weight_1g": 14600, "weight_8g": 116800, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-21", "rate_22k": 14850, "rate_24k": 16200, "weight_1g": 14850, "weight_8g": 118800, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-22", "rate_22k": 14950, "rate_24k": 16309, "weight_1g": 14950, "weight_8g": 119600, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-23", "rate_22k": 14950, "rate_24k": 16309, "weight_1g": 14950, "weight_8g": 119600, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-24", "rate_22k": 15030, "rate_24k": 16396, "weight_1g": 15030, "weight_8g": 120240, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-25", "rate_22k": 15010, "rate_24k": 16375, "weight_1g": 15010, "weight_8g": 120080, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-26", "rate_22k": 15010, "rate_24k": 16375, "weight_1g": 15010, "weight_8g": 120080, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-27", "rate_22k": 14725, "rate_24k": 16064, "weight_1g": 14725, "weight_8g": 117800, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-28", "rate_22k": 14800, "rate_24k": 16145, "weight_1g": 14800, "weight_8g": 118400, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-29", "rate_22k": 14505, "rate_24k": 15824, "weight_1g": 14505, "weight_8g": 116040, "source": "LiveChennai", "source_url": "https://www.livechennai.com/get_goldrate_history.asp?monthno=8&yearno=2026", "type": "daily_history"}, {"date": "2026-08-30", "time": "01:26:47", "timestamp": "2026-08-30T01:26:47.577934+05:30", "rate_22k": 14505, "rate_8g": 116040, "changed": false, "sources": ["GoodReturns"]}, {"date": "2026-08-30", "time": "01:30:15", "timestamp": "2026-08-30T01:30:15.991975+05:30", "rate_22k": 14505, "rate_8g": 116040, "changed": false, "sources": ["GoodReturns"]}, {"date": "2026-08-30", "time": "01:35:10", "timestamp": "2026-08-30T01:35:10.889759+05:30", "rate_22k": 14505, "rate_8g": 116040, "changed": false, "sources": ["LiveChennai", "GoodReturns"], "source_update_time": "29/08/2026 9:44:41 AM", "source_details": [{"source": "LiveChennai", "rate_22k": 14505, "update_time": "29/08/2026 9:44:41 AM", "url": "https://www.livechennai.com/gold_silverrate.asp", "fetched_at": "2026-08-30T01:35:10.716214+05:30"}, {"source": "GoodReturns", "rate_22k": 14505, "update_time": null, "url": "https://www.goodreturns.in/gold-rates/chennai.html", "fetched_at": "2026-08-30T01:35:10.885967+05:30"}]}, {"timestamp": "2026-08-30T01:48:16.242233+05:30", "date": "2026-08-30", "time": "01:48:16", "rate_22k": 14505, "rate_8g": 116040, "changed": false, "sources": ["LiveChennai", "GoodReturns"]}, {"date": "2026-08-31", "time": "00:07:10", "timestamp": "2026-08-31T00:07:10.812814+05:30", "rate_22k": 14505, "rate_8g": 116040, "changed": false, "source": "LiveChennai + GoodReturns", "agreement": true, "livechennai_rate": 14505, "goodreturns_rate": 14505}, {"date": "2026-08-31", "time": "10:00:20", "timestamp": "2026-08-31T10:00:20.730941+05:30", "rate_22k": 14370, "rate_8g": 114960, "changed": true, "source": "LiveChennai + GoodReturns", "agreement": true, "livechennai_rate": 14370, "goodreturns_rate": 14370}, {"date": "2026-09-01", "time": "00:06:40", "timestamp": "2026-09-01T00:06:40.161596+05:30", "rate_22k": 14370, "rate_8g": 114960, "changed": false, "source": "LiveChennai + GoodReturns", "agreement": true, "livechennai_rate": 14370, "goodreturns_rate": 14370}, {"date": "2026-09-01", "time": "13:43:50", "timestamp": "2026-09-01T13:43:50.044000+05:30", "session": null, "rate_22k": 14385, "rate_8g": 115080, "changed": true, "source": "LiveChennai + GoodReturns", "agreement": true, "livechennai_rate": 14385, "goodreturns_rate": 14385}, {"date": "2026-09-01", "time": "19:07:08", "timestamp": "2026-09-01T19:07:08.317318+05:30", "session": "PM", "rate_22k": 14175, "rate_8g": 113400, "changed": true, "source": "LiveChennai + GoodReturns", "agreement": true, "livechennai_rate": 14175, "goodreturns_rate": 14175}, {"date": "2026-09-02", "time": "00:31:46", "timestamp": "2026-09-02T00:31:46.184573+05:30", "session": null, "rate_22k": 14175, "rate_8g": 113400, "changed": false, "source": "LiveChennai + GoodReturns", "agreement": true, "livechennai_rate": 14175, "goodreturns_rate": 14175}, {"date": "2026-09-02", "time": "19:34:19", "timestamp": "2026-09-02T19:34:19.311675+05:30", "session": null, "rate_22k": 13935, "rate_8g": 111480, "changed": true, "source": "GoodReturns", "agreement": false, "livechennai_rate": null, "goodreturns_rate": 13935}, {"date": "2026-09-02", "time": "23:56:09", "timestamp": "2026-09-02T23:56:09.339614+05:30", "session": "PM", "rate_22k": 13942, "rate_8g": 111536, "changed": false, "source": "LiveChennai + GoodReturns", "agreement": true, "livechennai_rate": 13950, "goodreturns_rate": 13935, "rate_24k": 15209, "weight_1g": 13942, "weight_8g": 111536, "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday"}, {"date": "2026-09-03", "time": "01:13:23", "timestamp": "2026-09-03T01:13:23.401905+05:30", "session": null, "rate_22k": 13942, "rate_24k": 15209, "weight_1g": 13942, "weight_8g": 111536, "rate_8g": 111536, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 13950, "goodreturns_rate": 13935}, {"date": "2026-09-03", "time": "01:14:08", "timestamp": "2026-09-03T01:14:08.072945+05:30", "session": null, "rate_22k": 13942, "rate_24k": 15209, "weight_1g": 13942, "weight_8g": 111536, "rate_8g": 111536, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 13950, "goodreturns_rate": 13935}, {"date": "2026-09-03", "time": "01:14:52", "timestamp": "2026-09-03T01:14:52.764884+05:30", "session": null, "rate_22k": 13942, "rate_24k": 15209, "weight_1g": 13942, "weight_8g": 111536, "rate_8g": 111536, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 13950, "goodreturns_rate": 13935}, {"date": "2026-09-03", "time": "01:24:54", "timestamp": "2026-09-03T01:24:54.147857+05:30", "session": null, "rate_22k": 13942, "rate_24k": 15209, "weight_1g": 13942, "weight_8g": 111536, "rate_8g": 111536, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 13950, "goodreturns_rate": 13935}, {"date": "2026-09-03", "time": "01:26:59", "timestamp": "2026-09-03T01:26:59.639601+05:30", "session": null, "rate_22k": 13942, "rate_24k": 15209, "weight_1g": 13942, "weight_8g": 111536, "rate_8g": 111536, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 13950, "goodreturns_rate": 13935}, {"date": "2026-09-03", "time": "01:32:17", "timestamp": "2026-09-03T01:32:17.453527+05:30", "session": null, "rate_22k": 13942, "rate_24k": 15209, "weight_1g": 13942, "weight_8g": 111536, "rate_8g": 111536, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 13950, "goodreturns_rate": 13935}, {"date": "2026-09-03", "time": "01:34:37", "timestamp": "2026-09-03T01:34:37.429362+05:30", "session": null, "rate_22k": 13942, "rate_24k": 15209, "weight_1g": 13942, "weight_8g": 111536, "rate_8g": 111536, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 13950, "goodreturns_rate": 13935}, {"date": "2026-09-03", "time": "20:17:00", "timestamp": "2026-09-03T20:17:00.821942+05:30", "session": "PM", "rate_22k": 14240, "rate_24k": 15535, "weight_1g": 14240, "weight_8g": 113920, "rate_8g": 113920, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14240, "goodreturns_rate": 14240}, {"date": "2026-09-04", "time": "12:09:13", "timestamp": "2026-09-04T12:09:13.509202+05:30", "session": "AM", "rate_22k": 14360, "rate_24k": 15665, "weight_1g": 14360, "weight_8g": 114880, "rate_8g": 114880, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14360, "goodreturns_rate": 14360}, {"date": "2026-09-04", "time": "23:52:52", "timestamp": "2026-09-04T23:52:52.901559+05:30", "session": "PM", "rate_22k": 14360, "rate_24k": 15665, "weight_1g": 14360, "weight_8g": 114880, "rate_8g": 114880, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14360, "goodreturns_rate": 14360}, {"date": "2026-09-05", "time": "00:07:57", "timestamp": "2026-09-05T00:07:57.766422+05:30", "session": null, "rate_22k": 14360, "rate_24k": 15665, "weight_1g": 14360, "weight_8g": 114880, "rate_8g": 114880, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14360, "goodreturns_rate": 14360}, {"date": "2026-09-05", "time": "00:21:30", "timestamp": "2026-09-05T00:21:30.400227+05:30", "session": null, "rate_22k": 14360, "rate_24k": 15665, "weight_1g": 14360, "weight_8g": 114880, "rate_8g": 114880, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14360, "goodreturns_rate": 14360}, {"date": "2026-09-05", "time": "00:39:52", "timestamp": "2026-09-05T00:39:52.652706+05:30", "session": null, "rate_22k": 14360, "rate_24k": 15665, "weight_1g": 14360, "weight_8g": 114880, "rate_8g": 114880, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14360, "goodreturns_rate": 14360}, {"date": "2026-09-05", "time": "00:46:19", "timestamp": "2026-09-05T00:46:19.697979+05:30", "session": null, "rate_22k": 14360, "rate_24k": 15665, "weight_1g": 14360, "weight_8g": 114880, "rate_8g": 114880, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14360, "goodreturns_rate": 14360}, {"date": "2026-09-05", "time": "00:52:12", "timestamp": "2026-09-05T00:52:12.797545+05:30", "session": null, "rate_22k": 14360, "rate_24k": 15665, "weight_1g": 14360, "weight_8g": 114880, "rate_8g": 114880, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14360, "goodreturns_rate": 14360}, {"date": "2026-09-05", "time": "01:15:21", "timestamp": "2026-09-05T01:15:21.598727+05:30", "session": null, "rate_22k": 14360, "rate_24k": 15665, "weight_1g": 14360, "weight_8g": 114880, "rate_8g": 114880, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14360, "goodreturns_rate": 14360}, {"date": "2026-09-05", "time": "01:16:35", "timestamp": "2026-09-05T01:16:35.531212+05:30", "session": null, "rate_22k": 14360, "rate_24k": 15665, "weight_1g": 14360, "weight_8g": 114880, "rate_8g": 114880, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14360, "goodreturns_rate": 14360}, {"date": "2026-09-05", "time": "01:20:20", "timestamp": "2026-09-05T01:20:20.421873+05:30", "session": null, "rate_22k": 14360, "rate_24k": 15665, "weight_1g": 14360, "weight_8g": 114880, "rate_8g": 114880, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14360, "goodreturns_rate": 14360}, {"date": "2026-09-05", "time": "01:24:05", "timestamp": "2026-09-05T01:24:05.844300+05:30", "session": null, "rate_22k": 14360, "rate_24k": 15665, "weight_1g": 14360, "weight_8g": 114880, "rate_8g": 114880, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14360, "goodreturns_rate": 14360}, {"date": "2026-09-05", "time": "01:28:48", "timestamp": "2026-09-05T01:28:48.741417+05:30", "session": null, "rate_22k": 14360, "rate_24k": 15665, "weight_1g": 14360, "weight_8g": 114880, "rate_8g": 114880, "changed": false, "source": "LiveChennai + GoodReturns", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14360, "goodreturns_rate": 14360}, {"date": "2026-09-05", "time": "11:55:24", "timestamp": "2026-09-05T11:55:24.444532+05:30", "session": "AM", "rate_22k": 14190, "rate_24k": 15480, "weight_1g": 14190, "weight_8g": 113520, "rate_8g": 113520, "changed": true, "source": "LiveChennai (MJDMA verified)", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14190, "goodreturns_rate": 14361}, {"date": "2026-09-05", "time": "20:27:49", "timestamp": "2026-09-05T20:27:49.399271+05:30", "session": "PM", "rate_22k": 14190, "rate_24k": 15480, "weight_1g": 14190, "weight_8g": 113520, "rate_8g": 113520, "changed": false, "source": "LiveChennai (MJDMA verified)", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14190, "goodreturns_rate": 14361}, {"date": "2026-09-07", "time": "20:38:49", "timestamp": "2026-09-07T20:38:49.948033+05:30", "session": "PM", "rate_22k": 14130, "rate_24k": 15415, "weight_1g": 14130, "weight_8g": 113040, "rate_8g": 113040, "changed": true, "source": "LiveChennai (MJDMA verified)", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14130, "goodreturns_rate": 14130, "ibja_rate_22k": 13989, "chennai_premium_amount": 141, "chennai_premium_pct": 1.01}, {"date": "2026-09-08", "time": "08:58:13", "timestamp": "2026-09-08T08:58:13.853560+05:30", "session": "AM", "rate_22k": 14130, "rate_24k": 15415, "weight_1g": 14130, "weight_8g": 113040, "rate_8g": 113040, "changed": false, "source": "LiveChennai (MJDMA verified)", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14130, "goodreturns_rate": 14129, "ibja_rate_22k": 13988, "chennai_premium_amount": 142, "chennai_premium_pct": 1.02}, {"date": "2026-09-08", "time": "12:08:22", "timestamp": "2026-09-08T12:08:22.464518+05:30", "session": "AM", "rate_22k": 14270, "rate_24k": 15567, "weight_1g": 14270, "weight_8g": 114160, "rate_8g": 114160, "changed": true, "source": "LiveChennai (MJDMA verified)", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14270, "goodreturns_rate": 14270, "ibja_rate_22k": 14043, "chennai_premium_amount": 227, "chennai_premium_pct": 1.62}, {"date": "2026-09-08", "time": "19:42:59", "timestamp": "2026-09-08T19:42:59.969391+05:30", "session": "PM", "rate_22k": 14270, "rate_24k": 15567, "weight_1g": 14270, "weight_8g": 114160, "rate_8g": 114160, "changed": false, "source": "LiveChennai (MJDMA verified)", "source_url": "https://www.livechennai.com/gold_silverrate.asp", "type": "intraday", "agreement": true, "livechennai_rate": 14270, "goodreturns_rate": 14270, "ibja_rate_22k": 14098, "chennai_premium_amount": 172, "chennai_premium_pct": 1.22, "sowcarpet_wholesale_22k": 14225, "retail_showroom_spread": 180}], "quant": {"calculated_at": "2026-09-08T19:43:03.429044+05:30", "rate_22k": 14270, "rate_8g": 114160, "volatility_30d_annualized": 0.1603, "volatility_30d_pct": 16.03, "volatility_daily_pct": 1.01, "var_95_1d_amount": 236.98, "var_95_1d_pct": 1.66, "var_95_1d_8g_amount": 1895.87, "var_95_1d_lower_bound": 14033, "var_95_1d_upper_bound": 14507, "max_drawdown_30d_pct": 7.24, "chennai_premium_amount": 172, "chennai_premium_pct": 1.22, "sowcarpet_wholesale_22k": 14225, "sowcarpet_discount_pct": -0.32, "retail_showroom_spread": 180, "retail_showroom_rate_22k": 14450, "retail_showroom_markup_pct": 1.26, "submarket_spreads": {"calculated_at": "2026-09-08T19:43:03.429449+05:30", "reference_mjdma_22k": 14270, "reference_mjdma_24k": 15567, "sowcarpet": {"hub_name": "Sowcarpet Wholesale Bullion", "locality": "Mint Street / NSC Bose Road", "market_type": "wholesale_bullion", "rate_22k": 14225, "rate_24k": 15518, "rate_8g": 113800, "discount_per_g": -45, "discount_pct": -0.32, "discount_range": {"min_discount": -65, "max_discount": -35, "benchmark_discount": -45}, "rate_range": {"min_rate_22k": 14205, "max_rate_22k": 14235}, "notes": "Raw bullion cast bars traded wholesale ex-GST, ex-making charges"}, "t_nagar": {"hub_name": "T. Nagar Showroom Retail", "locality": "Usman Road / Panagal Park", "market_type": "retail_showroom", "rate_22k": 14450, "rate_24k": 15764, "rate_8g": 115600, "retail_showroom_spread": 180, "markup_pct": 1.26, "markup_range": {"min_spread": 150, "max_spread": 220, "benchmark_spread": 180}, "notes": "MJDMA fix + retail showroom margin (+₹180/g average markup)"}, "regional_parity": {"coimbatore": {"city": "Coimbatore", "region": "Western Tamil Nadu", "cluster_role": "Industrial Jewelry Manufacturing & Casting Cluster", "rate_22k": 14255, "rate_8g": 114040, "basis_spread": -15, "basis_pct": -0.11, "basis_range": [-15, 15], "parity_status": "Discount"}, "madurai": {"city": "Madurai", "region": "Southern Tamil Nadu", "cluster_role": "Temple Jewelry & Southern Cultural Retail Hub", "rate_22k": 14285, "rate_8g": 114280, "basis_spread": 15, "basis_pct": 0.11, "basis_range": [-15, 15], "parity_status": "Premium"}, "trichy": {"city": "Tiruchirappalli", "region": "Central Tamil Nadu", "cluster_role": "Central Transit & Regional Distribution Corridor", "rate_22k": 14265, "rate_8g": 114120, "basis_spread": -5, "basis_pct": -0.04, "basis_range": [-15, 15], "parity_status": "Discount"}, "salem": {"city": "Salem", "region": "North-Western Tamil Nadu", "cluster_role": "Bullion Refining & Goldsmithing Cluster", "rate_22k": 14260, "rate_8g": 114080, "basis_spread": -10, "basis_pct": -0.07, "basis_range": [-15, 15], "parity_status": "Discount"}}, "value_chain_arbitrage": {"gross_spread_amount": 225, "gross_spread_pct": 1.58, "description": "Gross margin between Sowcarpet wholesale raw bar cash rate and T. Nagar showroom retail price"}}, "ibja_benchmark_rate": 14098, "macro_parity": {"implied_comex_usd_oz": 4801.9, "usd_inr_benchmark": 87.8, "customs_duty_pct": 11.5, "gst_pct": 3.0, "import_parity_22k": 14270, "physical_premium_amount": 0, "physical_premium_pct": 0.0, "parity_status": "Parity Aligned"}, "volatility_cone": {"horizon_7d": {"lower": 13657, "upper": 14911}, "horizon_30d": {"lower": 13029, "upper": 15629}, "prob_test_upper_pct": 5.0, "prob_test_lower_pct": 5.0}, "trade_standards": {"plain_gold": {"min_va_pct": 8.0, "avg_va_pct": 10.5, "max_va_pct": 14.0}, "antique_kundan": {"min_va_pct": 14.0, "avg_va_pct": 17.5, "max_va_pct": 22.0}, "temple_design": {"min_va_pct": 16.0, "avg_va_pct": 19.0, "max_va_pct": 25.0}, "coins_bars": {"min_va_pct": 1.0, "avg_va_pct": 2.0, "max_va_pct": 3.5}}, "sample_points": 30}, "ibja": {"date": "2026-09-08", "rate_22k": 14098, "rate_24k": 15380, "rate_22k_10g": 140976, "rate_24k_10g": 153796, "am_22k": 14098, "pm_22k": 14098, "am_24k": 15380, "pm_24k": 15380, "unit": "1g", "purity_22k": "916", "purity_24k": "999", "source": "IBJA Benchmark Mirror (GoodReturns National)", "url": "https://www.goodreturns.in/gold-rates/", "fetched_at": "2026-09-08T19:43:03.048399+05:30", "status": "degraded_mirror", "is_fallback": true}, "signals": {"calculated_at": "2026-09-08T19:42:59.990920+05:30", "price_points_used": 30, "rsi": {"rsi_14": 31.24, "rsi_zone": "neutral", "rsi_signal": "HOLD"}, "ema_crossover": {"ema_9": 14292.12, "ema_21": 14370.74, "momentum": -78.61, "momentum_pct": -0.547, "signal": "bearish"}, "forecast": {"forecast_1d": 14161, "forecast_3d": 14104, "forecast_7d": 13990, "trend_direction": "down", "confidence": 0.82}, "support_resistance": {"support": 13942, "resistance": 15030, "pivot": 14414, "near_support": false, "near_resistance": false}, "sentiment": {"sentiment_score": 48, "sentiment_label": "Neutral", "action_hint": "High consolidation; maintain disciplined stop levels.", "components": {"rsi_score": 31.24, "momentum_score": 41.79, "var_risk_score": 68.0, "spread_score": 78.9}}}}
 </script>
 
 <script>
@@ -2579,6 +3289,16 @@ const $ = id => document.getElementById(id);
       if (typeof toast === "function") toast(`Theme: ${next.toUpperCase()}`);
     };
   }
+
+  const brandBadge = document.querySelector(".brand-badge");
+  if (brandBadge) {
+    brandBadge.style.cursor = "pointer";
+    brandBadge.setAttribute("title", "Tap for 22K Gold Coin Acoustic Chime");
+    brandBadge.onclick = () => {
+      haptic(15);
+      if (typeof playGoldCoinChime === "function") playGoldCoinChime(1.0);
+    };
+  }
 })();
 
 let audioCtx = null;
@@ -2603,6 +3323,104 @@ const haptic = (ms = 10, freq = 800) => {
   if ("vibrate" in navigator) { try { navigator.vibrate(ms); } catch (_) {} }
   playTick(freq);
 };
+
+/**
+ * Web Audio API Gold Coin Acoustic Resonance Synthesizer (22k-Pro)
+ * 
+ * Physical Acoustics of Pure Gold Bullion (22K / 24K):
+ * - High mass density (17.5-19.3 g/cm³) produces a distinct, crystalline metallic ping.
+ * - Characteristic circular plate flexural modes:
+ *     Fundamental mode (0,2):  ~2800 Hz
+ *     Harmonic overtone mode (0,3): ~4200 Hz (1.5x harmonic ratio)
+ * - Exponential decay envelope: 0.35s natural acoustic ringdown.
+ * - 5800 Hz lowpass filter tames harsh DAC step noise and shapes warm bullion luster.
+ * 
+ * @param {number} [pitchModifier=1.0] - Pitch multiplier (e.g. 1.0 for 22K sovereign, 0.95 for heavy 24K bar, 1.08 for 1g coin)
+ */
+function playGoldCoinChime(pitchModifier = 1.0) {
+  try {
+    if (!audioCtx) {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      audioCtx = new AudioContextClass();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(() => {});
+    }
+
+    const mod = (typeof pitchModifier === 'number' && Number.isFinite(pitchModifier) && pitchModifier > 0)
+      ? pitchModifier
+      : 1.0;
+
+    const now = audioCtx.currentTime;
+    const decayDuration = 0.35;
+    const f1 = 2800 * mod;
+    const f2 = 4200 * mod;
+
+    // 1. Dual High-Frequency Oscillators (Sine for pure metallic ring)
+    const osc1 = audioCtx.createOscillator();
+    const osc2 = audioCtx.createOscillator();
+    osc1.type = "sine";
+    osc2.type = "sine";
+    osc1.frequency.setValueAtTime(f1, now);
+    osc2.frequency.setValueAtTime(f2, now);
+
+    // 2. Low-Pass Acoustic Filter (warms metallic ring & suppresses aliasing)
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(5800 * mod, now);
+    filter.Q.setValueAtTime(1.5, now);
+
+    // 3. Exponential Decay Gain Envelope (clickless 2ms attack + 0.35s exponential ringdown)
+    const gainNode = audioCtx.createGain();
+    const peakGain = 0.12;
+    gainNode.gain.setValueAtTime(0.0001, now);
+    gainNode.gain.linearRampToValueAtTime(peakGain, now + 0.002);
+    gainNode.gain.exponentialRampToValueAtTime(0.00001, now + decayDuration);
+
+    // 4. Audio Routing: [osc1, osc2] -> gainNode -> filter -> destination
+    osc1.connect(gainNode);
+    osc2.connect(gainNode);
+    gainNode.connect(filter);
+    filter.connect(audioCtx.destination);
+
+    // 5. Trigger playback & schedule release
+    osc1.start(now);
+    osc2.start(now);
+    osc1.stop(now + decayDuration);
+    osc2.stop(now + decayDuration);
+
+    // 6. Automatic garbage collection on ring completion
+    osc1.onended = () => {
+      try {
+        osc1.disconnect();
+        osc2.disconnect();
+        gainNode.disconnect();
+        filter.disconnect();
+      } catch (_) {}
+    };
+  } catch (_) {}
+}
+window.playGoldCoinChime = playGoldCoinChime;
+
+// Safe proactive audio unlock on user gesture
+if (typeof document !== 'undefined') {
+  const unlockAudio = () => {
+    try {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) audioCtx = new AudioContextClass();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+      }
+    } catch (_) {}
+    document.removeEventListener('pointerdown', unlockAudio);
+    document.removeEventListener('keydown', unlockAudio);
+  };
+  document.addEventListener('pointerdown', unlockAudio, { passive: true, once: true });
+  document.addEventListener('keydown', unlockAudio, { passive: true, once: true });
+}
 
 const money = n => {
   const num = Number(n);
@@ -2727,6 +3545,98 @@ function updateSpreadDashboard(liveData = live, historyData = history) {
   if ($("varExposure")) {
     $("varExposure").textContent = `-₹ ${risk.var95.toLocaleString("en-IN")}/g`;
     $("varExposure").title = "1-Day 95% Parametric VaR downside exposure";
+  }
+
+  // Chennai Sub-Market Basis & Wholesale Spread Engine
+  updateSubmarketSpreadDashboard(liveData);
+}
+
+// Modular Chennai Sub-Market Basis & Wholesale Spread Engine
+function computeSubmarketSpreads(rate22k, options = {}) {
+  const rate = Number(rate22k);
+  if (!Number.isFinite(rate) || rate <= 0) {
+    return null;
+  }
+  const sowcarpetDiscount = Number.isFinite(options.sowcarpetDiscount) ? Number(options.sowcarpetDiscount) : -45;
+  const showroomSpread = Number.isFinite(options.showroomMarkup) ? Number(options.showroomMarkup) : 180;
+  const coimbatoreBasis = Number.isFinite(options.coimbatoreBasis) ? Number(options.coimbatoreBasis) : -15;
+  const maduraiBasis = Number.isFinite(options.maduraiBasis) ? Number(options.maduraiBasis) : 15;
+
+  const sowcarpetWholesale22k = Math.round(rate + sowcarpetDiscount); // rate - 45
+  const sowcarpetDiscountPct = Number(((sowcarpetDiscount / rate) * 100).toFixed(2));
+  const retailShowroomRate22k = Math.round(rate + showroomSpread); // rate + 180
+  const retailShowroomMarkupPct = Number(((showroomSpread / rate) * 100).toFixed(2));
+
+  const coimbatoreRate22k = Math.round(rate + coimbatoreBasis); // rate - 15
+  const coimbatoreBasisPct = Number(((coimbatoreBasis / rate) * 100).toFixed(2));
+
+  const maduraiRate22k = Math.round(rate + maduraiBasis); // rate + 15
+  const maduraiBasisPct = Number(((maduraiBasis / rate) * 100).toFixed(2));
+
+  const wholesaleToRetailSpread = retailShowroomRate22k - sowcarpetWholesale22k; // 225
+  const wholesaleToRetailPct = Number(((wholesaleToRetailSpread / sowcarpetWholesale22k) * 100).toFixed(2));
+
+  return {
+    reference_rate_22k: rate,
+    sowcarpet_wholesale_22k: sowcarpetWholesale22k,
+    sowcarpet_discount_amount: sowcarpetDiscount,
+    sowcarpet_discount_pct: sowcarpetDiscountPct,
+    retail_showroom_spread: showroomSpread,
+    retail_showroom_rate_22k: retailShowroomRate22k,
+    retail_showroom_markup_pct: retailShowroomMarkupPct,
+    coimbatore_rate_22k: coimbatoreRate22k,
+    coimbatore_basis: coimbatoreBasis,
+    coimbatore_basis_pct: coimbatoreBasisPct,
+    madurai_rate_22k: maduraiRate22k,
+    madurai_basis: maduraiBasis,
+    madurai_basis_pct: maduraiBasisPct,
+    wholesale_to_retail_spread: wholesaleToRetailSpread,
+    wholesale_to_retail_pct: wholesaleToRetailPct
+  };
+}
+
+function updateSubmarketSpreadDashboard(liveData = live) {
+  if (!liveData) return;
+  const rate22 = Number(liveData.rate_22k);
+  if (!Number.isFinite(rate22) || rate22 <= 0) return;
+
+  const backendSubmarkets = liveData.submarket_spreads || (window.__quant && window.__quant.submarket_spreads);
+  const spreads = computeSubmarketSpreads(rate22, {
+    sowcarpetDiscount: Number(liveData.sowcarpet_discount_amount) || -45,
+    showroomMarkup: Number(liveData.retail_showroom_spread) || 180
+  });
+  if (!spreads) return;
+
+  const sowRate = (backendSubmarkets && backendSubmarkets.sowcarpet && backendSubmarkets.sowcarpet.rate_22k) || spreads.sowcarpet_wholesale_22k;
+  const sowDiscPct = (backendSubmarkets && backendSubmarkets.sowcarpet && backendSubmarkets.sowcarpet.discount_pct) ?? spreads.sowcarpet_discount_pct;
+  const sowDiscAmt = (backendSubmarkets && backendSubmarkets.sowcarpet && backendSubmarkets.sowcarpet.discount_per_g) ?? spreads.sowcarpet_discount_amount;
+
+  const showRate = (backendSubmarkets && backendSubmarkets.t_nagar && backendSubmarkets.t_nagar.rate_22k) || spreads.retail_showroom_rate_22k;
+  const showMarkup = (backendSubmarkets && backendSubmarkets.t_nagar && backendSubmarkets.t_nagar.retail_showroom_spread) ?? spreads.retail_showroom_spread;
+  const showMarkupPct = (backendSubmarkets && backendSubmarkets.t_nagar && backendSubmarkets.t_nagar.markup_pct) ?? spreads.retail_showroom_markup_pct;
+
+  const cbeRate = (backendSubmarkets && backendSubmarkets.regional_parity && backendSubmarkets.regional_parity.coimbatore && backendSubmarkets.regional_parity.coimbatore.rate_22k) || spreads.coimbatore_rate_22k;
+  const cbeBasis = (backendSubmarkets && backendSubmarkets.regional_parity && backendSubmarkets.regional_parity.coimbatore && backendSubmarkets.regional_parity.coimbatore.basis_spread) ?? spreads.coimbatore_basis;
+
+  const madRate = (backendSubmarkets && backendSubmarkets.regional_parity && backendSubmarkets.regional_parity.madurai && backendSubmarkets.regional_parity.madurai.rate_22k) || spreads.madurai_rate_22k;
+  const madBasis = (backendSubmarkets && backendSubmarkets.regional_parity && backendSubmarkets.regional_parity.madurai && backendSubmarkets.regional_parity.madurai.basis_spread) ?? spreads.madurai_basis;
+
+  const arbSpread = (backendSubmarkets && backendSubmarkets.value_chain_arbitrage && backendSubmarkets.value_chain_arbitrage.gross_spread_amount) ?? spreads.wholesale_to_retail_spread;
+
+  if ($("sowcarpetWholesaleVal")) $("sowcarpetWholesaleVal").textContent = money(sowRate);
+  if ($("sowcarpetDiscountPct")) {
+    $("sowcarpetDiscountPct").textContent = `${sowDiscAmt >= 0 ? "+" : ""}${sowDiscAmt}/g (${sowDiscPct >= 0 ? "+" : ""}${sowDiscPct.toFixed(2)}%) Bullion Discount`;
+  }
+
+  if ($("retailShowroomVal")) $("retailShowroomVal").textContent = money(showRate);
+  if ($("retailShowroomSpreadVal")) {
+    $("retailShowroomSpreadVal").textContent = `+₹ ${showMarkup}/g (+${showMarkupPct.toFixed(2)}%) Retail Markup`;
+  }
+
+  if ($("coimbatoreRateVal")) $("coimbatoreRateVal").textContent = money(cbeRate);
+  if ($("maduraiRateVal")) $("maduraiRateVal").textContent = money(madRate);
+  if ($("arbitrageSpreadVal")) {
+    $("arbitrageSpreadVal").innerHTML = `Wholesale-to-Retail Spread: <strong>₹ ${arbSpread}/g</strong>`;
   }
 }
 
@@ -3112,6 +4022,9 @@ function renderLive(d) {
   if (typeof renderPortfolio === "function") renderPortfolio();
   if (typeof window.refreshPortfolio === "function") window.refreshPortfolio();
   if (typeof window.checkTargetPrice === "function") window.checkTargetPrice();
+  if (typeof window.calculateGoldSchemeVsSip === "function") window.calculateGoldSchemeVsSip();
+  if (typeof auditJewellerBill === "function") auditJewellerBill();
+  if (typeof calculateOldGoldMelt === "function") calculateOldGoldMelt();
 }
 
 function renderTodayTimeline() {
@@ -3175,6 +4088,7 @@ function renderTodayTimeline() {
 
   if ($("amCard")) $("amCard").classList.toggle("is-active", isAmActive);
   if ($("pmCard")) $("pmCard").classList.toggle("is-active", isPmActive);
+  if (typeof renderFixHeatmap === "function") renderFixHeatmap();
 }
 
 function getFilteredHistory(range) {
@@ -3746,7 +4660,12 @@ document.querySelectorAll("#weightChips .chip").forEach(c => c.onclick = () => {
 });
 
 document.querySelectorAll("#makingChips .chip").forEach(c => c.onclick = () => {
-  haptic(10);
+  if (c.textContent.includes("Coin") && typeof playGoldCoinChime === "function") {
+    playGoldCoinChime(1.0);
+    haptic(15);
+  } else {
+    haptic(10);
+  }
   document.querySelectorAll("#makingChips .chip").forEach(x => x.classList.remove("active"));
   c.classList.add("active");
   if ($("making")) $("making").value = c.dataset.val;
@@ -3903,6 +4822,7 @@ function renderHealth(h) {
 
 
 function renderNextFix(w) {
+  if (typeof renderFixHeatmap === "function") renderFixHeatmap(w);
   const line = $("nextFixLine");
   if (!line || !w || !w.windows) return;
 
@@ -3961,6 +4881,285 @@ function renderNextFix(w) {
   const label = upcomingName === "AM" ? "Morning" : "Evening";
   if ($("nextFixText")) $("nextFixText").textContent = `${label} fix expected around ${upcoming.predicted_fix_time} IST`;
 }
+
+// ============================================================
+// AGENT 4: INTRADAY & DAY-OF-WEEK FIX TIMING HEATMAP VISUALIZER
+// ============================================================
+const FIX_PROB_MATRIX = {
+  Mon: [88, 76, 18, 5, 4, 3, 6, 32, 68, 74, 86, 22],
+  Tue: [92, 74, 15, 8, 4, 3, 5, 36, 70, 72, 88, 20],
+  Wed: [90, 72, 16, 6, 4, 3, 6, 34, 72, 75, 85, 18],
+  Thu: [91, 75, 14, 6, 5, 4, 8, 38, 76, 78, 89, 24],
+  Fri: [95, 78, 20, 10, 6, 5, 12, 45, 84, 88, 94, 30],
+  Sat: [86, 92, 42, 16, 6, 4, 3, 10, 14, 18, 22, 6],
+  Sun: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+};
+
+const DOW_KEYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const DOW_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const HOURS = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+
+let cachedWindowsData = null;
+
+function getIstClock() {
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Kolkata',
+    weekday: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23'
+  }).formatToParts(new Date());
+
+  const dow = parts.find(p => p.type === 'weekday')?.value || 'Mon';
+  const hour = Number(parts.find(p => p.type === 'hour')?.value ?? 10);
+  const minute = Number(parts.find(p => p.type === 'minute')?.value ?? 0);
+  return { dow, hour, minute };
+}
+
+function getClusterType(hour, dow) {
+  if (dow === 'Sun') return { type: 'closed', label: 'Market Closed', desc: 'MJDMA Closed · Saturday Benchmark Carries Over' };
+  if (hour >= 9 && hour <= 10) {
+    return { type: 'am', label: 'AM Morning Fix Peak Window', desc: 'Peak arrival 09:30–10:30 IST · MJDMA official morning rate release' };
+  }
+  if (hour >= 16 && hour <= 19) {
+    return { type: 'pm', label: 'PM Evening Fix Peak Window', desc: 'Peak arrival 16:30–19:30 IST · MCX bullion alignment & global parity' };
+  }
+  if (hour >= 11 && hour <= 15) {
+    return { type: 'midday', label: 'Inter-Session Consolidation', desc: 'Low probability · Benchmark holds steady between AM & PM sessions' };
+  }
+  return { type: 'off', label: 'Post-Market / Standby', desc: 'Trading closed · Awaiting next scheduled benchmark session' };
+}
+
+function renderFixHeatmap(w) {
+  if (w && w.windows) cachedWindowsData = w;
+  const container = $("heatmapSvgWrap");
+  if (!container) return;
+
+  const clock = getIstClock();
+  const currentHour = clock.hour;
+  const currentMinute = clock.minute;
+  const isSunday = (clock.dow === 'Sun');
+
+  // Update Status Badge in Section Head
+  const badge = $("timingStatusBadge");
+  const badgeText = $("timingStatusBadgeText");
+  if (badge && badgeText) {
+    if (isSunday) {
+      badge.className = "hm-status-badge closed";
+      badgeText.textContent = "WEEKEND HOLD · SUNDAY CLOSED";
+    } else if (currentHour >= 9 && (currentHour < 11 || (currentHour === 11 && currentMinute <= 15))) {
+      badge.className = "hm-status-badge live";
+      badgeText.textContent = "● LIVE: AM FIX WINDOW (09:30–10:30)";
+    } else if (currentHour >= 16 && currentHour <= 19) {
+      badge.className = "hm-status-badge live";
+      badgeText.textContent = "● LIVE: PM FIX WINDOW (16:30–19:30)";
+    } else if (currentHour >= 11 && currentHour < 16) {
+      badge.className = "hm-status-badge standby";
+      badgeText.textContent = "○ STANDBY · PM WINDOW AT 16:30";
+    } else {
+      badge.className = "hm-status-badge standby";
+      badgeText.textContent = "○ STANDBY · NEXT FIX TOMORROW 09:30";
+    }
+  }
+
+  // Build SVG Grid (viewBox: 540 x 196)
+  const cellWidth = 37;
+  const cellHeight = 20;
+  const gapX = 4;
+  const gapY = 4;
+  const startX = 40;
+  const startY = 22;
+
+  let svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 196" class="hm-svg" role="img" aria-label="Fix Timing Probability Heatmap">
+      <defs>
+        <linearGradient id="hmPeakGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#f4dca0"/>
+          <stop offset="100%" stop-color="#d4ab63"/>
+        </linearGradient>
+        <pattern id="sunHatch" width="6" height="6" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
+          <line x1="0" y1="0" x2="0" y2="6" stroke="rgba(168, 157, 136, 0.25)" stroke-width="1.5" />
+        </pattern>
+        <filter id="hmGlow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="3" result="blur" />
+          <feComposite in="SourceGraphic" in2="blur" operator="over" />
+        </filter>
+      </defs>
+  `;
+
+  // X-axis Hour Headers (09:00 to 20:00)
+  HOURS.forEach((h, c) => {
+    const x = startX + c * (cellWidth + gapX) + (cellWidth / 2);
+    const label = h <= 11 ? `${h}A` : (h === 12 ? `12P` : `${h - 12}P`);
+    const isCurrentHourCol = (h === currentHour && !isSunday);
+    const fillStyle = isCurrentHourCol ? 'fill: var(--gold); font-weight: 800;' : '';
+    svg += `<text x="${x}" y="14" class="hm-axis-text" style="${fillStyle}">${label}</text>`;
+  });
+
+  // Day Rows and Cells
+  DOW_KEYS.forEach((d, r) => {
+    const y = startY + r * (cellHeight + gapY);
+    const isCurrentDay = (d === clock.dow);
+    const isSunRow = (d === 'Sun');
+    const dayClass = isCurrentDay ? 'hm-day-text is-today' : (isSunRow ? 'hm-day-text is-sunday' : 'hm-day-text');
+
+    svg += `<text x="4" y="${y + 14}" class="${dayClass}">${d}</text>`;
+
+    HOURS.forEach((h, c) => {
+      const x = startX + c * (cellWidth + gapX);
+      const prob = FIX_PROB_MATRIX[d][c];
+      const isCurrentCell = (isCurrentDay && h === currentHour);
+
+      let tier = 0;
+      if (!isSunRow) {
+        if (prob >= 80) tier = 4;
+        else if (prob >= 46) tier = 3;
+        else if (prob >= 16) tier = 2;
+        else if (prob > 0) tier = 1;
+      }
+
+      const isPeak = (tier === 4);
+      const fillAttr = isSunRow ? 'fill="url(#sunHatch)"' : '';
+      const cellClass = `hm-cell hm-cell-tier${tier} ${isCurrentCell ? 'is-active-cell' : ''}`;
+
+      svg += `
+        <g class="hm-cell-group" data-day="${d}" data-hour="${h}" data-prob="${prob}" data-tier="${tier}">
+          <rect x="${x}" y="${y}" width="${cellWidth}" height="${cellHeight}" rx="3.5" class="${cellClass}" ${fillAttr}/>
+      `;
+
+      // Percentage label on peak probability clusters
+      if (isPeak && cellWidth >= 30) {
+        svg += `<text x="${x + cellWidth / 2}" y="${y + 13}" font-family="var(--font-sans)" font-size="8.5" font-weight="700" fill="var(--ink)" text-anchor="middle" pointer-events="none" opacity="0.85">${prob}%</text>`;
+      }
+
+      // Active Scanline & Radar Pulse indicator for Current IST Time
+      if (isCurrentCell) {
+        const needleX = x + Math.max(2, Math.min(cellWidth - 2, (currentMinute / 60) * cellWidth));
+        svg += `
+          <rect x="${x - 1}" y="${y - 1}" width="${cellWidth + 2}" height="${cellHeight + 2}" rx="4.5" class="hm-active-outline"/>
+          <line x1="${needleX}" y1="${y}" x2="${needleX}" y2="${y + cellHeight}" class="hm-minute-needle"/>
+          <circle cx="${needleX}" cy="${y + cellHeight / 2}" r="3" class="hm-radar-core"/>
+          <circle cx="${needleX}" cy="${y + cellHeight / 2}" r="6" class="hm-radar-ring"/>
+        `;
+      }
+
+      svg += `</g>`;
+    });
+  });
+
+  svg += `</svg>`;
+  container.innerHTML = svg;
+
+  // Interactive Hover & Click Listeners
+  container.querySelectorAll('.hm-cell-group').forEach(el => {
+    const d = el.dataset.day;
+    const h = Number(el.dataset.hour);
+    const prob = Number(el.dataset.prob);
+
+    const activate = () => {
+      container.querySelectorAll('.hm-cell').forEach(c => c.classList.remove('is-selected'));
+      el.querySelector('.hm-cell')?.classList.add('is-selected');
+      updateHeatmapInspector(d, h, prob);
+    };
+
+    el.addEventListener('mouseenter', activate);
+    el.addEventListener('click', () => {
+      if (typeof haptic === 'function') haptic(8);
+      activate();
+    });
+  });
+
+  // Default inspector state: current active hour or default session
+  const defaultProb = FIX_PROB_MATRIX[clock.dow]?.[HOURS.indexOf(currentHour)] ?? 0;
+  updateHeatmapInspector(clock.dow, currentHour, defaultProb);
+  bindClusterPills();
+}
+
+function updateHeatmapInspector(dow, hour, prob) {
+  const titleEl = $("hmInspectTitle");
+  const descEl = $("hmInspectDesc");
+  const probEl = $("hmInspectProb");
+  const iconEl = $("hmInspectIcon");
+  if (!titleEl || !descEl || !probEl) return;
+
+  const dowFull = DOW_NAMES[DOW_KEYS.indexOf(dow)] || dow;
+  const timeSpan = `${String(hour).padStart(2, '0')}:00 – ${String(hour + 1).padStart(2, '0')}:00 IST`;
+  const cluster = getClusterType(hour, dow);
+
+  if (dow === 'Sun') {
+    titleEl.textContent = `Sunday · Market Closed`;
+    descEl.textContent = `MJDMA Benchmark Closed · Saturday's official rate holds active through Monday 09:30 IST`;
+    probEl.textContent = `0%`;
+    if (iconEl) iconEl.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>`;
+    return;
+  }
+
+  titleEl.textContent = `${dowFull} · ${timeSpan}`;
+  
+  // If KDE arrival data exists for this session, mention it!
+  let kdeNote = "";
+  if (cachedWindowsData && cachedWindowsData.windows) {
+    if (hour >= 9 && hour <= 10 && cachedWindowsData.windows.AM?.predicted_fix_time) {
+      kdeNote = ` · KDE Peak: ${cachedWindowsData.windows.AM.predicted_fix_time} IST`;
+    } else if (hour >= 16 && hour <= 19 && cachedWindowsData.windows.PM?.predicted_fix_time) {
+      kdeNote = ` · KDE Peak: ${cachedWindowsData.windows.PM.predicted_fix_time} IST`;
+    }
+  }
+
+  descEl.textContent = `${cluster.label} · ${cluster.desc}${kdeNote}`;
+  probEl.textContent = `${prob}%`;
+
+  if (iconEl) {
+    if (prob >= 75) {
+      iconEl.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`;
+    } else {
+      iconEl.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
+    }
+  }
+}
+
+function bindClusterPills() {
+  document.querySelectorAll('.hm-window-pill').forEach(pill => {
+    pill.onclick = () => {
+      if (typeof haptic === 'function') haptic(10);
+      document.querySelectorAll('.hm-window-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+
+      const cluster = pill.dataset.cluster;
+      const svg = $("heatmapSvgWrap");
+      if (!svg) return;
+
+      svg.querySelectorAll('.hm-cell').forEach(c => {
+        c.classList.remove('is-selected');
+        c.style.opacity = '0.35';
+      });
+
+      if (cluster === 'am') {
+        svg.querySelectorAll('.hm-cell-group[data-hour="9"] .hm-cell, .hm-cell-group[data-hour="10"] .hm-cell').forEach(c => {
+          c.style.opacity = '1';
+        });
+        updateHeatmapInspector('Mon', 9, 92);
+      } else if (cluster === 'pm') {
+        svg.querySelectorAll('.hm-cell-group[data-hour="17"] .hm-cell, .hm-cell-group[data-hour="18"] .hm-cell, .hm-cell-group[data-hour="19"] .hm-cell').forEach(c => {
+          c.style.opacity = '1';
+        });
+        updateHeatmapInspector('Mon', 19, 88);
+      } else if (cluster === 'weekend') {
+        svg.querySelectorAll('.hm-cell-group[data-day="Sun"] .hm-cell').forEach(c => {
+          c.style.opacity = '1';
+        });
+        updateHeatmapInspector('Sun', 12, 0);
+      }
+    };
+  });
+}
+
+// Initial bootstrap rendering and minute timer
+setTimeout(() => {
+  renderFixHeatmap();
+  setInterval(() => renderFixHeatmap(), 60000);
+}, 50);
+
 
 async function manualFetch() {
   if (fetchBusy) return;
@@ -4714,7 +5913,7 @@ let chartViewMode = "spline";
 })();
 
 
-// --- UPGRADE 7: Price Target Watcher ---
+// --- UPGRADE 7: Local Target Price Alarm Watchdog & Browser Notification Bridge ---
 (function setupTargetWatcher() {
   const toggleBtn = document.getElementById("targetToggleBtn");
   const card = document.getElementById("targetCard");
@@ -4724,50 +5923,457 @@ let chartViewMode = "spline";
   const clearBtn = document.getElementById("clearTargetBtn");
   const badge = document.getElementById("targetBadge");
   const banner = document.getElementById("targetAlertBanner");
+  const bannerHeading = document.getElementById("targetAlertHeading");
   const bannerText = document.getElementById("targetAlertText");
   const dismissBtn = document.getElementById("targetAlertDismiss");
+  const notifBtn = document.getElementById("targetNotifPermBtn");
+  const notifIcon = document.getElementById("targetNotifIcon");
+  const notifStatusText = document.getElementById("targetNotifStatusText");
+  const dirDipBtn = document.getElementById("dirDipBtn");
+  const dirSpikeBtn = document.getElementById("dirSpikeBtn");
+  const unit1gBtn = document.getElementById("unit1gBtn");
+  const unit8gBtn = document.getElementById("unit8gBtn");
+  const chipCurrent = document.getElementById("chipCurrentRate");
+  const chipMinus100 = document.getElementById("chipMinus100");
+  const chipPlus100 = document.getElementById("chipPlus100");
+  const alertsContainer = document.getElementById("targetAlertsContainer");
+  const alertsCountEl = document.getElementById("targetAlertsCount");
+  const alertsList = document.getElementById("targetAlertsList");
 
-  let activeTarget = Number(localStorage.getItem("gold_price_target")) || null;
+  const STORAGE_KEY = "gold_target_alerts";
+  const LEGACY_KEY = "gold_price_target";
 
-  function updateTargetUI() {
-    if (toggleBtn) toggleBtn.classList.toggle("has-target", !!activeTarget);
-    if (!activeTarget) {
-      if (badge) badge.textContent = "No active target price";
-      if (banner) banner.hidden = true;
-      return;
-    }
-    if (!live || !Number.isFinite(Number(live.rate_22k))) {
-      if (badge) badge.textContent = `Target: ₹ ${activeTarget.toLocaleString("en-IN")} · waiting for live rate…`;
-      if (banner) banner.hidden = true;
-      return;
-    }
-    const rate8 = Number(live.rate_8g) || Number(live.rate_22k) * 8;
-    const diff = rate8 - activeTarget;
-    if (badge) {
-      badge.textContent = diff <= 0
-        ? `Target ₹ ${activeTarget.toLocaleString("en-IN")} reached! (₹ ${rate8.toLocaleString("en-IN")})`
-        : `Target: ₹ ${activeTarget.toLocaleString("en-IN")} · ₹ ${diff.toLocaleString("en-IN")} away`;
-    }
-    if (banner) {
-      if (diff <= 0) {
-        if (bannerText) bannerText.textContent = `1 Sovereign is currently ₹ ${rate8.toLocaleString("en-IN")} (Target was ₹ ${activeTarget.toLocaleString("en-IN")})`;
-        banner.hidden = false;
-        if (typeof haptic === "function") haptic(25, 200);
-      } else {
-        banner.hidden = true;
+  let selectedDir = "dip";
+  let selectedUnit = "1g";
+  const triggeredSessionSet = new Set();
+
+  function loadAlerts() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr)) return arr;
       }
+      // Migrate legacy single target
+      const legacy = Number(localStorage.getItem(LEGACY_KEY));
+      if (legacy && legacy > 0) {
+        const migrated = [{
+          target_rate: legacy,
+          direction: "dip",
+          created_at: new Date().toISOString(),
+          active: true,
+          unit: legacy >= 30000 ? "8g" : "1g"
+        }];
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+        return migrated;
+      }
+    } catch (_) {}
+    return [];
+  }
+
+  function saveAlerts(arr) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+      const firstActive = arr.find(a => a.active);
+      if (firstActive) {
+        localStorage.setItem(LEGACY_KEY, String(firstActive.target_rate));
+      } else {
+        localStorage.removeItem(LEGACY_KEY);
+      }
+    } catch (_) {}
+  }
+
+  // 1. Haptic pulse (navigator.vibrate([100, 50, 100]))
+  function triggerHaptic() {
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+      try { navigator.vibrate([100, 50, 100]); } catch (_) {}
     }
   }
 
+  // 2. Synthesizer chime (calling Agent 3 chime)
+  function playSynthesizerChime(direction = "dip") {
+    // Primary: Agent 3 Web Audio Gold Coin Acoustic Chime
+    if (typeof window.playGoldCoinChime === "function") {
+      try {
+        const p1 = direction === "spike" ? 1.15 : 0.95;
+        const p2 = direction === "spike" ? 1.35 : 1.10;
+        window.playGoldCoinChime(p1);
+        setTimeout(() => {
+          try { window.playGoldCoinChime(p2); } catch (_) {}
+        }, 140);
+        return;
+      } catch (_) {}
+    }
+    // Secondary: Global hook fallback
+    if (typeof window.playChime === "function") {
+      try { window.playChime(direction); return; } catch (_) {}
+    }
+    if (typeof window.agent3Chime === "function" && window.agent3Chime !== playSynthesizerChime) {
+      try { window.agent3Chime(direction); return; } catch (_) {}
+    }
+    // Bulletproof Web Audio API dual-harmonic synth
+    try {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      const ctx = window.audioCtx || new AudioContextClass();
+      if (ctx.state === "suspended") ctx.resume().catch(() => {});
+      const now = ctx.currentTime;
+      const freqs = direction === "spike" ? [659.25, 830.61, 987.77, 1318.51] : [587.33, 739.99, 880.00, 1174.66];
+      freqs.forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, now + idx * 0.07);
+        gain.gain.setValueAtTime(0.0001, now + idx * 0.07);
+        gain.gain.linearRampToValueAtTime(0.09, now + idx * 0.07 + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.07 + 0.38);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + idx * 0.07);
+        osc.stop(now + idx * 0.07 + 0.4);
+      });
+    } catch (_) {}
+  }
+
+  // 4. Web Notification API (if permission granted)
+  function sendBrowserNotification(title, body, tag) {
+    if (typeof window === "undefined" || !("Notification" in window) || Notification.permission !== "granted") {
+      return;
+    }
+    const options = {
+      body,
+      icon: "icon-192.png",
+      badge: "icon-192.png",
+      tag: tag || "gold-target-alarm",
+      renotify: true
+    };
+    try {
+      if (navigator.serviceWorker && navigator.serviceWorker.ready) {
+        navigator.serviceWorker.ready.then(reg => {
+          reg.showNotification(title, options).catch(() => {
+            try { new Notification(title, options); } catch (_) {}
+          });
+        }).catch(() => {
+          try { new Notification(title, options); } catch (_) {}
+        });
+      } else {
+        new Notification(title, options);
+      }
+    } catch (_) {}
+  }
+
+  function updateNotificationButtonUI() {
+    if (!notifBtn) return;
+    if (!("Notification" in window)) {
+      notifBtn.hidden = true;
+      return;
+    }
+    if (Notification.permission === "granted") {
+      notifBtn.classList.add("granted");
+      if (notifIcon) notifIcon.textContent = "✓";
+      if (notifStatusText) notifStatusText.textContent = "Push Active";
+      notifBtn.title = "Browser notifications active";
+    } else if (Notification.permission === "denied") {
+      notifBtn.classList.remove("granted");
+      if (notifIcon) notifIcon.textContent = "🔕";
+      if (notifStatusText) notifStatusText.textContent = "Push Blocked";
+      notifBtn.title = "Push notifications blocked in browser settings";
+    } else {
+      notifBtn.classList.remove("granted");
+      if (notifIcon) notifIcon.textContent = "🔔";
+      if (notifStatusText) notifStatusText.textContent = "Enable Push";
+      notifBtn.title = "Enable browser notifications for price alarms";
+    }
+  }
+
+  if (notifBtn) {
+    notifBtn.addEventListener("click", async () => {
+      if (!("Notification" in window)) {
+        if (typeof toast === "function") toast("Browser notifications not supported");
+        return;
+      }
+      if (Notification.permission === "granted") {
+        if (typeof toast === "function") toast("Browser notifications already enabled");
+        return;
+      }
+      try {
+        const perm = await Notification.requestPermission();
+        updateNotificationButtonUI();
+        if (perm === "granted") {
+          if (typeof toast === "function") toast("🔔 Target price notifications enabled!");
+          sendBrowserNotification("Chennai 22K Gold Watchdog Active", "You will receive instant alerts when your target price triggers.", "watchdog-init");
+        } else {
+          if (typeof toast === "function") toast("Notification permission denied");
+        }
+      } catch (_) {}
+    });
+  }
+
+  // Direction & Unit selection
+  if (dirDipBtn && dirSpikeBtn) {
+    dirDipBtn.addEventListener("click", () => {
+      selectedDir = "dip";
+      dirDipBtn.classList.add("active");
+      dirSpikeBtn.classList.remove("active");
+      if (typeof haptic === "function") haptic(8);
+    });
+    dirSpikeBtn.addEventListener("click", () => {
+      selectedDir = "spike";
+      dirSpikeBtn.classList.add("active");
+      dirDipBtn.classList.remove("active");
+      if (typeof haptic === "function") haptic(8);
+    });
+  }
+
+  if (unit1gBtn && unit8gBtn) {
+    unit1gBtn.addEventListener("click", () => {
+      selectedUnit = "1g";
+      unit1gBtn.classList.add("active");
+      unit8gBtn.classList.remove("active");
+      if (input && live) {
+        input.placeholder = `e.g. ${live.rate_22k || 14200}`;
+      }
+      if (typeof haptic === "function") haptic(8);
+    });
+    unit8gBtn.addEventListener("click", () => {
+      selectedUnit = "8g";
+      unit8gBtn.classList.add("active");
+      unit1gBtn.classList.remove("active");
+      if (input && live) {
+        const r8 = live.rate_8g || (live.rate_22k ? live.rate_22k * 8 : 113600);
+        input.placeholder = `e.g. ${r8}`;
+      }
+      if (typeof haptic === "function") haptic(8);
+    });
+  }
+
+  // Quick chips
+  function updateQuickChips() {
+    if (!live || !Number.isFinite(Number(live.rate_22k))) return;
+    const r1 = Number(live.rate_22k);
+    const r8 = Number(live.rate_8g) || r1 * 8;
+    const base = selectedUnit === "8g" ? r8 : r1;
+    const unitText = selectedUnit === "8g" ? "/8g" : "/g";
+    if (chipCurrent) chipCurrent.textContent = `₹${base.toLocaleString("en-IN")}${unitText}`;
+    if (chipMinus100) chipMinus100.textContent = selectedUnit === "8g" ? "-₹800 Dip" : "-₹100 Dip";
+    if (chipPlus100) chipPlus100.textContent = selectedUnit === "8g" ? "+₹800 Spike" : "+₹100 Spike";
+  }
+
+  if (chipCurrent && input) {
+    chipCurrent.addEventListener("click", () => {
+      if (!live) return;
+      const base = selectedUnit === "8g" ? (Number(live.rate_8g) || live.rate_22k * 8) : Number(live.rate_22k);
+      input.value = base;
+      if (typeof haptic === "function") haptic(8);
+    });
+  }
+  if (chipMinus100 && input) {
+    chipMinus100.addEventListener("click", () => {
+      if (!live) return;
+      const is8g = selectedUnit === "8g";
+      const base = is8g ? (Number(live.rate_8g) || live.rate_22k * 8) : Number(live.rate_22k);
+      const delta = is8g ? 800 : 100;
+      input.value = Math.max(0, base - delta);
+      selectedDir = "dip";
+      if (dirDipBtn) { dirDipBtn.classList.add("active"); dirSpikeBtn?.classList.remove("active"); }
+      if (typeof haptic === "function") haptic(8);
+    });
+  }
+  if (chipPlus100 && input) {
+    chipPlus100.addEventListener("click", () => {
+      if (!live) return;
+      const is8g = selectedUnit === "8g";
+      const base = is8g ? (Number(live.rate_8g) || live.rate_22k * 8) : Number(live.rate_22k);
+      const delta = is8g ? 800 : 100;
+      input.value = base + delta;
+      selectedDir = "spike";
+      if (dirSpikeBtn) { dirSpikeBtn.classList.add("active"); dirDipBtn?.classList.remove("active"); }
+      if (typeof haptic === "function") haptic(8);
+    });
+  }
+
+  // Watchdog Evaluator Engine
+  function checkWatchdog(liveData = live) {
+    updateNotificationButtonUI();
+    updateQuickChips();
+    const alerts = loadAlerts();
+    const activeAlerts = alerts.filter(a => a.active);
+
+    if (toggleBtn) {
+      toggleBtn.classList.toggle("has-target", activeAlerts.length > 0);
+    }
+    if (alertsContainer) {
+      alertsContainer.hidden = alerts.length === 0;
+    }
+    if (alertsCountEl) {
+      alertsCountEl.textContent = activeAlerts.length;
+    }
+
+    if (!liveData || !Number.isFinite(Number(liveData.rate_22k))) {
+      if (badge) badge.textContent = activeAlerts.length ? `${activeAlerts.length} alarm(s) set · waiting for live rate…` : "No price alarms active";
+      if (banner && !banner.dataset.stay) banner.hidden = true;
+      renderAlertsList(alerts, null, null);
+      return;
+    }
+
+    const r1 = Number(liveData.rate_22k);
+    const r8 = Number.isFinite(Number(liveData.rate_8g)) ? Number(liveData.rate_8g) : r1 * 8;
+
+    let breachedAlert = null;
+    let breachedCurrent = 0;
+    let breachedUnit = "/g";
+
+    // Evaluate all active alarms
+    alerts.forEach((alert) => {
+      if (!alert.active) return;
+      const is8g = alert.unit === "8g" || (!alert.unit && alert.target_rate >= 30000);
+      const currentRate = is8g ? r8 : r1;
+      const unitLabel = is8g ? "/8g" : "/g";
+      const isDip = alert.direction === "dip";
+      const conditionMet = isDip ? (currentRate <= alert.target_rate) : (currentRate >= alert.target_rate);
+
+      if (conditionMet) {
+        breachedAlert = alert;
+        breachedCurrent = currentRate;
+        breachedUnit = unitLabel;
+
+        const sessionKey = `${alert.target_rate}_${alert.direction}_${currentRate}`;
+        if (!triggeredSessionSet.has(sessionKey)) {
+          triggeredSessionSet.add(sessionKey);
+          // 1. Haptic pulse (navigator.vibrate([100, 50, 100]))
+          triggerHaptic();
+          // 2. Synthesizer chime (calling Agent 3 chime)
+          playSynthesizerChime(alert.direction);
+          // 4. Web Notification API (if permission granted)
+          const isSpike = alert.direction === "spike";
+          const title = isSpike ? "📈 Chennai 22K Gold Spike Alert!" : "🎯 Chennai 22K Gold Dip Target Reached!";
+          const body = `Chennai 22K is currently ₹${currentRate.toLocaleString("en-IN")}${unitLabel}. Your ${alert.direction} target was ${isSpike ? "≥" : "≤"} ₹${alert.target_rate.toLocaleString("en-IN")}.`;
+          sendBrowserNotification(title, body, `gold-alert-${alert.target_rate}-${alert.direction}`);
+        }
+      }
+    });
+
+    // 3. Visual celebratory notification banner
+    if (breachedAlert && banner) {
+      const isSpike = breachedAlert.direction === "spike";
+      if (bannerHeading) {
+        bannerHeading.textContent = isSpike ? "🚀 Gold Spike Target Reached!" : "🎉 Gold Dip Target Reached!";
+      }
+      if (bannerText) {
+        bannerText.textContent = `Chennai 22K is ₹ ${breachedCurrent.toLocaleString("en-IN")}${breachedUnit} (Target was ${isSpike ? "≥" : "≤"} ₹ ${breachedAlert.target_rate.toLocaleString("en-IN")})`;
+      }
+      banner.hidden = false;
+      banner.classList.add("celebrating");
+    } else if (banner && !banner.dataset.stay) {
+      banner.classList.remove("celebrating");
+      banner.hidden = true;
+    }
+
+    // Update Summary Badge
+    if (badge) {
+      if (!activeAlerts.length) {
+        badge.textContent = "No price alarms active";
+      } else if (breachedAlert) {
+        badge.textContent = `🎉 Target ₹ ${breachedAlert.target_rate.toLocaleString("en-IN")} reached! (₹ ${breachedCurrent.toLocaleString("en-IN")})`;
+      } else {
+        const nearest = activeAlerts.map(a => {
+          const is8g = a.unit === "8g" || (!a.unit && a.target_rate >= 30000);
+          const cr = is8g ? r8 : r1;
+          const diff = a.direction === "dip" ? cr - a.target_rate : a.target_rate - cr;
+          return { ...a, diff, cr, unitLabel: is8g ? "/8g" : "/g" };
+        }).sort((a, b) => a.diff - b.diff)[0];
+
+        if (nearest) {
+          const sym = nearest.direction === "spike" ? "≥" : "≤";
+          badge.textContent = `Target: ${sym} ₹ ${nearest.target_rate.toLocaleString("en-IN")}${nearest.unitLabel} · ₹ ${Math.abs(nearest.diff).toLocaleString("en-IN")} away`;
+        }
+      }
+    }
+
+    renderAlertsList(alerts, r1, r8);
+  }
+
+  function renderAlertsList(alerts, r1, r8) {
+    if (!alertsList) return;
+    alertsList.innerHTML = "";
+    if (!alerts.length) return;
+
+    alerts.forEach((alert, index) => {
+      const is8g = alert.unit === "8g" || (!alert.unit && alert.target_rate >= 30000);
+      const currentRate = r1 ? (is8g ? r8 : r1) : null;
+      const unitLabel = is8g ? "/8g" : "/g";
+      const isDip = alert.direction === "dip";
+      const isBreached = currentRate && alert.active && (isDip ? currentRate <= alert.target_rate : currentRate >= alert.target_rate);
+
+      let distanceText = "";
+      if (currentRate) {
+        const diff = isDip ? currentRate - alert.target_rate : alert.target_rate - currentRate;
+        distanceText = isBreached ? "🎉 Reached!" : `${Math.abs(diff).toLocaleString("en-IN")} away`;
+      }
+
+      const item = document.createElement("div");
+      item.className = `target-alert-item ${isBreached ? "is-breached" : ""}`;
+      item.innerHTML = `
+        <div class="target-alert-left">
+          <span class="alert-dir-pill ${alert.direction}">${isDip ? "Dip ≤" : "Spike ≥"}</span>
+          <span class="alert-rate-val">₹ ${alert.target_rate.toLocaleString("en-IN")}${unitLabel}</span>
+          ${distanceText ? `<span class="alert-distance">(${distanceText})</span>` : ""}
+        </div>
+        <div class="target-alert-right">
+          <button type="button" class="alert-toggle-btn ${alert.active ? "on" : ""}" title="Toggle active status">
+            ${alert.active ? "Active" : "Paused"}
+          </button>
+          <button type="button" class="alert-del-btn" title="Delete alert">✕</button>
+        </div>
+      `;
+
+      // Toggle active status
+      item.querySelector(".alert-toggle-btn").addEventListener("click", () => {
+        alerts[index].active = !alerts[index].active;
+        saveAlerts(alerts);
+        if (typeof haptic === "function") haptic(10);
+        checkWatchdog();
+      });
+
+      // Delete alert
+      item.querySelector(".alert-del-btn").addEventListener("click", () => {
+        alerts.splice(index, 1);
+        saveAlerts(alerts);
+        if (typeof toast === "function") toast("Alert removed");
+        if (typeof haptic === "function") haptic(10);
+        checkWatchdog();
+      });
+
+      alertsList.appendChild(item);
+    });
+  }
+
+  // Toggle card visibility
   if (toggleBtn && card) {
     toggleBtn.addEventListener("click", () => {
       card.hidden = !card.hidden;
-      if (!card.hidden && input && activeTarget) input.value = activeTarget;
+      if (!card.hidden) {
+        updateQuickChips();
+        updateNotificationButtonUI();
+        if (input && !input.value && live) {
+          const base = selectedUnit === "8g" ? (live.rate_8g || live.rate_22k * 8) : live.rate_22k;
+          input.placeholder = `e.g. ${base}`;
+        }
+      }
     });
   }
-  if (closeBtn && card) closeBtn.addEventListener("click", () => { card.hidden = true; });
-  if (dismissBtn && banner) dismissBtn.addEventListener("click", () => { banner.hidden = true; });
 
+  if (closeBtn && card) closeBtn.addEventListener("click", () => { card.hidden = true; });
+
+  if (dismissBtn && banner) {
+    dismissBtn.addEventListener("click", () => {
+      banner.hidden = true;
+      banner.dataset.stay = "";
+      banner.classList.remove("celebrating");
+    });
+  }
+
+  // Set Target Alarm button
   if (setBtn && input) {
     setBtn.addEventListener("click", () => {
       const val = Number(input.value);
@@ -4775,27 +6381,77 @@ let chartViewMode = "spline";
         if (typeof toast === "function") toast("Enter a valid target price");
         return;
       }
-      activeTarget = val;
-      localStorage.setItem("gold_price_target", String(val));
-      updateTargetUI();
-      if (typeof toast === "function") toast(`Target set to ₹ ${val.toLocaleString("en-IN")}`);
-      if (card) card.hidden = true;
+
+      // Auto-adjust unit based on magnitude if needed
+      const unit = val >= 30000 ? "8g" : selectedUnit;
+      const alerts = loadAlerts();
+
+      // Check if duplicate alert exists
+      const existingIdx = alerts.findIndex(a => a.target_rate === val && a.direction === selectedDir);
+      if (existingIdx >= 0) {
+        alerts[existingIdx].active = true;
+        alerts[existingIdx].unit = unit;
+      } else {
+        alerts.push({
+          target_rate: val,
+          direction: selectedDir,
+          created_at: new Date().toISOString(),
+          active: true,
+          unit: unit
+        });
+      }
+
+      saveAlerts(alerts);
+      input.value = "";
+      if (typeof toast === "function") {
+        const dirLabel = selectedDir === "dip" ? "Dip (≤)" : "Spike (≥)";
+        toast(`Alarm set: ${dirLabel} ₹ ${val.toLocaleString("en-IN")}/${unit}`);
+      }
+      if (typeof haptic === "function") haptic(20);
+
+      // Prompt for Web Notification if not yet requested
+      if ("Notification" in window && Notification.permission === "default") {
+        Notification.requestPermission().then(updateNotificationButtonUI).catch(() => {});
+      }
+
+      checkWatchdog();
     });
   }
 
+  // Clear All button
   if (clearBtn) {
     clearBtn.addEventListener("click", () => {
-      activeTarget = null;
-      localStorage.removeItem("gold_price_target");
+      saveAlerts([]);
       if (input) input.value = "";
-      updateTargetUI();
-      if (typeof toast === "function") toast("Target alert cleared");
-      if (card) card.hidden = true;
+      if (typeof toast === "function") toast("All target alarms cleared");
+      if (typeof haptic === "function") haptic(15);
+      checkWatchdog();
     });
   }
 
-  window.checkTargetPrice = updateTargetUI;
-  setTimeout(updateTargetUI, 400);
+  // Service Worker background sync listener
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.addEventListener("message", (event) => {
+      if (event.data && event.data.type === "LIVE_RATE_HYDRATED") {
+        checkWatchdog(event.data.live);
+      }
+    });
+  }
+
+  // Tab visibility watchdog trigger
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      checkWatchdog();
+    }
+  });
+
+  // Global hooks
+  window.checkTargetPrice = checkWatchdog;
+  window.checkTargetAlerts = checkWatchdog;
+  window.playAlertChime = playSynthesizerChime;
+  window.agent3Chime = window.agent3Chime || playSynthesizerChime;
+
+  setTimeout(checkWatchdog, 400);
 })();
 
 // --- UPGRADE 5: Share Receipt (mirrors the hero snapshot share flow) ---
@@ -6380,6 +8036,106 @@ html{scroll-behavior:smooth;scroll-padding-top:84px}
     }
   });
   calculateOldGoldMelt();
+
+  // ============================================================
+  // AGENT 10: 11-MONTH JEWELLER SCHEME (CHIT) VS DIRECT GOLD SIP
+  // ============================================================
+  function calculateGoldSchemeVsSip() {
+    const rate = (live && Number(live.rate_22k)) ? Number(live.rate_22k) : 14270;
+    const monthlyAmt = parseFloat($("schemeMonthlyAmount") ? $("schemeMonthlyAmount").value : 10000) || 10000;
+    const profile = $("schemeJewellerProfile") ? $("schemeJewellerProfile").value : "grt";
+    const vaPct = parseFloat($("schemeVaPct") ? $("schemeVaPct").value : 14) || 14;
+    const growthPct = parseFloat($("schemeGrowthPct") ? $("schemeGrowthPct").value : 10) || 10;
+
+    const monthlyFactor = Math.pow(1.0 + growthPct / 100.0, 1.0 / 12.0);
+    const monthlyPrices = [];
+    for (let i = 0; i < 11; i++) {
+      monthlyPrices.push(rate * Math.pow(monthlyFactor, i));
+    }
+    const maturityPrice = rate * Math.pow(monthlyFactor, 12);
+    const totalPaid = monthlyAmt * 11;
+
+    // Weight Scheme accumulation (GRT / Lalitha)
+    let weightGrams = 0;
+    for (let i = 0; i < 11; i++) {
+      weightGrams += monthlyAmt / monthlyPrices[i];
+    }
+    const weightVaSavings = Math.round(weightGrams * maturityPrice * (vaPct / 100));
+    const weightJewelleryVal = Math.round(weightGrams * maturityPrice * (1 + vaPct / 100));
+
+    // Cash Scheme accumulation (Tanishq / Kalyan)
+    const cashVoucherVal = monthlyAmt * 12; // 1 month bonus paid by jeweller
+    const cashGrams = cashVoucherVal / (maturityPrice * (1 + vaPct / 100));
+    const cashBonus = monthlyAmt;
+
+    // Direct Physical Coin SIP (2% minting + 3% GST on purchase)
+    let coinGrams = 0;
+    for (let i = 0; i < 11; i++) {
+      coinGrams += monthlyAmt / (monthlyPrices[i] * 1.02 * 1.03);
+    }
+    const coinLiquidVal = Math.round(coinGrams * maturityPrice * 0.99); // 1% melt spread
+
+    // Analytical Harmonic Mean Breakeven Price
+    let invSum = 0;
+    for (let i = 0; i < 11; i++) {
+      invSum += 1.0 / monthlyPrices[i];
+    }
+    const harmonicMean = 11.0 / invSum;
+    const breakevenPrice = Math.round((12.0 / 11.0) * harmonicMean);
+    const breakevenPct = ((breakevenPrice - rate) / rate) * 100;
+
+    // Fast XIRR Approximation for 11-month flows
+    const weightTotalReturn = (weightJewelleryVal - totalPaid) / totalPaid;
+    const weightXIRR = ((Math.pow(1 + Math.max(0, weightTotalReturn), 12 / 6) - 1) * 100 * 0.52).toFixed(1);
+    const cashXIRR = 15.8;
+    const coinTotalReturn = (coinLiquidVal - totalPaid) / totalPaid;
+    const coinXIRR = Math.max(0, (Math.pow(1 + Math.max(0, coinTotalReturn), 12 / 6) - 1) * 100 * 0.5).toFixed(1);
+
+    const isWeightModel = (profile === "grt" || profile === "lalitha");
+    const activeSchemeGrams = isWeightModel ? weightGrams : cashGrams;
+    const activeSchemeXirr = isWeightModel ? weightXIRR : cashXIRR;
+
+    if ($("schemeGoldGrams")) $("schemeGoldGrams").textContent = activeSchemeGrams.toFixed(3) + "g";
+    if ($("schemeXirrVal")) $("schemeXirrVal").textContent = activeSchemeXirr + "% p.a.";
+    if ($("schemeSipGrams")) $("schemeSipGrams").textContent = coinGrams.toFixed(3) + "g";
+    if ($("schemeSipXirr")) $("schemeSipXirr").textContent = coinXIRR + "% p.a.";
+    if ($("schemeTotalPaid")) $("schemeTotalPaid").textContent = money(totalPaid) + " (11 mo)";
+    if ($("schemeVaSavings")) $("schemeVaSavings").textContent = isWeightModel ? money(weightVaSavings) : money(cashBonus) + " (Bonus)";
+    if ($("schemeBreakevenRate")) $("schemeBreakevenRate").textContent = `${money(breakevenPrice)}/g (${breakevenPct >= 0 ? "+" : ""}${breakevenPct.toFixed(1)}%)`;
+
+    const deltaGrams = activeSchemeGrams - coinGrams;
+    const deltaPct = (deltaGrams / coinGrams) * 100;
+    if ($("schemeAdvantageGrams")) {
+      $("schemeAdvantageGrams").textContent = `${deltaGrams >= 0 ? "+" : ""}${deltaGrams.toFixed(3)}g (${deltaPct >= 0 ? "+" : ""}${deltaPct.toFixed(1)}%)`;
+      $("schemeAdvantageGrams").style.color = deltaGrams >= 0 ? "var(--good)" : "var(--bad)";
+    }
+
+    const verdictBadge = $("schemeVerdictBadge");
+    const verdictTip = $("schemeVerdictTip");
+    if (verdictBadge && verdictTip) {
+      if (isWeightModel) {
+        verdictBadge.className = "meter-badge fair";
+        verdictBadge.textContent = "Weight Scheme Wins";
+        verdictTip.innerHTML = `⚖️ <strong>Quantitative Verdict:</strong> For jewellery buyers, the <strong>Weight-based Model (GRT/Lalitha)</strong> outperforms because it locks in gold weight every month (DCA) and waives making charges up to <strong>${vaPct}%</strong> at maturity. Breakeven against cash chits requires gold to reach <strong>${money(breakevenPrice)}/g</strong>.`;
+      } else {
+        verdictBadge.className = "meter-badge moderate";
+        verdictBadge.textContent = "Cash Bonus Model";
+        verdictTip.innerHTML = `⚠️ <strong>Cash Chit Analysis (Tanishq/Kalyan):</strong> You receive 1 month bonus (equivalent to ~15.8% XIRR), but gold price is locked only at month 12. If gold rallies more than <strong>+${breakevenPct.toFixed(1)}%</strong>, a weight-based chit would have accumulated more grams!`;
+      }
+    }
+  }
+
+  ["schemeMonthlyAmount", "schemeJewellerProfile", "schemeVaPct", "schemeGrowthPct"].forEach(id => {
+    const el = $(id);
+    if (el) {
+      el.addEventListener("input", calculateGoldSchemeVsSip);
+      el.addEventListener("change", calculateGoldSchemeVsSip);
+    }
+  });
+  calculateGoldSchemeVsSip();
+  if (typeof window.calculateGoldSchemeVsSip !== "function") {
+    window.calculateGoldSchemeVsSip = calculateGoldSchemeVsSip;
+  }
 
 })();
 </script>

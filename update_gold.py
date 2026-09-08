@@ -1201,6 +1201,193 @@ def compute_chennai_premium(rate_22k, ibja_rate_22k):
     return diff, pct
 
 
+def compute_submarket_spreads(
+    rate_22k,
+    rate_24k=None,
+    sowcarpet_discount=-45,
+    showroom_markup=180,
+    coimbatore_basis=-15,
+    madurai_basis=15,
+):
+    """
+    Chennai Sub-Market Basis & Wholesale Spread Engine:
+    
+    1. T. Nagar Showroom Retail:
+       Official MJDMA fix + retail showroom margin.
+       retail_showroom_spread = +₹180/g average markup
+       retail_showroom_rate_22k = rate_22k + retail_showroom_spread
+       retail_showroom_markup_pct = (retail_showroom_spread / rate_22k) * 100
+       
+    2. Sowcarpet Wholesale Bullion:
+       Mint Street / NSC Bose Road bullion dealers trade raw cast bars (ex-GST, ex-making)
+       at -₹35 to -₹65/g discount to MJDMA benchmark. Benchmark discount: -₹45/g.
+       sowcarpet_wholesale_22k = rate_22k - 45
+       sowcarpet_discount_pct = (-45 / rate_22k) * 100
+       
+    3. Regional Parity (Western & Southern Tamil Nadu Hubs):
+       - Coimbatore: Western manufacturing & casting hub (typically -₹15/g basis spread, range ±₹15/g)
+       - Madurai: Southern temple jewellery & retail hub (typically +₹15/g basis spread, range ±₹15/g)
+       - Tiruchirappalli (Trichy): Central transit hub (-₹5/g basis spread)
+       - Salem: Refining & smithing corridor (-₹10/g basis spread)
+       
+    4. Wholesale-to-Retail Value Chain Arbitrage:
+       Gross spread = retail_showroom_rate_22k - sowcarpet_wholesale_22k = 180 - (-45) = ₹225/g
+    """
+    if not rate_22k or not valid_gold_rate(rate_22k):
+        return {
+            "sowcarpet_wholesale_22k": None,
+            "sowcarpet_discount_pct": None,
+            "retail_showroom_spread": None,
+            "retail_showroom_rate_22k": None,
+            "retail_showroom_markup_pct": None,
+            "submarket_spreads": None,
+        }
+
+    r22 = int(round(float(rate_22k)))
+    r24 = int(round(float(rate_24k))) if (rate_24k and valid_gold_rate(rate_24k)) else int(round(r22 * (24.0 / 22.0)))
+
+    # 1. Sowcarpet Wholesale Bullion (-₹35 to -₹65/g discount, benchmark -₹45/g)
+    sow_disc = int(round(float(sowcarpet_discount)))
+    sow_22k = r22 + sow_disc  # r22 - 45
+    sow_24k = int(round(sow_22k * (24.0 / 22.0)))
+    sow_8g = sow_22k * 8
+    sow_disc_pct = round((float(sow_disc) / float(r22)) * 100.0, 2)
+
+    # 2. T. Nagar Showroom Retail (+₹180/g average markup)
+    show_spread = int(round(float(showroom_markup)))
+    show_22k = r22 + show_spread  # r22 + 180
+    show_24k = int(round(show_22k * (24.0 / 22.0)))
+    show_8g = show_22k * 8
+    show_markup_pct = round((float(show_spread) / float(r22)) * 100.0, 2)
+
+    # 3. Regional Basis Parity (±₹15/g basis spread)
+    cbe_basis = int(round(float(coimbatore_basis)))
+    cbe_22k = r22 + cbe_basis
+    cbe_8g = cbe_22k * 8
+    cbe_basis_pct = round((float(cbe_basis) / float(r22)) * 100.0, 2)
+
+    mad_basis = int(round(float(madurai_basis)))
+    mad_22k = r22 + mad_basis
+    mad_8g = mad_22k * 8
+    mad_basis_pct = round((float(mad_basis) / float(r22)) * 100.0, 2)
+
+    trichy_basis = -5
+    trichy_22k = r22 + trichy_basis
+    trichy_basis_pct = round((float(trichy_basis) / float(r22)) * 100.0, 2)
+
+    salem_basis = -10
+    salem_22k = r22 + salem_basis
+    salem_basis_pct = round((float(salem_basis) / float(r22)) * 100.0, 2)
+
+    # 4. Bullion-to-Retail Gross Margin Arbitrage
+    gross_arbitrage = show_22k - sow_22k  # e.g., 225
+    gross_arbitrage_pct = round((float(gross_arbitrage) / float(sow_22k)) * 100.0, 2) if sow_22k else 0.0
+
+    now_iso = now_ist().isoformat()
+
+    submarket_payload = {
+        "calculated_at": now_iso,
+        "reference_mjdma_22k": r22,
+        "reference_mjdma_24k": r24,
+        "sowcarpet": {
+            "hub_name": "Sowcarpet Wholesale Bullion",
+            "locality": "Mint Street / NSC Bose Road",
+            "market_type": "wholesale_bullion",
+            "rate_22k": sow_22k,
+            "rate_24k": sow_24k,
+            "rate_8g": sow_8g,
+            "discount_per_g": sow_disc,
+            "discount_pct": sow_disc_pct,
+            "discount_range": {
+                "min_discount": -65,
+                "max_discount": -35,
+                "benchmark_discount": sow_disc,
+            },
+            "rate_range": {
+                "min_rate_22k": r22 - 65,
+                "max_rate_22k": r22 - 35,
+            },
+            "notes": "Raw bullion cast bars traded wholesale ex-GST, ex-making charges",
+        },
+        "t_nagar": {
+            "hub_name": "T. Nagar Showroom Retail",
+            "locality": "Usman Road / Panagal Park",
+            "market_type": "retail_showroom",
+            "rate_22k": show_22k,
+            "rate_24k": show_24k,
+            "rate_8g": show_8g,
+            "retail_showroom_spread": show_spread,
+            "markup_pct": show_markup_pct,
+            "markup_range": {
+                "min_spread": 150,
+                "max_spread": 220,
+                "benchmark_spread": show_spread,
+            },
+            "notes": "MJDMA fix + retail showroom margin (+₹180/g average markup)",
+        },
+        "regional_parity": {
+            "coimbatore": {
+                "city": "Coimbatore",
+                "region": "Western Tamil Nadu",
+                "cluster_role": "Industrial Jewelry Manufacturing & Casting Cluster",
+                "rate_22k": cbe_22k,
+                "rate_8g": cbe_8g,
+                "basis_spread": cbe_basis,
+                "basis_pct": cbe_basis_pct,
+                "basis_range": [-15, 15],
+                "parity_status": "Discount" if cbe_basis < 0 else "Parity",
+            },
+            "madurai": {
+                "city": "Madurai",
+                "region": "Southern Tamil Nadu",
+                "cluster_role": "Temple Jewelry & Southern Cultural Retail Hub",
+                "rate_22k": mad_22k,
+                "rate_8g": mad_8g,
+                "basis_spread": mad_basis,
+                "basis_pct": mad_basis_pct,
+                "basis_range": [-15, 15],
+                "parity_status": "Premium" if mad_basis > 0 else "Parity",
+            },
+            "trichy": {
+                "city": "Tiruchirappalli",
+                "region": "Central Tamil Nadu",
+                "cluster_role": "Central Transit & Regional Distribution Corridor",
+                "rate_22k": trichy_22k,
+                "rate_8g": trichy_22k * 8,
+                "basis_spread": trichy_basis,
+                "basis_pct": trichy_basis_pct,
+                "basis_range": [-15, 15],
+                "parity_status": "Discount",
+            },
+            "salem": {
+                "city": "Salem",
+                "region": "North-Western Tamil Nadu",
+                "cluster_role": "Bullion Refining & Goldsmithing Cluster",
+                "rate_22k": salem_22k,
+                "rate_8g": salem_22k * 8,
+                "basis_spread": salem_basis,
+                "basis_pct": salem_basis_pct,
+                "basis_range": [-15, 15],
+                "parity_status": "Discount",
+            },
+        },
+        "value_chain_arbitrage": {
+            "gross_spread_amount": gross_arbitrage,
+            "gross_spread_pct": gross_arbitrage_pct,
+            "description": "Gross margin between Sowcarpet wholesale raw bar cash rate and T. Nagar showroom retail price",
+        },
+    }
+
+    return {
+        "sowcarpet_wholesale_22k": sow_22k,
+        "sowcarpet_discount_pct": sow_disc_pct,
+        "retail_showroom_spread": show_spread,
+        "retail_showroom_rate_22k": show_22k,
+        "retail_showroom_markup_pct": show_markup_pct,
+        "submarket_spreads": submarket_payload,
+    }
+
+
 def fetch_bankbazaar():
     now = now_ist()
     try:
@@ -1605,6 +1792,9 @@ def select_rate(
         selected["chennai_premium_amount"] = None
         selected["chennai_premium_pct"] = None
 
+    submarkets = compute_submarket_spreads(selected.get("rate_22k"), selected.get("rate_24k"))
+    selected.update(submarkets)
+
     return selected
 
 
@@ -1747,6 +1937,12 @@ def save_live(
             "ibja_rate_24k": ibja_source.get("rate_24k"),
             "chennai_premium_amount": selected.get("chennai_premium_amount"),
             "chennai_premium_pct": selected.get("chennai_premium_pct"),
+            "sowcarpet_wholesale_22k": selected.get("sowcarpet_wholesale_22k"),
+            "sowcarpet_discount_pct": selected.get("sowcarpet_discount_pct"),
+            "retail_showroom_spread": selected.get("retail_showroom_spread"),
+            "retail_showroom_rate_22k": selected.get("retail_showroom_rate_22k"),
+            "retail_showroom_markup_pct": selected.get("retail_showroom_markup_pct"),
+            "submarket_spreads": selected.get("submarket_spreads"),
             "consensus": selected.get("consensus"),
         }
     )
@@ -1861,6 +2057,8 @@ def save_history(
         ),
         "chennai_premium_amount": selected.get("chennai_premium_amount"),
         "chennai_premium_pct": selected.get("chennai_premium_pct"),
+        "sowcarpet_wholesale_22k": selected.get("sowcarpet_wholesale_22k"),
+        "retail_showroom_spread": selected.get("retail_showroom_spread"),
     }
 
     should_append = False
@@ -2340,6 +2538,8 @@ def compute_quant_metrics(history_records, live_record, ibja_record=None):
         "coins_bars": {"min_va_pct": 1.0, "avg_va_pct": 2.0, "max_va_pct": 3.5},
     }
 
+    submarkets = compute_submarket_spreads(rate_22k, domestic_24k_rate)
+
     metrics = {
         "calculated_at": now.isoformat(),
         "rate_22k": int(round(rate_22k)),
@@ -2355,6 +2555,12 @@ def compute_quant_metrics(history_records, live_record, ibja_record=None):
         "max_drawdown_30d_pct": round(max_dd, 2),
         "chennai_premium_amount": premium_amt,
         "chennai_premium_pct": premium_pct,
+        "sowcarpet_wholesale_22k": submarkets.get("sowcarpet_wholesale_22k"),
+        "sowcarpet_discount_pct": submarkets.get("sowcarpet_discount_pct"),
+        "retail_showroom_spread": submarkets.get("retail_showroom_spread"),
+        "retail_showroom_rate_22k": submarkets.get("retail_showroom_rate_22k"),
+        "retail_showroom_markup_pct": submarkets.get("retail_showroom_markup_pct"),
+        "submarket_spreads": submarkets.get("submarket_spreads"),
         "ibja_benchmark_rate": int(round(ibja_22k)) if ibja_22k else None,
         "macro_parity": {
             "implied_comex_usd_oz": implied_comex_usd,
