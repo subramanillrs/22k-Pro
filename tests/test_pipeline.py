@@ -155,10 +155,13 @@ def test_instant_cache_generator():
 
 def test_full_pipeline_run():
     print("Testing Full Pipeline Run (save_live, summary, quant, windows)...")
-    # Simulate normal fetch pass
     prev_rate = update_gold.get_previous_rate()
-    live, good, ibja = update_gold.fetch_all_sources()
-    selected = update_gold.select_rate(live, good, ibja, prev_rate)
+    res = update_gold.fetch_all_sources()
+    live, good, ibja = res[0], res[1], res[2]
+    bank = res[3] if len(res) > 3 else None
+    money = res[4] if len(res) > 4 else None
+    policy = res[5] if len(res) > 5 else None
+    selected = update_gold.select_rate(live, good, ibja, prev_rate, bankbazaar=bank, moneycontrol=money, policybazaar=policy)
     assert selected is not None, "select_rate returned None"
 
     rate = selected["rate_22k"]

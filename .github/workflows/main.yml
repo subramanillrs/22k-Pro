@@ -266,6 +266,10 @@ jobs:
           git add data/bootstrap.json 2>/dev/null || true
           git add data/quant_metrics.json 2>/dev/null || true
           git add data/ibja.json 2>/dev/null || true
+          git add data/signals.json 2>/dev/null || true
+          git add data/source_reliability.json 2>/dev/null || true
+          git add data/selector_memory.json 2>/dev/null || true
+          git add data/page_fingerprints.json 2>/dev/null || true
           git add index.html 2>/dev/null || true
 
           if git diff --cached --quiet; then

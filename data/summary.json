@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-07T22:37:36.097791+05:30",
+  "generated_at": "2026-09-08T09:01:29.446874+05:30",
   "all_time_high": {
     "rate_22k": 16800,
     "date": "2026-01-29"
@@ -10,7 +10,7 @@
   },
   "current_month": {
     "month": "2026-09",
-    "average_22k": 14195,
+    "average_22k": 14193,
     "high": 14385,
     "low": 13935
   },
@@ -21,23 +21,23 @@
     "low": 12440
   },
   "last_30_records": {
-    "average_22k": 14413,
+    "average_22k": 14419,
     "high": 15030,
     "low": 13942
   },
-  "total_records": 1160,
+  "total_records": 1161,
   "quant": {
-    "calculated_at": "2026-09-07T22:37:36.092254+05:30",
+    "calculated_at": "2026-09-08T09:01:28.925152+05:30",
     "rate_22k": 14130,
     "rate_8g": 113040,
-    "volatility_30d_annualized": 0.1584,
-    "volatility_30d_pct": 15.84,
-    "volatility_daily_pct": 0.998,
-    "var_95_1d_amount": 231.91,
+    "volatility_30d_annualized": 0.1579,
+    "volatility_30d_pct": 15.79,
+    "volatility_daily_pct": 0.995,
+    "var_95_1d_amount": 231.21,
     "var_95_1d_pct": 1.64,
-    "var_95_1d_8g_amount": 1855.28,
-    "var_95_1d_lower_bound": 13898,
-    "var_95_1d_upper_bound": 14362,
+    "var_95_1d_8g_amount": 1849.68,
+    "var_95_1d_lower_bound": 13899,
+    "var_95_1d_upper_bound": 14361,
     "max_drawdown_30d_pct": 7.24,
     "chennai_premium_amount": 142,
     "chennai_premium_pct": 1.02,
