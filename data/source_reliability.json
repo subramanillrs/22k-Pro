@@ -1,11 +1,11 @@
 {
   "policybazaar": {
-    "attempts": 8,
+    "attempts": 9,
     "successes": 0,
     "success_rate": 0.0,
     "avg_parse_confidence": 0.5,
     "last_success_at": null,
-    "failure_streak": 8,
+    "failure_streak": 9,
     "history": [
       {
         "ts": "2026-09-08T08:50:02.155275+05:30",
@@ -46,16 +46,21 @@
         "ts": "2026-09-08T09:01:28.945106+05:30",
         "success": false,
         "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T12:08:21.668508+05:30",
+        "success": false,
+        "confidence": 0.0
       }
     ]
   },
   "bankbazaar": {
-    "attempts": 8,
+    "attempts": 9,
     "successes": 0,
     "success_rate": 0.0,
     "avg_parse_confidence": 0.5,
     "last_success_at": null,
-    "failure_streak": 8,
+    "failure_streak": 9,
     "history": [
       {
         "ts": "2026-09-08T08:50:02.155753+05:30",
@@ -96,16 +101,21 @@
         "ts": "2026-09-08T09:01:28.941932+05:30",
         "success": false,
         "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T12:08:21.450070+05:30",
+        "success": false,
+        "confidence": 0.0
       }
     ]
   },
   "moneycontrol": {
-    "attempts": 8,
+    "attempts": 9,
     "successes": 0,
     "success_rate": 0.0,
     "avg_parse_confidence": 0.5,
     "last_success_at": null,
-    "failure_streak": 8,
+    "failure_streak": 9,
     "history": [
       {
         "ts": "2026-09-08T08:50:02.157815+05:30",
@@ -144,6 +154,11 @@
       },
       {
         "ts": "2026-09-08T09:01:28.942476+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T12:08:21.705066+05:30",
         "success": false,
         "confidence": 0.0
       }
