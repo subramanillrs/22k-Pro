@@ -1,17 +1,19 @@
 // Service worker for the Chennai 22K Gold PWA.
 //
-// Strategy: network-first for everything (app shell and data/*.json
-// alike). Always try the network so the shell and the rate data are
-// as fresh as possible; only fall back to the cache when the network
-// request fails (offline, or a network error). On a successful
-// network response, the cache is updated so that fallback stays
-// reasonably current.
-//
-// Bump CACHE_NAME whenever you want to force old cached responses to
-// be dropped (e.g. after a shell redesign) -- activate() clears any
-// cache that doesn't match the current name.
+// Strategy:
+// 1. Data requests (data/*.json): Fast network-first with a 2500ms timeout.
+//    Always bypasses the browser/HTTP disk cache using both `cache: "no-store"`
+//    and a cache-busting query parameter `?_cb=Date.now()`. If network succeeds,
+//    updates the cache in the background. If network takes > 2500ms or fails (offline),
+//    falls back immediately to the cached response.
+// 2. Navigation requests (mode === 'navigate' / index.html): Network-first with a
+//    2000ms timeout so fresh HTML is served when connected, falling back to cached
+//    app shell when offline or slow.
+// 3. Static shell assets: Network-first with cache fallback.
+// 4. Lifecycle: `self.skipWaiting()` and `self.clients.claim()` ensure instant
+//    activation without waiting for tabs/PWA restart.
 
-const CACHE_NAME = "gold22k-shell-v5";
+const CACHE_NAME = "gold22k-shell-v6";
 
 const SHELL_FILES = [
   "./",
@@ -23,28 +25,67 @@ const SHELL_FILES = [
 ];
 
 self.addEventListener("install", (event) => {
+  // Activate worker immediately without waiting for existing clients to close
+  self.skipWaiting();
   event.waitUntil(
     caches
       .open(CACHE_NAME)
-      .then((cache) => cache.addAll(SHELL_FILES))
-      .then(() => self.skipWaiting())
+      .then(async (cache) => {
+        try {
+          await cache.addAll(SHELL_FILES);
+        } catch (err) {
+          console.warn("Precache failed partially, attempting individual caching:", err);
+          await Promise.all(
+            SHELL_FILES.map((file) =>
+              cache.add(file).catch((e) => console.warn("Failed caching shell file:", file, e))
+            )
+          );
+        }
+      })
   );
 });
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches
-      .keys()
-      .then((keys) =>
-        Promise.all(
-          keys
-            .filter((key) => key !== CACHE_NAME)
-            .map((key) => caches.delete(key))
-        )
-      )
-      .then(() => self.clients.claim())
+    Promise.all([
+      // Claim clients immediately so this SW controls all open pages
+      self.clients.claim(),
+      // Purge obsolete caches
+      caches
+        .keys()
+        .then((keys) =>
+          Promise.all(
+            keys
+              .filter((key) => key !== CACHE_NAME)
+              .map((key) => caches.delete(key))
+          )
+        ),
+    ])
   );
 });
+
+// Check if request is for rate or analytical data
+function isDataRequest(url) {
+  const p = url.pathname;
+  return (
+    p.includes("/data/") ||
+    p.endsWith("live.json") ||
+    p.endsWith("bootstrap.json") ||
+    p.endsWith("signals.json") ||
+    p.endsWith("monitoring_windows.json") ||
+    p.endsWith(".json")
+  );
+}
+
+// Check if request is a top-level page navigation
+function isNavigationRequest(request, url) {
+  return (
+    request.mode === "navigate" ||
+    url.pathname.endsWith("/index.html") ||
+    url.pathname === "/" ||
+    url.pathname.endsWith("/")
+  );
+}
 
 self.addEventListener("fetch", (event) => {
   const request = event.request;
@@ -59,10 +100,142 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  event.respondWith(networkFirst(request));
+  // Fast network-first with cache-busting & 2500ms timeout for live and bootstrap data
+  if (isDataRequest(url)) {
+    event.respondWith(handleDataRequest(event, request, url));
+    return;
+  }
+
+  // Fast network-first with 2000ms timeout for navigation requests (index.html shell)
+  if (isNavigationRequest(request, url)) {
+    event.respondWith(handleNavigationRequest(event, request, url));
+    return;
+  }
+
+  // Default network-first with cache fallback for other static assets (icons, manifest, etc.)
+  event.respondWith(defaultNetworkFirst(request));
 });
 
-async function networkFirst(request) {
+/**
+ * Handles data requests (data/live.json, data/bootstrap.json, etc.):
+ * - Always bypasses HTTP disk cache using `cache: "no-store"` and `?_cb=Date.now()`.
+ * - Fast network-first with 2500ms timeout.
+ * - Updates cache in the background upon successful fetch.
+ * - Falls back to cache on failure or if network exceeds 2500ms.
+ */
+async function handleDataRequest(event, request, url) {
+  const fetchUrl = new URL(request.url);
+  fetchUrl.searchParams.set("_cb", Date.now().toString());
+
+  let cacheUpdatePromise = null;
+
+  const networkPromise = (async () => {
+    const response = await fetch(fetchUrl.toString(), {
+      cache: "no-store",
+      headers: request.headers,
+    });
+
+    if (response && response.ok) {
+      const responseToCache = response.clone();
+      cacheUpdatePromise = (async () => {
+        try {
+          const cache = await caches.open(CACHE_NAME);
+          await cache.put(request, responseToCache.clone());
+          await cache.put(url.pathname, responseToCache);
+        } catch (e) {
+          console.warn("Background cache update failed for data:", e);
+        }
+      })();
+      event.waitUntil(cacheUpdatePromise);
+    }
+    return response;
+  })();
+
+  const timeoutPromise = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error("DATA_NETWORK_TIMEOUT_2500MS")), 2500)
+  );
+
+  try {
+    const networkResponse = await Promise.race([networkPromise, timeoutPromise]);
+    if (networkResponse && networkResponse.ok) {
+      return networkResponse;
+    }
+    throw new Error("DATA_RESPONSE_NOT_OK");
+  } catch (err) {
+    // Timeout (> 2500ms) or network error: fall back to cache
+    const cached =
+      (await caches.match(request, { ignoreSearch: true })) ||
+      (await caches.match(url.pathname, { ignoreSearch: true })) ||
+      (await caches.match(url.pathname.replace(/^\//, ""), { ignoreSearch: true }));
+
+    if (cached) {
+      return cached;
+    }
+
+    // If cache is empty (first run), await network response directly
+    return await networkPromise;
+  }
+}
+
+/**
+ * Handles navigation requests (index.html / root):
+ * - Network-first with 2000ms timeout.
+ * - Fresh index.html served when connected.
+ * - Falls back to cached shell if offline or if network takes > 2000ms.
+ * - Updates shell cache in background when network arrives.
+ */
+async function handleNavigationRequest(event, request, url) {
+  let cacheUpdatePromise = null;
+
+  const networkPromise = (async () => {
+    const response = await fetch(request);
+    if (response && response.ok) {
+      const responseToCache = response.clone();
+      cacheUpdatePromise = (async () => {
+        try {
+          const cache = await caches.open(CACHE_NAME);
+          await cache.put(request, responseToCache.clone());
+          await cache.put("index.html", responseToCache.clone());
+          await cache.put("./", responseToCache);
+        } catch (e) {
+          console.warn("Background cache update failed for navigation:", e);
+        }
+      })();
+      event.waitUntil(cacheUpdatePromise);
+    }
+    return response;
+  })();
+
+  const timeoutPromise = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error("NAV_NETWORK_TIMEOUT_2000MS")), 2000)
+  );
+
+  try {
+    const networkResponse = await Promise.race([networkPromise, timeoutPromise]);
+    if (networkResponse && networkResponse.ok) {
+      return networkResponse;
+    }
+    throw new Error("NAV_RESPONSE_NOT_OK");
+  } catch (err) {
+    // Timeout (> 2000ms) or network error: fall back to cached shell
+    const cached =
+      (await caches.match(request, { ignoreSearch: true })) ||
+      (await caches.match("index.html", { ignoreSearch: true })) ||
+      (await caches.match("./", { ignoreSearch: true }));
+
+    if (cached) {
+      return cached;
+    }
+
+    // If cache is empty, await network response
+    return await networkPromise;
+  }
+}
+
+/**
+ * Default network-first handler for other static assets (icons, manifest, etc.)
+ */
+async function defaultNetworkFirst(request) {
   try {
     const response = await fetch(request);
     if (response && response.ok) {
@@ -75,17 +248,6 @@ async function networkFirst(request) {
     if (cached) {
       return cached;
     }
-
-    // Nothing cached either -- for a navigation request, fall back to
-    // the cached app shell so the user still sees something usable
-    // instead of a browser error page.
-    if (request.mode === "navigate") {
-      const shell = await caches.match("index.html", { ignoreSearch: true });
-      if (shell) {
-        return shell;
-      }
-    }
-
     throw err;
   }
 }
@@ -117,8 +279,12 @@ self.addEventListener("notificationclick", (event) => {
 
 async function syncLiveRateAndNotify() {
   try {
-    const res = await fetch("data/live.json", { cache: "no-store" });
+    const res = await fetch(`data/live.json?_cb=${Date.now()}`, { cache: "no-store" });
     if (!res || !res.ok) return;
+    const clone = res.clone();
+    const cache = await caches.open(CACHE_NAME);
+    await cache.put("data/live.json", clone.clone());
+    await cache.put("/data/live.json", clone);
     const liveData = await res.json();
     const clients = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
     clients.forEach((client) => {

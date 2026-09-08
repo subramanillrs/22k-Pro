@@ -4,27 +4,22 @@ on:
   workflow_dispatch:
 
   schedule:
-    # Dense polling (every 5 min) across two bands that cover the AM
-    # (~09:38-11:03 IST) and PM (~19:19-20:44 IST) predicted fix
-    # windows with a wide margin either side, in case the predicted
-    # times drift day to day. Expressed in UTC (IST = UTC+5:30):
-    #   08:00-12:00 IST = 02:30-06:30 UTC  (covers AM window)
-    #   18:30-21:30 IST = 13:00-16:00 UTC  (covers PM window)
-    # Each run is short (single fetch, no internal sleep/poll loop)
-    # and independently scheduled by GitHub -- so if one tick is
-    # delayed or skipped (GitHub's `schedule` trigger is best-effort,
-    # not guaranteed to the minute), the next tick 5 minutes later
-    # picks up where it left off instead of the whole session being
-    # pushed back, unlike the old design where a single job slept
-    # until the window then polled internally for up to 85 minutes.
+    # Dense polling (every 5 min) across two comprehensive bands that cover
+    # Chennai MJDMA morning fix (~09:30-11:30 IST) and evening fix (~16:00-20:45 IST)
+    # with wide buffer margins for day-to-day drift. Expressed in UTC (IST = UTC+5:30):
+    #   AM Window: 07:30-12:25 IST = 02:00-06:55 UTC (cron: "*/5 2-6 * * *")
+    #   PM Window: 15:30-22:25 IST = 10:00-16:55 UTC (cron: "*/5 10-16 * * *")
+    # Each run is short (single fetch, no internal sleep/poll loop) and independently
+    # scheduled by GitHub -- so if one tick is delayed or skipped, the next tick 5 min
+    # later seamlessly catches the rate update without pushing the session back.
     - cron: "*/5 2-6 * * *"
-    - cron: "*/5 13-16 * * *"
+    - cron: "*/5 10-16 * * *"
 
     # Hourly outside the two dense bands, as a low-cost heartbeat.
-    # This is what catches a session that GitHub delayed so badly it
-    # slipped past the dense polling bands above -- see the
-    # STALE_CATCHUP_HOURS self-heal in update_gold.py.
-    - cron: "0 7-12,17 * * *"
+    # Covers midday afternoon lull (UTC 7-9 = 12:30-15:25 IST) and
+    # overnight (UTC 17-23, 0-1 = 22:30-07:25 IST).
+    # Catches delayed GitHub actions or off-session rate revisions (see STALE_CATCHUP_HOURS).
+    - cron: "0 0,1,7-9,17-23 * * *"
 
 permissions:
   contents: write

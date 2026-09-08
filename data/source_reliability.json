@@ -1,92 +1,12 @@
 {
   "policybazaar": {
-    "attempts": 23,
+    "attempts": 39,
     "successes": 0,
     "success_rate": 0.0,
     "avg_parse_confidence": 0.5,
     "last_success_at": null,
-    "failure_streak": 23,
+    "failure_streak": 39,
     "history": [
-      {
-        "ts": "2026-09-08T08:58:13.370596+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T08:58:20.603585+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T08:58:39.035151+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T09:01:17.986722+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T09:01:28.945106+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T12:08:21.668508+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T17:13:17.128539+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T17:25:00.782940+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T19:28:58.147720+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T19:29:02.815441+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T19:38:25.105285+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T19:38:46.627569+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T19:39:12.486008+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T19:39:35.125429+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T19:40:07.067559+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T19:40:32.852141+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
       {
         "ts": "2026-09-08T19:40:52.796013+05:30",
         "success": false,
@@ -106,97 +26,97 @@
         "ts": "2026-09-08T19:43:03.449491+05:30",
         "success": false,
         "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:49:54.493290+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:50:54.954928+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:51:22.793339+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:52:25.707555+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:52:52.225516+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:53:17.740376+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:54:00.739756+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:54:05.762418+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:55:07.352754+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:55:12.135958+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:55:23.921790+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:55:32.207692+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:56:13.588254+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:56:30.377863+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:56:52.202612+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:56:59.924932+05:30",
+        "success": false,
+        "confidence": 0.0
       }
     ]
   },
   "bankbazaar": {
-    "attempts": 23,
+    "attempts": 39,
     "successes": 0,
     "success_rate": 0.0,
     "avg_parse_confidence": 0.5,
     "last_success_at": null,
-    "failure_streak": 23,
+    "failure_streak": 39,
     "history": [
-      {
-        "ts": "2026-09-08T08:58:13.368582+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T08:58:20.600675+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T08:58:39.032695+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T09:01:17.984020+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T09:01:28.941932+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T12:08:21.450070+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T17:13:16.781235+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T17:25:00.143093+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T19:28:58.144843+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T19:29:02.812602+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T19:38:25.102379+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T19:38:46.624989+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T19:39:12.483020+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T19:39:35.122902+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T19:40:07.064235+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T19:40:32.849088+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
       {
         "ts": "2026-09-08T19:40:52.793267+05:30",
         "success": false,
@@ -216,97 +136,97 @@
         "ts": "2026-09-08T19:43:03.446346+05:30",
         "success": false,
         "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:49:54.490439+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:50:54.951954+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:51:22.789825+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:52:25.704234+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:52:52.222278+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:53:17.737279+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:54:00.737407+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:54:05.759573+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:55:07.350170+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:55:12.132427+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:55:23.918795+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:55:32.204875+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:56:13.585137+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:56:30.374734+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:56:52.199434+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:56:59.921378+05:30",
+        "success": false,
+        "confidence": 0.0
       }
     ]
   },
   "moneycontrol": {
-    "attempts": 23,
+    "attempts": 39,
     "successes": 0,
     "success_rate": 0.0,
     "avg_parse_confidence": 0.5,
     "last_success_at": null,
-    "failure_streak": 23,
+    "failure_streak": 39,
     "history": [
-      {
-        "ts": "2026-09-08T08:58:13.367882+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T08:58:20.601416+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T08:58:39.032280+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T09:01:17.983709+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T09:01:28.942476+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T12:08:21.705066+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T17:13:16.856040+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T17:25:00.277791+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T19:28:58.144619+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T19:29:02.812643+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T19:38:25.103101+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T19:38:46.624917+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T19:39:12.482959+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T19:39:35.122860+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T19:40:07.065157+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
-      {
-        "ts": "2026-09-08T19:40:32.849878+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
       {
         "ts": "2026-09-08T19:40:52.792908+05:30",
         "success": false,
@@ -324,6 +244,86 @@
       },
       {
         "ts": "2026-09-08T19:43:03.446653+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:49:54.490394+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:50:54.952805+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:51:22.790130+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:52:25.705142+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:52:52.222679+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:53:17.737546+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:54:00.736685+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:54:05.759295+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:55:07.349971+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:55:12.133248+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:55:23.918849+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:55:32.205135+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:56:13.585740+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:56:30.375610+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:56:52.199525+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-08T19:56:59.921083+05:30",
         "success": false,
         "confidence": 0.0
       }

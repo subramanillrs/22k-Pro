@@ -216,6 +216,8 @@ def save_json(path, data):
                 ensure_ascii=False,
                 indent=2,
             )
+            f.flush()
+            os.fsync(f.fileno())
         temp.replace(path)
 
 
@@ -494,7 +496,9 @@ DAY_HALF_SPLIT_HOUR = 14
 DAY_HALF_AM_START_HOUR = 6
 
 
-def session_for_time(dt):
+def session_for_time(dt=None):
+    if dt is None:
+        dt = now_ist()
     hour = dt.hour
 
     if DAY_HALF_AM_START_HOUR <= hour < DAY_HALF_SPLIT_HOUR:
@@ -503,7 +507,9 @@ def session_for_time(dt):
     if DAY_HALF_SPLIT_HOUR <= hour <= 23:
         return "PM"
 
-    return None
+    # Overnight 00:00-05:59 IST prior to the morning fix
+    # reflects the prevailing PM fix
+    return "PM"
 
 
 def session_for_minutes(mins):
@@ -511,7 +517,7 @@ def session_for_minutes(mins):
     midnight integer (used by the history-based prediction learner,
     which works in minutes rather than datetimes)."""
     if mins is None:
-        return ""
+        return "AM"
 
     am_start = DAY_HALF_AM_START_HOUR * 60
     split = DAY_HALF_SPLIT_HOUR * 60
@@ -522,7 +528,7 @@ def session_for_minutes(mins):
     if split <= mins <= 23 * 60 + 59:
         return "PM"
 
-    return ""
+    return "PM"
 
 
 # ============================================================
@@ -1915,7 +1921,7 @@ def save_live(
             "verified_at": (
                 now.isoformat()
                 if is_verified_reading
-                else data.get("verified_at")
+                else (data.get("verified_at") or now.isoformat())
             ),
             "change": (int(rate) - int(previous_rate)) if valid_gold_rate(previous_rate) else 0,
             "sources": {
@@ -2860,6 +2866,26 @@ def bake_instant_bootstrap(live_data, history_data, quant_metrics, ibja_data, si
     if signals_data is None:
         signals_data = load_json(SIGNALS_FILE, {})
 
+    # Ensure live_data is a valid dict and contains all required explicit metadata
+    if not isinstance(live_data, dict):
+        live_data = load_json(LIVE_FILE, {})
+        if not isinstance(live_data, dict):
+            live_data = {}
+
+    if live_data:
+        if not live_data.get("date"):
+            live_data["date"] = now.strftime("%Y-%m-%d")
+        if not live_data.get("time"):
+            live_data["time"] = now.strftime("%H:%M:%S")
+        if not live_data.get("session") or live_data.get("session") not in ("AM", "PM"):
+            live_data["session"] = session_for_time(now)
+        if not live_data.get("last_checked_at"):
+            live_data["last_checked_at"] = now.isoformat()
+        if not live_data.get("timestamp"):
+            live_data["timestamp"] = now.isoformat()
+        if not live_data.get("updated_at"):
+            live_data["updated_at"] = now.isoformat()
+
     payload = {
         "baked_at": now.isoformat(),
         "live": live_data,
@@ -2889,7 +2915,12 @@ def bake_instant_bootstrap(live_data, history_data, quant_metrics, ibja_data, si
                 else:
                     updated_html = script_tag + "\n" + html_content
 
-            INDEX_HTML_FILE.write_text(updated_html, encoding="utf-8")
+            temp_html = INDEX_HTML_FILE.with_name(f"{INDEX_HTML_FILE.name}.{os.getpid()}.tmp")
+            with open(temp_html, "w", encoding="utf-8") as f:
+                f.write(updated_html)
+                f.flush()
+                os.fsync(f.fileno())
+            temp_html.replace(INDEX_HTML_FILE)
             print(f"Pre-baked instant bootstrap cache into {INDEX_HTML_FILE} ({len(serialized)} bytes)")
         except Exception as exc:
             print(f"Warning: Failed to bake bootstrap into index.html: {exc}")
@@ -3546,7 +3577,8 @@ def poll_window_once(window):
     history_data = load_json(HISTORY_FILE, [])
     live_data = load_json(LIVE_FILE, {})
     quant_metrics = compute_quant_metrics(history_data, live_data, selected.get("ibja"))
-    bake_instant_bootstrap(live_data, history_data, quant_metrics, selected.get("ibja"))
+    signals = compute_financial_signals(history_data, live_data.get("rate_22k"), quant_metrics.get("chennai_premium_pct"))
+    bake_instant_bootstrap(live_data, history_data, quant_metrics, selected.get("ibja"), signals)
 
     save_window_info(
         window if not changed else None
@@ -3558,8 +3590,10 @@ def poll_window_once(window):
 def _in_dense_polling_band(now):
     """
     True if `now` falls inside one of the wide dense-polling cron
-    bands defined in the workflow (08:00-12:00 IST or 18:30-21:30
-    IST). Must be kept in sync with the `schedule:` entries in
+    bands defined in the workflow:
+      AM Fix: 07:30-12:30 IST (02:00-07:00 UTC)
+      PM Fix: 15:30-22:30 IST (10:00-17:00 UTC)
+    Must be kept in sync with the `schedule:` entries in
     main.yml. Used only to decide whether an off-window tick should
     skip fetching (see main()) -- has no effect on whether polling
     actually happens, since that's entirely controlled by GitHub's
@@ -3567,8 +3601,8 @@ def _in_dense_polling_band(now):
     """
     minutes = now.hour * 60 + now.minute
 
-    band_1 = (8 * 60, 12 * 60)
-    band_2 = (18 * 60 + 30, 21 * 60 + 30)
+    band_1 = (7 * 60 + 30, 12 * 60 + 30)
+    band_2 = (15 * 60 + 30, 22 * 60 + 30)
 
     return (
         band_1[0] <= minutes < band_1[1]

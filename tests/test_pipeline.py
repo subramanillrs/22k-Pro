@@ -12,7 +12,9 @@ Comprehensive Test Suite for Chennai 22K Gold Data Pipeline & Quant Engine:
 import json
 import math
 import os
+import re
 import sys
+from datetime import datetime
 from pathlib import Path
 
 # Add project root to sys.path
@@ -214,8 +216,17 @@ def test_full_pipeline_run():
     update_gold.save_live(rate, selected, changed)
     update_gold.save_window_info(None)
 
-    # Verify live.json
+    # Verify live.json explicit metadata & ISO 8601 timestamps
     live_json = update_gold.load_json(update_gold.LIVE_FILE, {})
+    assert "date" in live_json and re.match(r"^\d{4}-\d{2}-\d{2}$", live_json["date"]), f"Invalid date: {live_json.get('date')}"
+    assert "time" in live_json and re.match(r"^\d{2}:\d{2}:\d{2}$", live_json["time"]), f"Invalid time: {live_json.get('time')}"
+    assert live_json.get("session") in ("AM", "PM"), f"session must be 'AM' or 'PM', got: {live_json.get('session')}"
+    assert "last_checked_at" in live_json and datetime.fromisoformat(live_json["last_checked_at"]), "last_checked_at must be valid ISO 8601"
+    assert "timestamp" in live_json and datetime.fromisoformat(live_json["timestamp"]), "timestamp must be valid ISO 8601"
+    assert "updated_at" in live_json and datetime.fromisoformat(live_json["updated_at"]), "updated_at must be valid ISO 8601"
+    assert "verified_at" in live_json and datetime.fromisoformat(live_json["verified_at"]), "verified_at must be valid ISO 8601"
+
+    # Verify quantitative metadata
     assert "ibja" in live_json, "ibja missing from live.json"
     assert "consensus" in live_json, "consensus missing from live.json"
     assert "chennai_premium_amount" in live_json, "chennai_premium_amount missing from live.json"
@@ -224,6 +235,18 @@ def test_full_pipeline_run():
     assert "sowcarpet_discount_pct" in live_json, "sowcarpet_discount_pct missing from live.json"
     assert "retail_showroom_spread" in live_json, "retail_showroom_spread missing from live.json"
     assert "submarket_spreads" in live_json, "submarket_spreads missing from live.json"
+
+    # Verify atomic bootstrap baking and synchrony with live.json
+    history_data = update_gold.load_json(update_gold.HISTORY_FILE, [])
+    quant_data = update_gold.compute_quant_metrics(history_data, live_json, ibja)
+    signals_data = update_gold.compute_financial_signals(history_data, live_json.get("rate_22k"), quant_data.get("chennai_premium_pct"))
+    boot_payload = update_gold.bake_instant_bootstrap(live_json, history_data, quant_data, ibja, signals_data)
+    assert update_gold.BOOTSTRAP_FILE.exists(), "bootstrap.json was not created"
+    boot_json = update_gold.load_json(update_gold.BOOTSTRAP_FILE, {})
+    assert datetime.fromisoformat(boot_json["baked_at"]), "baked_at must be valid ISO 8601"
+    assert boot_json["live"]["session"] in ("AM", "PM"), f"bootstrap live.session invalid: {boot_json['live'].get('session')}"
+    assert boot_json["live"]["last_checked_at"] == live_json["last_checked_at"]
+    assert boot_json["live"]["rate_22k"] == live_json["rate_22k"]
 
     # Verify monitoring_windows.json
     windows_json = update_gold.load_json(update_gold.WINDOW_FILE, {})
