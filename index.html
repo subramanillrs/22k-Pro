@@ -2244,7 +2244,14 @@ footer { padding: 20px 0 8px; font-size: var(--fs-xs2); opacity: 0.7; }
 
 /* Mobile refinements */
 @media (max-width: 420px) {
-  .app { padding-left: 12px; padding-right: 12px; gap: 12px; }
+  .app { padding-left: 12px; padding-right: 12px; gap: 12px; overflow-x: hidden; }
+  .masthead { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+  .brand-wrap { min-width: 0; flex: 1 1 auto; overflow: hidden; gap: 6px; }
+  .masthead-title { font-size: clamp(15px, 4.2vw, 19px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .masthead-actions { display: flex; align-items: center; gap: 5px; flex-shrink: 0; margin-left: auto; }
+  .status-pill { max-width: 100px; padding: 0 7px; font-size: 10px; }
+  .target-toggle, .theme-toggle { width: 30px; height: 30px; flex-shrink: 0; }
+  .theme-toggle { display: inline-flex !important; visibility: visible !important; }
   .panel, .hero, details.collapsible, .last-box { padding: 12px; border-radius: 14px; }
   .hero-price { font-size: clamp(22px, 8vw, 29px); }
   .section-head h3 { font-size: var(--fs-lg2); }
@@ -2254,6 +2261,13 @@ footer { padding: 20px 0 8px; font-size: var(--fs-xs2); opacity: 0.7; }
   .chart-panel { padding: 10px 10px 8px; }
   .receipt-card { padding: 12px; }
   .port-summary-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 360px) {
+  .app { padding-left: 8px; padding-right: 8px; }
+  .status-pill { max-width: 82px; padding: 0 5px; font-size: 9px; }
+  .masthead-title { font-size: 14px; }
+  .target-toggle, .theme-toggle { width: 28px; height: 28px; }
 }
 </style>
 
@@ -2279,11 +2293,8 @@ footer { padding: 20px 0 8px; font-size: var(--fs-xs2); opacity: 0.7; }
     <div class="masthead-actions">
       <div class="status-pill live-pulse" id="status">
         <span class="status-dot"></span>
-        <span id="statusText">Live 19:48 IST</span>
+        <span id="statusText">Live 19:57 IST</span>
       </div>
-      <button class="target-toggle" id="shareCardBtn" type="button" aria-label="Share Daily Rate Infographic Card" title="Share Daily Rate Card">
-        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-      </button>
       <button class="target-toggle" id="targetToggleBtn" type="button" aria-label="Set price target alert">
         <svg class="icon-bell" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       </button>
@@ -2396,21 +2407,21 @@ footer { padding: 20px 0 8px; font-size: var(--fs-xs2); opacity: 0.7; }
       </button>
     </div>
 
-    <div class="hero-price" id="hero8">₹ 1,13,520</div>
-    <div id="change8" class="change-pill down">▼ -₹ 1,360 Today</div>
+    <div class="hero-price" id="hero8">₹ 1,14,160</div>
+    <div id="change8" class="change-pill">● ₹ 0 Today</div>
 
     <div class="hero-rule"></div>
 
     <div class="hero-foot">
       <div class="hero-foot-col">
         <span class="hero-foot-label">Rate per gram</span>
-        <div class="hero-foot-val" id="hero1">₹ 14,190 <span id="change1" class="change-pill mini down">-₹ 170</span></div>
+        <div class="hero-foot-val" id="hero1">₹ 14,270 <span id="change1" class="change-pill mini">₹ 0</span></div>
         <span class="hero-foot-sub">1 gram benchmark</span>
       </div>
       <div class="hero-foot-col">
         <span class="hero-foot-label">Market date</span>
-        <div class="hero-foot-val" id="today">Sep 5, 2026</div>
-        <span class="hero-foot-sub" id="todayTime">19:25 PM</span>
+        <div class="hero-foot-val" id="today">Sep 8, 2026</div>
+        <span class="hero-foot-sub" id="todayTime">19:57 PM</span>
       </div>
     </div>
   </section>
@@ -2418,15 +2429,15 @@ footer { padding: 20px 0 8px; font-size: var(--fs-xs2); opacity: 0.7; }
   <div class="panel purity-row">
     <div class="purity-cell">
       <small>24K · 99.9%</small>
-      <b id="purity24">₹ 15,480/g</b>
+      <b id="purity24">₹ 15,567/g</b>
     </div>
     <div class="purity-cell">
       <small>22K · 91.6%</small>
-      <b id="purity22">₹ 14,190/g</b>
+      <b id="purity22">₹ 14,270/g</b>
     </div>
     <div class="purity-cell">
       <small>18K · 75.0%</small>
-      <b id="purity18">₹ 11,618/g</b>
+      <b id="purity18">₹ 11,684/g</b>
     </div>
   </div>
 
@@ -2664,78 +2675,6 @@ footer { padding: 20px 0 8px; font-size: var(--fs-xs2); opacity: 0.7; }
         <span id="nextFixText">—</span>
       </div>
 
-      <!-- Intraday & Day-of-Week Fix Timing Heatmap Visualizer -->
-      <div class="heatmap-card" id="fixHeatmapCard">
-        <div class="heatmap-header">
-          <div class="heatmap-title-group">
-            <div class="heatmap-title-row">
-              <span class="heatmap-title">MJDMA Fix Timing Probability</span>
-              <span class="heatmap-tag">Heatmap</span>
-            </div>
-            <span class="heatmap-sub">Mon–Sat arrival clusters (AM 09:30–10:30 · PM 16:30–19:30) · Sunday market hold</span>
-          </div>
-          <div class="heatmap-legend-mini">
-            <span class="hm-legend-label">Low</span>
-            <div class="hm-legend-bar">
-              <span class="hm-bar-seg s1"></span>
-              <span class="hm-bar-seg s2"></span>
-              <span class="hm-bar-seg s3"></span>
-              <span class="hm-bar-seg s4"></span>
-            </div>
-            <span class="hm-legend-label">Peak</span>
-          </div>
-        </div>
-
-        <!-- SVG Heatmap Container -->
-        <div class="heatmap-svg-container" id="heatmapSvgWrap">
-          <!-- Dynamically populated SVG via renderFixHeatmap() -->
-        </div>
-
-        <!-- Interactive Inspector Card -->
-        <div class="heatmap-inspector" id="heatmapInspector">
-          <div class="hm-inspect-left">
-            <div class="hm-inspect-icon" id="hmInspectIcon">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            </div>
-            <div class="hm-inspect-details">
-              <div class="hm-inspect-title" id="hmInspectTitle">Active Session Window</div>
-              <div class="hm-inspect-desc" id="hmInspectDesc">Hover or tap any cell for arrival cluster probability</div>
-            </div>
-          </div>
-          <div class="hm-inspect-stat">
-            <span class="hm-stat-val" id="hmInspectProb">—</span>
-            <span class="hm-stat-lbl">Probability</span>
-          </div>
-        </div>
-
-        <!-- Probability Window Cluster Pills -->
-        <div class="hm-window-pills">
-          <div class="hm-window-pill" data-cluster="am">
-            <div class="pill-head">
-              <span class="pill-dot am-dot"></span>
-              <span class="pill-title">AM Window</span>
-            </div>
-            <span class="pill-time">09:30–10:30 IST</span>
-            <span class="pill-prob">~92% Peak Cluster</span>
-          </div>
-          <div class="hm-window-pill" data-cluster="pm">
-            <div class="pill-head">
-              <span class="pill-dot pm-dot"></span>
-              <span class="pill-title">PM Window</span>
-            </div>
-            <span class="pill-time">16:30–19:30 IST</span>
-            <span class="pill-prob">~85% Peak Cluster</span>
-          </div>
-          <div class="hm-window-pill" data-cluster="weekend">
-            <div class="pill-head">
-              <span class="pill-dot sun-dot"></span>
-              <span class="pill-title">Sunday Pattern</span>
-            </div>
-            <span class="pill-time">Market Closed</span>
-            <span class="pill-prob">Saturday Close Holds</span>
-          </div>
-        </div>
-      </div>
     </div>
   </section>
 
@@ -3859,6 +3798,56 @@ const formatLiveStatus = s => {
   return hhmm ? `Live ${hhmm} IST` : "Live IST";
 };
 window.formatLiveStatus = formatLiveStatus;
+
+function getCurrentMarketRates() {
+  let r22 = 0;
+  let r8 = 0;
+  let chg = 0;
+  let dt = "";
+  let tm = "";
+
+  if (live && Number(live.rate_22k) > 0) {
+    r22 = Number(live.rate_22k);
+    r8 = Number(live.rate_8g || r22 * 8);
+    chg = Number.isFinite(Number(live.change)) ? Number(live.change) : 0;
+    dt = live.date ? dateText(live.date) : "";
+    tm = live.time ? timeText(live.time) : "";
+  } else if (typeof DEFAULT_LIVE !== "undefined" && DEFAULT_LIVE && Number(DEFAULT_LIVE.rate_22k) > 0) {
+    r22 = Number(DEFAULT_LIVE.rate_22k);
+    r8 = Number(DEFAULT_LIVE.rate_8g || r22 * 8);
+    chg = Number.isFinite(Number(DEFAULT_LIVE.change)) ? Number(DEFAULT_LIVE.change) : 0;
+    dt = DEFAULT_LIVE.date ? dateText(DEFAULT_LIVE.date) : "";
+    tm = DEFAULT_LIVE.time ? timeText(DEFAULT_LIVE.time) : "";
+  }
+
+  if (!r22) {
+    const el1 = document.getElementById("hero1");
+    if (el1) {
+      const txt = (el1.childNodes[0] && el1.childNodes[0].textContent) || el1.textContent || "";
+      const m = txt.replace(/,/g, "").match(/\d+/);
+      if (m) r22 = Number(m[0]);
+    }
+  }
+  if (!r8) {
+    const el8 = document.getElementById("hero8");
+    if (el8) {
+      const txt = el8.textContent || "";
+      const m = txt.replace(/,/g, "").match(/\d+/);
+      if (m) r8 = Number(m[0]);
+    }
+  }
+
+  if (!r22) r22 = 14270;
+  if (!r8) r8 = r22 * 8;
+  if (!dt || dt === "—") dt = "Sep 8, 2026";
+  if (!tm || tm === "—") tm = "19:57 IST";
+
+  const r24 = (live && Number(live.rate_24k) > 0) ? Number(live.rate_24k) : ((typeof DEFAULT_LIVE !== "undefined" && DEFAULT_LIVE && Number(DEFAULT_LIVE.rate_24k) > 0) ? Number(DEFAULT_LIVE.rate_24k) : Math.round(r22 * (0.999 / 0.916)));
+  const r18 = Math.round(r22 * (0.750 / 0.916));
+
+  return { r22, r8, r24, r18, chg, dt, tm };
+}
+window.getCurrentMarketRates = getCurrentMarketRates;
 
 function triggerPriceUpdatedGlow() {
   const el1 = $("hero1");
@@ -5840,56 +5829,58 @@ if ("serviceWorker" in navigator) {
 
 
 const DEFAULT_LIVE = {
-  "rate_22k": 14190,
-  "rate_8g": 113520,
+  "rate_22k": 14270,
+  "rate_8g": 114160,
   "currency": "INR",
   "city": "Chennai",
   "purity": "22K",
-  "date": "2026-09-05",
-  "time": "19:25:00",
-  "timestamp": "2026-09-05T19:25:00.000000+05:30",
-  "changed": true,
-  "previous_rate_22k": 14360,
-  "change": -170,
+  "date": "2026-09-08",
+  "time": "19:57:46",
+  "timestamp": "2026-09-08T19:57:46.611462+05:30",
+  "changed": false,
+  "previous_rate_22k": 14270,
+  "change": 0,
   "sources": {
     "livechennai": {
       "source": "LiveChennai",
-      "rate_22k": 14190,
+      "rate_22k": 14270,
+      "rate_24k": 15567,
+      "rate_8g": 114160,
       "url": "https://www.livechennai.com/gold_silverrate.asp",
-      "fetched_at": "2026-09-05T18:36:08.770824+05:30"
+      "fetched_at": "2026-09-08T19:57:46.611220+05:30"
     },
     "goodreturns": {
       "source": "GoodReturns",
-      "rate_22k": 14361,
+      "rate_22k": 14270,
       "url": "https://www.goodreturns.in/gold-rates/chennai.html",
-      "fetched_at": "2026-09-05T18:36:08.465521+05:30"
+      "fetched_at": "2026-09-08T19:57:46.263988+05:30"
     }
   },
   "source_update_times": [
-    "2026-09-05T18:36:08.770824+05:30",
-    "2026-09-05T18:36:08.465521+05:30"
+    "2026-09-08T19:57:46.611220+05:30",
+    "2026-09-08T19:57:46.263988+05:30"
   ],
   "source_rates": [
-    14190,
-    14361
+    14270,
+    14270
   ],
   "sources_agree": true,
-  "last_checked_at": "2026-09-05T19:25:00.000000+05:30",
+  "last_checked_at": "2026-09-08T19:57:46.611462+05:30",
   "source": "LiveChennai (MJDMA verified)",
-  "last_checked": "2026-09-05T19:25:00.000000+05:30",
+  "last_checked": "2026-09-08T19:57:46.611462+05:30",
   "agreement": true,
   "session": "PM",
-  "rate_24k": 15480,
-  "weight_1g": 14190,
-  "weight_8g": 113520,
-  "livechennai_rate": 14190,
-  "goodreturns_rate": 14361,
-  "livechennai_fetched_at": "2026-09-05T18:36:08.770824+05:30",
-  "goodreturns_fetched_at": "2026-09-05T18:36:08.465521+05:30",
+  "rate_24k": 15567,
+  "weight_1g": 14270,
+  "weight_8g": 114160,
+  "livechennai_rate": 14270,
+  "goodreturns_rate": 14270,
+  "livechennai_fetched_at": "2026-09-08T19:57:46.611220+05:30",
+  "goodreturns_fetched_at": "2026-09-08T19:57:46.263988+05:30",
   "livechennai_url": "https://www.livechennai.com/gold_silverrate.asp",
   "goodreturns_url": "https://www.goodreturns.in/gold-rates/chennai.html",
-  "updated_at": "2026-09-05T19:25:00.000000+05:30",
-  "verified_at": "2026-09-05T19:25:00.000000+05:30"
+  "updated_at": "2026-09-08T19:57:46.611462+05:30",
+  "verified_at": "2026-09-08T19:57:46.611462+05:30"
 };
 
 const DEFAULT_HISTORY = [
@@ -7072,8 +7063,9 @@ let chartViewMode = "spline";
   }
 
   function generateReceiptCard() {
-    const isDark = document.documentElement.getAttribute("data-theme") === "dark" ||
-      (!document.documentElement.getAttribute("data-theme") && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    const theme = (document.documentElement.getAttribute("data-theme") || localStorage.getItem("gold_theme") || "").toLowerCase();
+    const isDark = theme === "dark" || theme === "oled" || (!theme && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    const isOled = theme === "oled";
 
     const canvas = document.createElement("canvas");
     const W = 720;
@@ -7084,24 +7076,37 @@ let chartViewMode = "spline";
     const ctx = canvas.getContext("2d");
     ctx.scale(dpr, dpr);
 
-    const bgGrad = ctx.createRadialGradient(W / 2, 20, 10, W / 2, H / 2, W * 0.8);
-    if (isDark) {
-      bgGrad.addColorStop(0, "#231e16");
-      bgGrad.addColorStop(0.55, "#14120e");
-      bgGrad.addColorStop(1, "#0a0907");
+    const bgGrad = ctx.createRadialGradient(W / 2, 40, 20, W / 2, H / 2, W * 0.85);
+    if (isOled) {
+      bgGrad.addColorStop(0, "#0e0e0e");
+      bgGrad.addColorStop(0.5, "#000000");
+      bgGrad.addColorStop(1, "#000000");
+    } else if (isDark) {
+      bgGrad.addColorStop(0, "#241d16");
+      bgGrad.addColorStop(0.55, "#14110d");
+      bgGrad.addColorStop(1, "#090806");
     } else {
       bgGrad.addColorStop(0, "#ffffff");
-      bgGrad.addColorStop(0.55, "#f8f4ea");
+      bgGrad.addColorStop(0.55, "#fbf8f0");
       bgGrad.addColorStop(1, "#eee7d6");
     }
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, W, H);
 
-    ctx.strokeStyle = isDark ? "rgba(212, 171, 99, 0.36)" : "rgba(169, 127, 52, 0.32)";
+    // Card Outer Border
+    ctx.strokeStyle = isDark ? "rgba(212, 171, 99, 0.45)" : "rgba(169, 127, 52, 0.35)";
     ctx.lineWidth = 1.5;
     roundRect(ctx, 16, 16, W - 32, H - 32, 20);
     ctx.stroke();
 
+    if (isDark) {
+      ctx.strokeStyle = "rgba(212, 171, 99, 0.16)";
+      ctx.lineWidth = 1;
+      roundRect(ctx, 22, 22, W - 44, H - 44, 16);
+      ctx.stroke();
+    }
+
+    // Brand badge
     const badgeGrad = ctx.createLinearGradient(36, 36, 74, 74);
     badgeGrad.addColorStop(0, "#f4dca0");
     badgeGrad.addColorStop(0.55, "#a97f34");
@@ -7116,16 +7121,17 @@ let chartViewMode = "spline";
     ctx.textBaseline = "middle";
     ctx.fillText("Au", 55, 55);
 
+    // Header Title
     ctx.textAlign = "left";
-    ctx.fillStyle = isDark ? "#f2ede2" : "#1c1712";
+    ctx.fillStyle = isDark ? "#ffffff" : "#1c1712";
     ctx.font = "italic 600 22px 'Fraunces', Georgia, serif";
     ctx.fillText("Purchase Quotation", 86, 49);
 
-    ctx.fillStyle = isDark ? "#a89d88" : "#6b6255";
+    ctx.fillStyle = isDark ? "#d4ab63" : "#6b6255";
     ctx.font = "500 12px 'Inter', -apple-system, sans-serif";
     ctx.fillText("Gold 22k rate · Itemized Estimate", 86, 68);
 
-    ctx.strokeStyle = isDark ? "rgba(255,255,255,0.10)" : "rgba(28,23,18,0.10)";
+    ctx.strokeStyle = isDark ? "rgba(212, 171, 99, 0.22)" : "rgba(28,23,18,0.10)";
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(36, 100);
@@ -7143,50 +7149,66 @@ let chartViewMode = "spline";
       lines.push(["Old Gold Exchange Credit", textOf("receiptOldGold", "-₹ 0")]);
     }
 
-    let y = 140;
+    // Inner Box for Quotation Lines
+    const boxY = 118;
+    const boxH = 34 * lines.length + 22;
+    ctx.fillStyle = isDark ? "rgba(255, 255, 255, 0.035)" : "rgba(28, 23, 18, 0.03)";
+    ctx.strokeStyle = isDark ? "rgba(212, 171, 99, 0.16)" : "rgba(28, 23, 18, 0.07)";
+    ctx.lineWidth = 1;
+    roundRect(ctx, 36, boxY, W - 72, boxH, 14);
+    ctx.fill();
+    ctx.stroke();
+
+    let y = boxY + 28;
     ctx.font = "500 15px 'Inter', -apple-system, sans-serif";
     lines.forEach(([label, val]) => {
-      ctx.fillStyle = isDark ? "#a89d88" : "#6b6255";
+      const isCredit = label.includes("Credit");
+      ctx.fillStyle = isDark ? "#c8beaf" : "#6b6255";
       ctx.textAlign = "left";
-      ctx.fillText(label, 36, y);
-      ctx.fillStyle = isDark ? "#f2ede2" : "#1c1712";
+      ctx.fillText(label, 52, y);
+      ctx.fillStyle = isCredit ? (isDark ? "#7bd39a" : "#2d7a48") : (isDark ? "#ffffff" : "#1c1712");
+      ctx.font = "600 15px 'Inter', -apple-system, sans-serif";
       ctx.textAlign = "right";
-      ctx.fillText(val, W - 36, y);
+      ctx.fillText(val, W - 52, y);
+      ctx.font = "500 15px 'Inter', -apple-system, sans-serif";
       y += 34;
     });
 
-    y += 8;
-    ctx.strokeStyle = isDark ? "rgba(255,255,255,0.14)" : "rgba(28,23,18,0.14)";
-    ctx.beginPath();
-    ctx.moveTo(36, y);
-    ctx.lineTo(W - 36, y);
+    // Total Card Box
+    const totalY = boxY + boxH + 16;
+    ctx.fillStyle = isDark ? "rgba(212, 171, 99, 0.10)" : "rgba(169, 127, 52, 0.07)";
+    ctx.strokeStyle = isDark ? "rgba(212, 171, 99, 0.35)" : "rgba(169, 127, 52, 0.25)";
+    ctx.lineWidth = 1;
+    roundRect(ctx, 36, totalY, W - 72, 86, 14);
+    ctx.fill();
     ctx.stroke();
-    y += 44;
 
     ctx.textAlign = "left";
     ctx.font = "600 14px 'Inter', -apple-system, sans-serif";
-    ctx.fillStyle = isDark ? "#a89d88" : "#6b6255";
-    ctx.fillText(textOf("receiptTotalLabel", "Net Payable Amount"), 36, y);
+    ctx.fillStyle = isDark ? "#d4ab63" : "#8a6627";
+    ctx.fillText(textOf("receiptTotalLabel", "Net Payable Amount"), 56, totalY + 36);
 
     ctx.textAlign = "right";
-    ctx.font = "700 34px 'Fraunces', Georgia, serif";
-    ctx.fillStyle = isDark ? "#e8c988" : "#6b5223";
-    ctx.fillText(textOf("calcResult", "₹ —"), W - 36, y + 6);
+    ctx.font = "700 36px 'Fraunces', Georgia, serif";
+    ctx.fillStyle = isDark ? "#ffd700" : "#6b5223";
+    ctx.fillText(textOf("calcResult", "₹ —"), W - 56, totalY + 54);
 
-    y += 44;
+    // Subtitle & Date
+    const footY = totalY + 116;
     ctx.textAlign = "left";
     ctx.font = "500 12px 'Inter', -apple-system, sans-serif";
-    ctx.fillStyle = isDark ? "#786d5c" : "#a89d88";
-    ctx.fillText(textOf("calcSub", "Based on live 22K rate."), 36, y);
+    ctx.fillStyle = isDark ? "#a89d88" : "#8a8174";
+    ctx.fillText(textOf("calcSub", "Based on live 22K rate."), 36, footY);
 
-    const dt = (typeof live !== "undefined" && live && live.date ? dateText(live.date) : textOf("today")) || "Today";
+    const rates = (typeof getCurrentMarketRates === "function") ? getCurrentMarketRates() : { dt: "Today" };
+    const dt = rates.dt || (typeof live !== "undefined" && live && live.date ? dateText(live.date) : textOf("today")) || "Today";
     ctx.textAlign = "right";
-    ctx.fillText(dt, W - 36, y);
+    ctx.fillText(dt, W - 36, footY);
 
     ctx.textAlign = "center";
     ctx.font = "500 11px 'Inter', -apple-system, sans-serif";
-    ctx.fillStyle = isDark ? "#6b6255" : "#a89d88";
-    ctx.fillText("Gold 22k rate · Institutional Terminal", W / 2, H - 34);
+    ctx.fillStyle = isDark ? "#786d5c" : "#a89d88";
+    ctx.fillText("Gold 22k rate · Institutional Terminal Benchmark", W / 2, H - 24);
 
     return canvas;
   }
@@ -7569,8 +7591,10 @@ let chartViewMode = "spline";
   }
 
   function generateSnapshotCard() {
-    const isDark = document.documentElement.getAttribute("data-theme") === "dark" ||
-      (!document.documentElement.getAttribute("data-theme") && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    const theme = (document.documentElement.getAttribute("data-theme") || localStorage.getItem("gold_theme") || "").toLowerCase();
+    const isDark = theme === "dark" || theme === "oled" || (!theme && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    const isOled = theme === "oled";
+    const rates = (typeof getCurrentMarketRates === "function") ? getCurrentMarketRates() : { r22: 14270, r8: 114160, r24: 15567, r18: 11684, chg: 0, dt: "Today", tm: "" };
 
     const canvas = document.createElement("canvas");
     const W = 820;
@@ -7583,7 +7607,11 @@ let chartViewMode = "spline";
 
     // 1. Background with subtle radial gold ambient glow
     const bgGrad = ctx.createRadialGradient(W / 2, 20, 10, W / 2, H / 2, W * 0.75);
-    if (isDark) {
+    if (isOled) {
+      bgGrad.addColorStop(0, "#0e0e0e");
+      bgGrad.addColorStop(0.5, "#000000");
+      bgGrad.addColorStop(1, "#000000");
+    } else if (isDark) {
       bgGrad.addColorStop(0, "#231e16");
       bgGrad.addColorStop(0.55, "#14120e");
       bgGrad.addColorStop(1, "#0a0907");
@@ -7627,8 +7655,8 @@ let chartViewMode = "spline";
     ctx.fillText("LiveChennai · GoodReturns Benchmark Terminal", 86, 68);
 
     // Date / Time Badge in Top Right
-    const dateStr = (live && live.date ? dateText(live.date) : textOf("today")) || "Today";
-    const timeStr = (live && live.time ? timeText(live.time) : textOf("todayTime")) || "";
+    const dateStr = rates.dt || "Today";
+    const timeStr = rates.tm || "";
     const sessionStr = (live && live.session ? live.session + " Fix" : textOf("session", "Benchmark"));
     const datePillText = timeStr ? `${dateStr} · ${timeStr}` : `${dateStr} · ${sessionStr}`;
 
@@ -7664,17 +7692,16 @@ let chartViewMode = "spline";
     ctx.font = "italic 600 14px 'Fraunces', Georgia, serif";
     ctx.fillText("One sovereign, eight grams", 36, 128);
 
-    const rate8g = (live ? money(live.rate_8g || live.rate_22k * 8) : textOf("hero8")) || "₹ —";
+    const rate8g = money(rates.r8);
     ctx.fillStyle = isDark ? "#ffffff" : "#1c1712";
     ctx.font = "bold 54px 'Fraunces', Georgia, serif";
     ctx.fillText(rate8g, 36, 184);
 
     // Change Pill
     const rate8gWidth = ctx.measureText(rate8g).width;
-    const changeEl = document.getElementById("change8");
-    const changeText = changeEl ? (changeEl.textContent || "").trim() : "No change";
-    const isUp = (changeEl && changeEl.classList.contains("up")) || changeText.includes("+") || changeText.includes("▲");
-    const isDown = (changeEl && changeEl.classList.contains("down")) || changeText.includes("-") || changeText.includes("▼");
+    const isUp = rates.chg > 0;
+    const isDown = rates.chg < 0;
+    const changeText = isUp ? `+₹ ${rates.chg} Today` : (isDown ? `-₹ ${Math.abs(rates.chg)} Today` : "Unchanged Today");
 
     ctx.font = "bold 13px 'Inter', -apple-system, sans-serif";
     const chgWidth = ctx.measureText(changeText).width + 24;
@@ -7712,25 +7739,24 @@ let chartViewMode = "spline";
     ctx.stroke();
 
     const colW = boxW / 3;
-    const rate22 = live ? Number(live.rate_22k) : 0;
     const purities = [
       {
         title: "24K PURE GOLD",
         sub: "99.9% Fineness",
-        val: textOf("purity24", rate22 ? money(Math.round(rate22 * (0.999 / 0.916))) + "/g" : "₹ —"),
+        val: money(rates.r24) + "/g",
         desc: "Investment Benchmark"
       },
       {
         title: "22K SOVEREIGN",
         sub: "91.6% Hallmark Standard",
-        val: textOf("purity22", rate22 ? money(rate22) + "/g" : "₹ —"),
+        val: money(rates.r22) + "/g",
         desc: "Primary Trading Benchmark",
         highlight: true
       },
       {
         title: "18K JEWELLERY",
         sub: "75.0% Fineness",
-        val: textOf("purity18", rate22 ? money(Math.round(rate22 * (0.750 / 0.916))) + "/g" : "₹ —"),
+        val: money(rates.r18) + "/g",
         desc: "Studded & Diamond Craft"
       }
     ];
@@ -7799,17 +7825,18 @@ let chartViewMode = "spline";
       if (typeof haptic === "function") haptic(15);
       btn.classList.add("is-sharing");
 
-      // Prepare text summary
-      const r8 = (live ? money(live.rate_8g || live.rate_22k * 8) : textOf("hero8")) || "₹ 54,800";
-      const r1 = (live ? money(live.rate_22k) + "/g" : textOf("hero1")) || "₹ 6,850/g";
-      const dt = (live && live.date ? dateText(live.date) : textOf("today")) || "Today";
-      const chg = textOf("change8", "+₹ 200 (+0.4%)");
-      const p24 = textOf("purity24", "—");
-      const p22 = textOf("purity22", "—");
-      const p18 = textOf("purity18", "—");
+      // Prepare text summary using guaranteed current rates
+      const rates = (typeof getCurrentMarketRates === "function") ? getCurrentMarketRates() : { r22: 14270, r8: 114160, r24: 15567, r18: 11684, chg: 0, dt: "Today" };
+      const r8 = money(rates.r8);
+      const r1 = money(rates.r22) + "/g";
+      const dt = rates.dt;
+      const chg = rates.chg > 0 ? `+₹ ${rates.chg} Today` : (rates.chg < 0 ? `-₹ ${Math.abs(rates.chg)} Today` : "Unchanged Today");
+      const p24 = money(rates.r24) + "/g";
+      const p22 = money(rates.r22) + "/g";
+      const p18 = money(rates.r18) + "/g";
       const shareUrl = window.location.href.split("#")[0];
 
-      const shareText = `🪙 Gold 22K Benchmark (${dt})\n• 1 Sovereign (8g): ${r8} (${chg})\n• Per Gram: ${r1}\n• Benchmarks: 24K ${p24} · 22K ${p22} · 18K ${p18}\n${shareUrl}`;
+      const shareText = `🪙 Chennai 22K Gold Benchmark (${dt})\n• 1 Sovereign (8g): ${r8} (${chg})\n• Per Gram: ${r1}\n• Benchmarks: 24K ${p24} · 22K ${p22} · 18K ${p18}\n${shareUrl}`;
 
       // Generate card canvas synchronously
       const canvas = generateSnapshotCard();
@@ -8370,10 +8397,11 @@ html{scroll-behavior:smooth;scroll-padding-top:84px}
   // AGENT 6: 1-CLICK VIRAL INFOGRAPHIC CARD GENERATOR
   // ============================================================
   async function generateDailyShareCard() {
-    const rate = (live && Number(live.rate_22k)) ? Number(live.rate_22k) : 14130;
-    const rate8 = rate * 8;
-    const dateStr = (live && live.date) ? dateText(live.date) : "Today";
-    const changeVal = (live && Number.isFinite(Number(live.change))) ? Number(live.change) : 0;
+    const rates = (typeof getCurrentMarketRates === "function") ? getCurrentMarketRates() : { r22: 14270, r8: 114160, chg: 0, dt: "Today" };
+    const rate = rates.r22;
+    const rate8 = rates.r8;
+    const dateStr = rates.dt;
+    const changeVal = rates.chg;
     const changeText = changeVal > 0 ? "+₹ " + changeVal : (changeVal < 0 ? "-₹ " + Math.abs(changeVal) : "Unchanged");
     const isUp = changeVal > 0;
 
@@ -8541,7 +8569,8 @@ html{scroll-behavior:smooth;scroll-padding-top:84px}
   // AGENT 8: CHENNAI JEWELLER BILL AUDITOR & BARGAINING METER
   // ============================================================
   function auditJewellerBill() {
-    const rate = (live && Number(live.rate_22k)) ? Number(live.rate_22k) : 14130;
+    const rates = (typeof getCurrentMarketRates === "function") ? getCurrentMarketRates() : { r22: 14270 };
+    const rate = rates.r22;
     const w = parseFloat($("auditWeight") ? $("auditWeight").value : 16) || 0;
     const quotedBill = parseFloat($("auditShopPrice") ? $("auditShopPrice").value : 0) || 0;
     const shopVaPct = parseFloat($("auditVaPct") ? $("auditVaPct").value : 14) || 0;
@@ -8598,7 +8627,8 @@ html{scroll-behavior:smooth;scroll-padding-top:84px}
   // AGENT 9: OLD GOLD MELT & EXCHANGE VALUATION
   // ============================================================
   function calculateOldGoldMelt() {
-    const rate = (live && Number(live.rate_22k)) ? Number(live.rate_22k) : 14130;
+    const rates = (typeof getCurrentMarketRates === "function") ? getCurrentMarketRates() : { r22: 14270 };
+    const rate = rates.r22;
     const w = parseFloat($("meltWeight") ? $("meltWeight").value : 24) || 0;
     const purityKey = $("meltPurity") ? $("meltPurity").value : "916";
 
