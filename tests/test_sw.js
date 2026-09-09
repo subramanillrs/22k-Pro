@@ -124,7 +124,7 @@ function assert(cond, msg) {
 
 async function runTests() {
   print("[TEST 1] CACHE_NAME and Lifecycle registration");
-  assert(CACHE_NAME === "gold22k-shell-v6", "CACHE_NAME is gold22k-shell-v6");
+  assert(CACHE_NAME === "gold22k-shell-v7", "CACHE_NAME is gold22k-shell-v7");
 
   // Trigger install
   const installEvent = { waitUntil: (p) => p };
@@ -167,6 +167,10 @@ async function runTests() {
   const navResp = await navRespondPromise;
   assert(navResp && navResp.ok, "Navigation responded ok");
   assert(fetchCalls.length > 0, "Fetch was called for navigation");
+  const navFetch = fetchCalls[0];
+  assert(navFetch.url.includes("_nav_cb="), "Navigation fetch URL has _nav_cb= cache buster: " + navFetch.url);
+  assert(navFetch.options.cache === "no-store", "Navigation fetch options include cache: 'no-store'");
+
 
   print("[TEST 4] Data Request Offline Fallback to Cache");
   // Clear mockCache to seed test specific entry

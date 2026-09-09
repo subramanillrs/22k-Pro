@@ -13,7 +13,7 @@
 // 4. Lifecycle: `self.skipWaiting()` and `self.clients.claim()` ensure instant
 //    activation without waiting for tabs/PWA restart.
 
-const CACHE_NAME = "gold22k-shell-v6";
+const CACHE_NAME = "gold22k-shell-v7";
 
 const SHELL_FILES = [
   "./",
@@ -100,13 +100,13 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Fast network-first with cache-busting & 2500ms timeout for live and bootstrap data
+  // Fast network-first with cache-busting & timeout for live and bootstrap data
   if (isDataRequest(url)) {
     event.respondWith(handleDataRequest(event, request, url));
     return;
   }
 
-  // Fast network-first with 2000ms timeout for navigation requests (index.html shell)
+  // Fast network-first with timeout for navigation requests (index.html shell)
   if (isNavigationRequest(request, url)) {
     event.respondWith(handleNavigationRequest(event, request, url));
     return;
@@ -119,9 +119,10 @@ self.addEventListener("fetch", (event) => {
 /**
  * Handles data requests (data/live.json, data/bootstrap.json, etc.):
  * - Always bypasses HTTP disk cache using `cache: "no-store"` and `?_cb=Date.now()`.
- * - Fast network-first with 2500ms timeout.
+ * - Fast network-first with timeout.
  * - Updates cache in the background upon successful fetch.
- * - Falls back to cache on failure or if network exceeds 2500ms.
+ * - Broadcasts fresh rate payload to client windows.
+ * - Falls back to cache on failure or if network exceeds timeout.
  */
 async function handleDataRequest(event, request, url) {
   const fetchUrl = new URL(request.url);
@@ -141,7 +142,18 @@ async function handleDataRequest(event, request, url) {
         try {
           const cache = await caches.open(CACHE_NAME);
           await cache.put(request, responseToCache.clone());
-          await cache.put(url.pathname, responseToCache);
+          await cache.put(url.pathname, responseToCache.clone());
+
+          // Broadcast fresh data to all open windows so UI updates instantly
+          if (url.pathname.includes("live.json")) {
+            const clients = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+            const freshJson = await responseToCache.json().catch(() => null);
+            if (freshJson) {
+              for (const client of clients) {
+                client.postMessage({ type: "LIVE_DATA_REFRESHED", payload: freshJson });
+              }
+            }
+          }
         } catch (e) {
           console.warn("Background cache update failed for data:", e);
         }
@@ -179,16 +191,26 @@ async function handleDataRequest(event, request, url) {
 
 /**
  * Handles navigation requests (index.html / root):
- * - Network-first with 2000ms timeout.
+ * - Network-first with cache-busting & 2500ms timeout.
+ * - Always bypasses HTTP disk cache using `cache: "no-store"` and `?_nav_cb=Date.now()`.
  * - Fresh index.html served when connected.
- * - Falls back to cached shell if offline or if network takes > 2000ms.
+ * - Falls back to cached shell if offline or if network takes > 2500ms.
  * - Updates shell cache in background when network arrives.
  */
 async function handleNavigationRequest(event, request, url) {
   let cacheUpdatePromise = null;
 
+  const navUrl = new URL(request.url);
+  navUrl.searchParams.set("_nav_cb", Date.now().toString());
+
   const networkPromise = (async () => {
-    const response = await fetch(request);
+    const response = await fetch(navUrl.toString(), {
+      cache: "no-store",
+      headers: {
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "Pragma": "no-cache",
+      },
+    });
     if (response && response.ok) {
       const responseToCache = response.clone();
       cacheUpdatePromise = (async () => {
@@ -207,7 +229,7 @@ async function handleNavigationRequest(event, request, url) {
   })();
 
   const timeoutPromise = new Promise((_, reject) =>
-    setTimeout(() => reject(new Error("NAV_NETWORK_TIMEOUT_2000MS")), 2000)
+    setTimeout(() => reject(new Error("NAV_NETWORK_TIMEOUT_2500MS")), 2500)
   );
 
   try {
@@ -217,7 +239,7 @@ async function handleNavigationRequest(event, request, url) {
     }
     throw new Error("NAV_RESPONSE_NOT_OK");
   } catch (err) {
-    // Timeout (> 2000ms) or network error: fall back to cached shell
+    // Timeout (> 2500ms) or network error: fall back to cached shell
     const cached =
       (await caches.match(request, { ignoreSearch: true })) ||
       (await caches.match("index.html", { ignoreSearch: true })) ||

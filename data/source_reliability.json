@@ -1,17 +1,12 @@
 {
   "policybazaar": {
-    "attempts": 49,
+    "attempts": 50,
     "successes": 0,
     "success_rate": 0.0,
     "avg_parse_confidence": 0.5,
     "last_success_at": null,
-    "failure_streak": 49,
+    "failure_streak": 50,
     "history": [
-      {
-        "ts": "2026-09-08T19:54:00.739756+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
       {
         "ts": "2026-09-08T19:54:05.762418+05:30",
         "success": false,
@@ -93,35 +88,35 @@
         "confidence": 0.0
       },
       {
-        "ts": "2026-09-09T17:27:17.162745+05:30",
+        "ts": "2026-09-09T22:39:54.922368+05:30",
         "success": false,
         "confidence": 0.0
       },
       {
-        "ts": "2026-09-09T17:38:44.316413+05:30",
+        "ts": "2026-09-09T22:43:41.151733+05:30",
         "success": false,
         "confidence": 0.0
       },
       {
-        "ts": "2026-09-09T19:43:16.430973+05:30",
+        "ts": "2026-09-09T22:45:07.369792+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-09T22:46:58.230102+05:30",
         "success": false,
         "confidence": 0.0
       }
     ]
   },
   "bankbazaar": {
-    "attempts": 49,
+    "attempts": 50,
     "successes": 0,
     "success_rate": 0.0,
     "avg_parse_confidence": 0.5,
     "last_success_at": null,
-    "failure_streak": 49,
+    "failure_streak": 50,
     "history": [
-      {
-        "ts": "2026-09-08T19:54:00.737407+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
       {
         "ts": "2026-09-08T19:54:05.759573+05:30",
         "success": false,
@@ -203,35 +198,35 @@
         "confidence": 0.0
       },
       {
-        "ts": "2026-09-09T17:27:16.683742+05:30",
+        "ts": "2026-09-09T22:39:54.919801+05:30",
         "success": false,
         "confidence": 0.0
       },
       {
-        "ts": "2026-09-09T17:38:43.867307+05:30",
+        "ts": "2026-09-09T22:43:40.276728+05:30",
         "success": false,
         "confidence": 0.0
       },
       {
-        "ts": "2026-09-09T19:43:15.813895+05:30",
+        "ts": "2026-09-09T22:45:07.366188+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-09T22:46:58.227123+05:30",
         "success": false,
         "confidence": 0.0
       }
     ]
   },
   "moneycontrol": {
-    "attempts": 49,
+    "attempts": 50,
     "successes": 0,
     "success_rate": 0.0,
     "avg_parse_confidence": 0.5,
     "last_success_at": null,
-    "failure_streak": 49,
+    "failure_streak": 50,
     "history": [
-      {
-        "ts": "2026-09-08T19:54:00.736685+05:30",
-        "success": false,
-        "confidence": 0.0
-      },
       {
         "ts": "2026-09-08T19:54:05.759295+05:30",
         "success": false,
@@ -313,17 +308,22 @@
         "confidence": 0.0
       },
       {
-        "ts": "2026-09-09T17:27:16.758033+05:30",
+        "ts": "2026-09-09T22:39:54.919236+05:30",
         "success": false,
         "confidence": 0.0
       },
       {
-        "ts": "2026-09-09T17:38:44.803784+05:30",
+        "ts": "2026-09-09T22:43:40.769019+05:30",
         "success": false,
         "confidence": 0.0
       },
       {
-        "ts": "2026-09-09T19:43:16.188522+05:30",
+        "ts": "2026-09-09T22:45:07.367078+05:30",
+        "success": false,
+        "confidence": 0.0
+      },
+      {
+        "ts": "2026-09-09T22:46:58.227847+05:30",
         "success": false,
         "confidence": 0.0
       }

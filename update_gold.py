@@ -585,6 +585,29 @@ def get_previous_rate():
     return None
 
 
+def get_previous_close_record(before_date=None):
+    """
+    Returns the history record dict of the most recent trading day strictly BEFORE `before_date`
+    (defaults to today's date in IST).
+    """
+    if before_date is None:
+        before_date = now_ist().strftime("%Y-%m-%d")
+    records = extract_history_records(load_json(HISTORY_FILE, []))
+    prev_day_records = [
+        r for r in records
+        if isinstance(r, dict) and r.get("date") and str(r.get("date")) < str(before_date) and valid_gold_rate(r.get("rate_22k"))
+    ]
+    if prev_day_records:
+        return prev_day_records[-1]
+    return None
+
+
+def get_previous_close_rate(before_date=None):
+    rec = get_previous_close_record(before_date)
+    return int(rec["rate_22k"]) if rec and valid_gold_rate(rec.get("rate_22k")) else None
+
+
+
 # ============================================================
 # SCRAPERS
 # ============================================================
@@ -1842,6 +1865,18 @@ def save_live(
         "rate_22k"
     )
 
+    today_str = now.strftime("%Y-%m-%d")
+    prev_close_rec = get_previous_close_record(today_str)
+    previous_close = prev_close_rec.get("rate_22k") if prev_close_rec else None
+    if previous_close is None or not valid_gold_rate(previous_close):
+        previous_close = previous_rate if valid_gold_rate(previous_rate) else int(rate)
+
+    previous_close = int(previous_close)
+    daily_change = int(rate) - previous_close
+    daily_change_pct = round((daily_change / float(previous_close)) * 100, 2) if previous_close else 0.0
+    daily_change_8g = daily_change * 8
+    today_changed = (int(rate) != previous_close)
+
     # BUGFIX: "updated_at"/"last_checked_at" get refreshed to `now` on
     # *every* run, including runs where select_rate() fell back to the
     # "Previous verified rate" (sources disagreed, or the reading was
@@ -1887,16 +1922,15 @@ def save_live(
             "agreement": selected.get(
                 "agreement"
             ),
-            "changed": bool(changed),
-            "previous_rate_22k": (
-                previous_rate
-                if valid_gold_rate(
-                    previous_rate
-                )
-                else data.get(
-                    "previous_rate_22k"
-                )
-            ),
+            "changed": today_changed,
+            "previous_close_22k": previous_close,
+            "previous_close_date": (prev_close_rec.get("date") if prev_close_rec else None),
+            "previous_rate_22k": previous_close,
+            "change": daily_change,
+            "change_8g": daily_change_8g,
+            "change_pct": daily_change_pct,
+            "intraday_change": (int(rate) - int(previous_rate)) if valid_gold_rate(previous_rate) and str(data.get("date")) == today_str else 0,
+            "intraday_changed": bool(changed),
             "livechennai_rate": live_source.get(
                 "rate_22k"
             ),
@@ -1923,7 +1957,7 @@ def save_live(
                 if is_verified_reading
                 else (data.get("verified_at") or now.isoformat())
             ),
-            "change": (int(rate) - int(previous_rate)) if valid_gold_rate(previous_rate) else 0,
+
             "sources": {
                 "livechennai": live_source or None,
                 "goodreturns": good_source or None,
@@ -2013,6 +2047,11 @@ def save_history(
         if source.get("url")
     ]
 
+    prev_close_rec = get_previous_close_record(today)
+    previous_close = prev_close_rec.get("rate_22k") if prev_close_rec else None
+    daily_change = (rate - int(previous_close)) if (previous_close and valid_gold_rate(previous_close)) else 0
+    today_changed = (rate != int(previous_close)) if (previous_close and valid_gold_rate(previous_close)) else bool(changed)
+
     rec = {
         "date": today,
         "time": current.strftime(
@@ -2038,7 +2077,9 @@ def save_history(
             selected.get("rate_8g")
             or (rate * 8)
         ),
-        "changed": bool(changed),
+        "previous_close_22k": int(previous_close) if previous_close else None,
+        "change": daily_change,
+        "changed": bool(changed or today_changed),
         "source": selected.get(
             "source",
             "Unknown",
