@@ -271,6 +271,37 @@ def test_full_pipeline_run():
     print("✓ Full Pipeline Run PASSED\n")
 
 
+def test_ui_layout_and_theme_fidelity():
+    print("Testing UI Layout, 2-Mode Theme & Dynamic Card Fidelity...")
+    index_html_path = update_gold.INDEX_HTML_FILE
+    assert index_html_path.exists(), "index.html not found"
+    content = index_html_path.read_text(encoding="utf-8")
+
+    # 1. Section Reordering: todayMarket must be above ibjaSpreadSection
+    today_pos = content.find('id="todayMarket"')
+    spread_pos = content.find('id="ibjaSpreadSection"')
+    assert today_pos != -1, "#todayMarket not found in index.html"
+    assert spread_pos != -1, "#ibjaSpreadSection not found in index.html"
+    assert today_pos < spread_pos, f"Expected #todayMarket ({today_pos}) to appear before #ibjaSpreadSection ({spread_pos})"
+    assert content.count('id="todayMarket"') == 1, "Duplicate #todayMarket found in index.html"
+
+    # 2. 2-Mode Theme Toggle & OLED Sun Icon
+    assert 'html[data-theme="oled"] .theme-toggle .icon-sun' in content, "OLED theme toggle icon rule missing"
+    assert 'next = (current === "oled" || current === "dark") ? "light" : "oled"' in content, "2-mode toggle logic missing"
+    assert 'Day Theme' in content and 'Night Theme' in content, "Day/Night theme toast missing"
+
+    # 3. Compact Feed Health Container
+    assert '.health-collapsible' in content, ".health-collapsible missing"
+    assert 'padding: 4px 10px' in content, "Compact padding 4px 10px missing from health-collapsible summary"
+
+    # 4. Dynamic Share Card and Receipt Card Themes & Salem Parity
+    assert 'function generateSnapshotCard()' in content, "generateSnapshotCard missing"
+    assert 'function generateReceiptCard()' in content, "generateReceiptCard missing"
+    assert 'Salem' in content and 'Regional Parity: Salem' in content, "Regional Parity Salem missing from snapshot card"
+
+    print("✓ UI Layout, 2-Mode Theme & Dynamic Card Fidelity PASSED\n")
+
+
 if __name__ == "__main__":
     print("============================================================")
     print("RUNNING PIPELINE & DEEPTECH QUANT TEST SUITE")
@@ -282,6 +313,7 @@ if __name__ == "__main__":
     test_probabilistic_fix_timing()
     test_instant_cache_generator()
     test_full_pipeline_run()
+    test_ui_layout_and_theme_fidelity()
     print("============================================================")
     print("ALL TESTS PASSED SUCCESSFULLY (100% GREEN)")
     print("============================================================")
