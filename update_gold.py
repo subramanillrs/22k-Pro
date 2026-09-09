@@ -1237,6 +1237,7 @@ def compute_submarket_spreads(
     showroom_markup=180,
     coimbatore_basis=-15,
     madurai_basis=15,
+    salem_basis=-10,
 ):
     """
     Chennai Sub-Market Basis & Wholesale Spread Engine:
@@ -1304,7 +1305,7 @@ def compute_submarket_spreads(
     trichy_22k = r22 + trichy_basis
     trichy_basis_pct = round((float(trichy_basis) / float(r22)) * 100.0, 2)
 
-    salem_basis = -10
+    salem_basis = int(round(float(salem_basis)))
     salem_22k = r22 + salem_basis
     salem_basis_pct = round((float(salem_basis) / float(r22)) * 100.0, 2)
 

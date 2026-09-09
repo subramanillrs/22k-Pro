@@ -207,6 +207,61 @@ function renderLive(d) {
   }
 }
 
+function computeSubmarketSpreads(rate22k, options = {}) {
+  const rate = Number(rate22k);
+  if (!Number.isFinite(rate) || rate <= 0) return null;
+  const sowcarpetDiscount = Number.isFinite(options.sowcarpetDiscount) ? Number(options.sowcarpetDiscount) : -45;
+  const showroomSpread = Number.isFinite(options.showroomMarkup) ? Number(options.showroomMarkup) : 180;
+  const coimbatoreBasis = Number.isFinite(options.coimbatoreBasis) ? Number(options.coimbatoreBasis) : -15;
+  const maduraiBasis = Number.isFinite(options.maduraiBasis) ? Number(options.maduraiBasis) : 15;
+  const salemBasis = Number.isFinite(options.salemBasis) ? Number(options.salemBasis) : -10;
+
+  const sowcarpetWholesale22k = Math.round(rate + sowcarpetDiscount);
+  const retailShowroomRate22k = Math.round(rate + showroomSpread);
+  const coimbatoreRate22k = Math.round(rate + coimbatoreBasis);
+  const maduraiRate22k = Math.round(rate + maduraiBasis);
+  const salemRate22k = Math.round(rate + salemBasis);
+
+  return {
+    sowcarpet_wholesale_22k: sowcarpetWholesale22k,
+    retail_showroom_rate_22k: retailShowroomRate22k,
+    coimbatore_rate_22k: coimbatoreRate22k,
+    coimbatore_basis: coimbatoreBasis,
+    madurai_rate_22k: maduraiRate22k,
+    madurai_basis: maduraiBasis,
+    salem_rate_22k: salemRate22k,
+    salem_basis: salemBasis
+  };
+}
+
+function updateSubmarketSpreadDashboard(liveData = live) {
+  if (!liveData) return;
+  const rate22 = Number(liveData.rate_22k);
+  if (!Number.isFinite(rate22) || rate22 <= 0) return;
+
+  const backendSubmarkets = liveData.submarket_spreads;
+  const spreads = computeSubmarketSpreads(rate22);
+  if (!spreads) return;
+
+  const cbeRate = (backendSubmarkets && backendSubmarkets.regional_parity && backendSubmarkets.regional_parity.coimbatore && backendSubmarkets.regional_parity.coimbatore.rate_22k) || spreads.coimbatore_rate_22k;
+  const cbeBasis = (backendSubmarkets && backendSubmarkets.regional_parity && backendSubmarkets.regional_parity.coimbatore && backendSubmarkets.regional_parity.coimbatore.basis_spread) ?? spreads.coimbatore_basis;
+
+  const madRate = (backendSubmarkets && backendSubmarkets.regional_parity && backendSubmarkets.regional_parity.madurai && backendSubmarkets.regional_parity.madurai.rate_22k) || spreads.madurai_rate_22k;
+  const madBasis = (backendSubmarkets && backendSubmarkets.regional_parity && backendSubmarkets.regional_parity.madurai && backendSubmarkets.regional_parity.madurai.basis_spread) ?? spreads.madurai_basis;
+
+  const salemRate = (backendSubmarkets && backendSubmarkets.regional_parity && backendSubmarkets.regional_parity.salem && backendSubmarkets.regional_parity.salem.rate_22k) || spreads.salem_rate_22k;
+  const salemBasis = (backendSubmarkets && backendSubmarkets.regional_parity && backendSubmarkets.regional_parity.salem && backendSubmarkets.regional_parity.salem.basis_spread) ?? spreads.salem_basis;
+
+  if ($("coimbatoreRateVal")) $("coimbatoreRateVal").textContent = money(cbeRate);
+  if ($("coimbatoreBasisVal")) $("coimbatoreBasisVal").textContent = `(${cbeBasis >= 0 ? "+" : "-"}₹${Math.abs(cbeBasis)})`;
+
+  if ($("maduraiRateVal")) $("maduraiRateVal").textContent = money(madRate);
+  if ($("maduraiBasisVal")) $("maduraiBasisVal").textContent = `(${madBasis >= 0 ? "+" : "-"}₹${Math.abs(madBasis)})`;
+
+  if ($("salemRateVal")) $("salemRateVal").textContent = money(salemRate);
+  if ($("salemBasisVal")) $("salemBasisVal").textContent = `(${salemBasis >= 0 ? "+" : "-"}₹${Math.abs(salemBasis)})`;
+}
+
 print("============================================================");
 print("TESTING UI, INSTANT HYDRATION & DAILY CHANGE BUG FIXES");
 print("============================================================");
@@ -345,6 +400,43 @@ if (lightCheck.isDark === false && lightCheck.isOled === false) {
   throw new Error("[TEST 7c FAIL]");
 }
 
+// [TEST 8] Regional Basis Parity including Salem
+const testSubmarketLive = {
+  rate_22k: 14145,
+  submarket_spreads: {
+    regional_parity: {
+      coimbatore: { rate_22k: 14130, basis_spread: -15 },
+      madurai: { rate_22k: 14160, basis_spread: 15 },
+      salem: { rate_22k: 14135, basis_spread: -10 }
+    }
+  }
+};
+
+updateSubmarketSpreadDashboard(testSubmarketLive);
+
+const salemRateEl = $("salemRateVal");
+const salemBasisEl = $("salemBasisVal");
+
+if (salemRateEl.textContent === "₹ 14,135") {
+  print("  ✓ [TEST 8a] Regional Basis Parity for Salem rate correctly displayed '₹ 14,135'");
+} else {
+  throw new Error("[TEST 8a FAIL] Expected '₹ 14,135', got: " + salemRateEl.textContent);
+}
+
+if (salemBasisEl.textContent === "(-₹10)") {
+  print("  ✓ [TEST 8b] Regional Basis Parity for Salem basis correctly displayed '(-₹10)'");
+} else {
+  throw new Error("[TEST 8b FAIL] Expected '(-₹10)', got: " + salemBasisEl.textContent);
+}
+
+const computedSalem = computeSubmarketSpreads(14145);
+if (computedSalem.salem_rate_22k === 14135 && computedSalem.salem_basis === -10) {
+  print("  ✓ [TEST 8c] computeSubmarketSpreads correctly computed Salem rate (14135) and basis (-10)");
+} else {
+  throw new Error("[TEST 8c FAIL] computeSubmarketSpreads failed for Salem: " + JSON.stringify(computedSalem));
+}
+
 print("============================================================");
 print("ALL UI & DAILY CHANGE BUG FIX TESTS PASSED 100%! ✓");
 print("============================================================");
+

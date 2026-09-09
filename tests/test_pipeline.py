@@ -70,6 +70,11 @@ def test_chennai_submarket_spreads():
     assert mad["basis_spread"] == 15
     assert mad["parity_status"] == "Premium"
 
+    salem = payload["regional_parity"]["salem"]
+    assert salem["rate_22k"] == rate_22k - 10
+    assert salem["basis_spread"] == -10
+    assert salem["parity_status"] == "Discount"
+
     # Test Bullion-to-Retail Value Chain Arbitrage
     arb = payload["value_chain_arbitrage"]
     assert arb["gross_spread_amount"] == 180 - (-45)  # 225
@@ -85,6 +90,7 @@ def test_chennai_submarket_spreads():
     print(f"  T. Nagar Showroom Retail: ₹{sub['retail_showroom_rate_22k']}/g (+{sub['retail_showroom_markup_pct']}%)")
     print(f"  Coimbatore Basis: ₹{cbe['rate_22k']}/g ({cbe['basis_spread']:+d}/g)")
     print(f"  Madurai Basis: ₹{mad['rate_22k']}/g ({mad['basis_spread']:+d}/g)")
+    print(f"  Salem Basis: ₹{salem['rate_22k']}/g ({salem['basis_spread']:+d}/g)")
     print(f"  Value Chain Arbitrage: ₹{arb['gross_spread_amount']}/g ({arb['gross_spread_pct']}%)")
     print("✓ Chennai Sub-Market Basis & Wholesale Spread Engine PASSED\n")
 
