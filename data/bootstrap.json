@@ -1,5 +1,5 @@
 {
-  "baked_at": "2026-09-10T17:21:07.863471+05:30",
+  "baked_at": "2026-09-10T17:33:10.112812+05:30",
   "live": {
     "rate_22k": 14255,
     "rate_8g": 114040,
@@ -7,8 +7,8 @@
     "city": "Chennai",
     "purity": "22K",
     "date": "2026-09-10",
-    "time": "17:21:07",
-    "timestamp": "2026-09-10T17:21:07.825903+05:30",
+    "time": "17:33:10",
+    "timestamp": "2026-09-10T17:33:10.065026+05:30",
     "changed": true,
     "previous_rate_22k": 14145,
     "change": 110,
@@ -19,13 +19,13 @@
         "rate_24k": 15551,
         "rate_8g": 114040,
         "url": "https://www.livechennai.com/gold_silverrate.asp",
-        "fetched_at": "2026-09-10T17:21:07.292150+05:30"
+        "fetched_at": "2026-09-10T17:33:09.412125+05:30"
       },
       "goodreturns": {
         "source": "GoodReturns",
         "rate_22k": 14255,
         "url": "https://www.goodreturns.in/gold-rates/chennai.html",
-        "fetched_at": "2026-09-10T17:21:06.621833+05:30"
+        "fetched_at": "2026-09-10T17:33:08.753512+05:30"
       },
       "ibja": {
         "date": "2026-09-10",
@@ -46,15 +46,15 @@
         "purity_24k": "999",
         "source": "IBJA Official (ibjarates.com)",
         "url": "https://ibjarates.com",
-        "fetched_at": "2026-09-10T17:21:06.376444+05:30",
+        "fetched_at": "2026-09-10T17:33:08.529091+05:30",
         "status": "success",
         "is_fallback": false
       }
     },
     "source_update_times": [
-      "2026-09-10T17:21:07.292150+05:30",
-      "2026-09-10T17:21:06.621833+05:30",
-      "2026-09-10T17:21:06.376444+05:30"
+      "2026-09-10T17:33:09.412125+05:30",
+      "2026-09-10T17:33:08.753512+05:30",
+      "2026-09-10T17:33:08.529091+05:30"
     ],
     "source_rates": [
       14255,
@@ -62,9 +62,9 @@
       14041
     ],
     "sources_agree": true,
-    "last_checked_at": "2026-09-10T17:21:07.825903+05:30",
+    "last_checked_at": "2026-09-10T17:33:10.065026+05:30",
     "source": "LiveChennai (MJDMA verified)",
-    "last_checked": "2026-09-10T17:21:07.825903+05:30",
+    "last_checked": "2026-09-10T17:33:10.065026+05:30",
     "agreement": true,
     "session": "PM",
     "rate_24k": 15551,
@@ -72,12 +72,12 @@
     "weight_8g": 114040,
     "livechennai_rate": 14255,
     "goodreturns_rate": 14255,
-    "livechennai_fetched_at": "2026-09-10T17:21:07.292150+05:30",
-    "goodreturns_fetched_at": "2026-09-10T17:21:06.621833+05:30",
+    "livechennai_fetched_at": "2026-09-10T17:33:09.412125+05:30",
+    "goodreturns_fetched_at": "2026-09-10T17:33:08.753512+05:30",
     "livechennai_url": "https://www.livechennai.com/gold_silverrate.asp",
     "goodreturns_url": "https://www.goodreturns.in/gold-rates/chennai.html",
-    "updated_at": "2026-09-10T17:21:07.825903+05:30",
-    "verified_at": "2026-09-10T17:21:07.825903+05:30",
+    "updated_at": "2026-09-10T17:33:10.065026+05:30",
+    "verified_at": "2026-09-10T17:33:10.065026+05:30",
     "ibja": {
       "date": "2026-09-10",
       "rate_22k": 14041,
@@ -97,7 +97,7 @@
       "purity_24k": "999",
       "source": "IBJA Official (ibjarates.com)",
       "url": "https://ibjarates.com",
-      "fetched_at": "2026-09-10T17:21:06.376444+05:30",
+      "fetched_at": "2026-09-10T17:33:08.529091+05:30",
       "status": "success",
       "is_fallback": false
     },
@@ -106,8 +106,8 @@
     "chennai_premium_amount": 214,
     "chennai_premium_pct": 1.52,
     "consensus": {
-      "consensus_rate": 14234,
-      "confidence": 95,
+      "consensus_rate": 14255,
+      "confidence": 100,
       "sources_count": 3,
       "breakdown": {
         "livechennai": {
@@ -116,8 +116,8 @@
           "is_outlier": false,
           "base_weight": 0.4,
           "reliability_weight": 0.4,
-          "deviation": 21,
-          "deviation_pct": 0.15,
+          "deviation": 0,
+          "deviation_pct": 0.0,
           "effective_weight": 0.5
         },
         "goodreturns": {
@@ -126,18 +126,18 @@
           "is_outlier": false,
           "base_weight": 0.25,
           "reliability_weight": 0.25,
-          "deviation": 21,
-          "deviation_pct": 0.15,
+          "deviation": 0,
+          "deviation_pct": 0.0,
           "effective_weight": 0.312
         },
         "ibja": {
-          "rate": 14145,
-          "modified_z": 2.6,
+          "rate": 14255,
+          "modified_z": 0.0,
           "is_outlier": false,
           "base_weight": 0.15,
           "reliability_weight": 0.15,
-          "deviation": -89,
-          "deviation_pct": -0.63,
+          "deviation": 0,
+          "deviation_pct": 0.0,
           "effective_weight": 0.187
         }
       },
@@ -149,7 +149,7 @@
     "retail_showroom_rate_22k": 14435,
     "retail_showroom_markup_pct": 1.26,
     "submarket_spreads": {
-      "calculated_at": "2026-09-10T17:21:07.825885+05:30",
+      "calculated_at": "2026-09-10T17:33:10.065006+05:30",
       "reference_mjdma_22k": 14255,
       "reference_mjdma_24k": 15551,
       "sowcarpet": {
@@ -256,8 +256,8 @@
     "previous_close_date": "2026-09-09",
     "change_8g": 880,
     "change_pct": 0.78,
-    "intraday_change": 110,
-    "intraday_changed": true
+    "intraday_change": 0,
+    "intraday_changed": false
   },
   "history": [
     {
@@ -1194,8 +1194,8 @@
     },
     {
       "date": "2026-09-10",
-      "time": "17:21:07",
-      "timestamp": "2026-09-10T17:21:07.832369+05:30",
+      "time": "17:33:10",
+      "timestamp": "2026-09-10T17:33:10.073823+05:30",
       "session": "PM",
       "rate_22k": 14255,
       "rate_24k": 15551,
@@ -1219,7 +1219,7 @@
     }
   ],
   "quant": {
-    "calculated_at": "2026-09-10T17:21:07.860737+05:30",
+    "calculated_at": "2026-09-10T17:33:10.110096+05:30",
     "rate_22k": 14255,
     "rate_8g": 114040,
     "volatility_30d_annualized": 0.1639,
@@ -1239,7 +1239,7 @@
     "retail_showroom_rate_22k": 14435,
     "retail_showroom_markup_pct": 1.26,
     "submarket_spreads": {
-      "calculated_at": "2026-09-10T17:21:07.861345+05:30",
+      "calculated_at": "2026-09-10T17:33:10.110715+05:30",
       "reference_mjdma_22k": 14255,
       "reference_mjdma_24k": 15551,
       "sowcarpet": {
@@ -1408,12 +1408,12 @@
     "purity_24k": "999",
     "source": "IBJA Official (ibjarates.com)",
     "url": "https://ibjarates.com",
-    "fetched_at": "2026-09-10T17:21:06.376444+05:30",
+    "fetched_at": "2026-09-10T17:33:08.529091+05:30",
     "status": "success",
     "is_fallback": false
   },
   "signals": {
-    "calculated_at": "2026-09-10T17:21:07.862309+05:30",
+    "calculated_at": "2026-09-10T17:33:10.111649+05:30",
     "price_points_used": 30,
     "rsi": {
       "rsi_14": 33.15,
