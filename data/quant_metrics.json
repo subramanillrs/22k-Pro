@@ -1,5 +1,5 @@
 {
-  "calculated_at": "2026-09-13T00:27:09.909720+05:30",
+  "calculated_at": "2026-09-13T02:48:18.254610+05:30",
   "rate_22k": 14170,
   "rate_8g": 113360,
   "volatility_30d_annualized": 0.1599,
@@ -19,7 +19,7 @@
   "retail_showroom_rate_22k": 14350,
   "retail_showroom_markup_pct": 1.27,
   "submarket_spreads": {
-    "calculated_at": "2026-09-13T00:27:09.910230+05:30",
+    "calculated_at": "2026-09-13T02:48:18.255256+05:30",
     "reference_mjdma_22k": 14170,
     "reference_mjdma_24k": 15458,
     "sowcarpet": {
