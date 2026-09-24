@@ -1,9 +1,9 @@
 {
-  "date": "2026-09-24",
-  "rate_22k": 13812,
-  "rate_24k": 6219,
-  "rate_22k_10g": 138119,
-  "rate_24k_10g": 62188,
+  "date": "2026-09-25",
+  "rate_22k": 13846,
+  "rate_24k": 6248,
+  "rate_22k_10g": 138465,
+  "rate_24k_10g": 62480,
   "am_22k": 13846,
   "pm_22k": 13812,
   "am_24k": 6248,
@@ -17,7 +17,7 @@
   "purity_24k": "999",
   "source": "IBJA Official (ibjarates.com)",
   "url": "https://ibjarates.com",
-  "fetched_at": "2026-09-24T20:10:42.001902+05:30",
+  "fetched_at": "2026-09-25T00:11:05.836586+05:30",
   "status": "success",
   "is_fallback": false
 }
