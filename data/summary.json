@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-01T02:22:46.321006+05:30",
+  "generated_at": "2026-10-01T02:41:48.610573+05:30",
   "all_time_high": {
     "rate_22k": 16800,
     "date": "2026-01-29"
@@ -27,7 +27,7 @@
   },
   "total_records": 1235,
   "quant": {
-    "calculated_at": "2026-10-01T02:22:46.304757+05:30",
+    "calculated_at": "2026-10-01T02:41:48.597198+05:30",
     "rate_22k": 13710,
     "rate_8g": 109680,
     "volatility_30d_annualized": 0.1433,
@@ -47,7 +47,7 @@
     "retail_showroom_rate_22k": 13890,
     "retail_showroom_markup_pct": 1.31,
     "submarket_spreads": {
-      "calculated_at": "2026-10-01T02:22:46.305435+05:30",
+      "calculated_at": "2026-10-01T02:41:48.597932+05:30",
       "reference_mjdma_22k": 13710,
       "reference_mjdma_24k": 14956,
       "sowcarpet": {
