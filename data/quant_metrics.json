@@ -1,25 +1,25 @@
 {
-  "calculated_at": "2026-09-30T21:47:33.489066+05:30",
+  "calculated_at": "2026-10-01T02:22:46.304757+05:30",
   "rate_22k": 13710,
   "rate_8g": 109680,
-  "volatility_30d_annualized": 0.145,
-  "volatility_30d_pct": 14.5,
-  "volatility_daily_pct": 0.913,
-  "var_95_1d_amount": 205.97,
-  "var_95_1d_pct": 1.5,
-  "var_95_1d_8g_amount": 1647.78,
-  "var_95_1d_lower_bound": 13504,
-  "var_95_1d_upper_bound": 13916,
-  "max_drawdown_30d_pct": 5.96,
-  "chennai_premium_amount": 2618,
-  "chennai_premium_pct": 23.6,
+  "volatility_30d_annualized": 0.1433,
+  "volatility_30d_pct": 14.33,
+  "volatility_daily_pct": 0.903,
+  "var_95_1d_amount": 203.61,
+  "var_95_1d_pct": 1.49,
+  "var_95_1d_8g_amount": 1628.87,
+  "var_95_1d_lower_bound": 13506,
+  "var_95_1d_upper_bound": 13914,
+  "max_drawdown_30d_pct": 5.08,
+  "chennai_premium_amount": 2582,
+  "chennai_premium_pct": 23.2,
   "sowcarpet_wholesale_22k": 13665,
   "sowcarpet_discount_pct": -0.33,
   "retail_showroom_spread": 180,
   "retail_showroom_rate_22k": 13890,
   "retail_showroom_markup_pct": 1.31,
   "submarket_spreads": {
-    "calculated_at": "2026-09-30T21:47:33.489691+05:30",
+    "calculated_at": "2026-10-01T02:22:46.305435+05:30",
     "reference_mjdma_22k": 13710,
     "reference_mjdma_24k": 14956,
     "sowcarpet": {
@@ -122,7 +122,7 @@
       "description": "Gross margin between Sowcarpet wholesale raw bar cash rate and T. Nagar showroom retail price"
     }
   },
-  "ibja_benchmark_rate": 11092,
+  "ibja_benchmark_rate": 11128,
   "macro_parity": {
     "implied_comex_usd_oz": 4613.5,
     "usd_inr_benchmark": 87.8,
@@ -135,14 +135,14 @@
   },
   "volatility_cone": {
     "horizon_7d": {
-      "lower": 13176,
-      "upper": 14266
+      "lower": 13182,
+      "upper": 14259
     },
     "horizon_30d": {
-      "lower": 12627,
-      "upper": 14886
+      "lower": 12639,
+      "upper": 14872
     },
-    "prob_test_upper_pct": 3.6,
+    "prob_test_upper_pct": 3.4,
     "prob_test_lower_pct": 5.0
   },
   "trade_standards": {
