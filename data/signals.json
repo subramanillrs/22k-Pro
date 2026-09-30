@@ -1,5 +1,5 @@
 {
-  "calculated_at": "2026-09-30T18:50:10.604253+05:30",
+  "calculated_at": "2026-09-30T21:47:33.490645+05:30",
   "price_points_used": 30,
   "rsi": {
     "rsi_14": 33.33,
@@ -28,14 +28,14 @@
     "near_resistance": false
   },
   "sentiment": {
-    "sentiment_score": 46,
-    "sentiment_label": "Neutral",
-    "action_hint": "High consolidation; maintain disciplined stop levels.",
+    "sentiment_score": 40,
+    "sentiment_label": "Bearish",
+    "action_hint": "Bearish drift; wait for support stabilization before buying.",
     "components": {
       "rsi_score": 33.33,
       "momentum_score": 34.99,
       "var_risk_score": 68.0,
-      "spread_score": 80.65
+      "spread_score": 40.0
     }
   }
 }
