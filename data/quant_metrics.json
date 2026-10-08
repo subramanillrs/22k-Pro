@@ -1,15 +1,15 @@
 {
-  "calculated_at": "2026-10-08T22:44:54.741478+05:30",
+  "calculated_at": "2026-10-09T03:19:37.196749+05:30",
   "rate_22k": 13710,
   "rate_8g": 109680,
-  "volatility_30d_annualized": 0.105,
-  "volatility_30d_pct": 10.5,
-  "volatility_daily_pct": 0.661,
-  "var_95_1d_amount": 149.14,
-  "var_95_1d_pct": 1.09,
-  "var_95_1d_8g_amount": 1193.13,
-  "var_95_1d_lower_bound": 13561,
-  "var_95_1d_upper_bound": 13859,
+  "volatility_30d_annualized": 0.1026,
+  "volatility_30d_pct": 10.26,
+  "volatility_daily_pct": 0.646,
+  "var_95_1d_amount": 145.78,
+  "var_95_1d_pct": 1.06,
+  "var_95_1d_8g_amount": 1166.24,
+  "var_95_1d_lower_bound": 13564,
+  "var_95_1d_upper_bound": 13856,
   "max_drawdown_30d_pct": 4.52,
   "chennai_premium_amount": 137,
   "chennai_premium_pct": 1.01,
@@ -19,7 +19,7 @@
   "retail_showroom_rate_22k": 13890,
   "retail_showroom_markup_pct": 1.31,
   "submarket_spreads": {
-    "calculated_at": "2026-10-08T22:44:54.742140+05:30",
+    "calculated_at": "2026-10-09T03:19:37.197246+05:30",
     "reference_mjdma_22k": 13710,
     "reference_mjdma_24k": 14956,
     "sowcarpet": {
@@ -135,14 +135,14 @@
   },
   "volatility_cone": {
     "horizon_7d": {
-      "lower": 13321,
-      "upper": 14110
+      "lower": 13330,
+      "upper": 14101
     },
     "horizon_30d": {
-      "lower": 12917,
-      "upper": 14552
+      "lower": 12934,
+      "upper": 14532
     },
-    "prob_test_upper_pct": 0.7,
+    "prob_test_upper_pct": 0.6,
     "prob_test_lower_pct": 5.0
   },
   "trade_standards": {
