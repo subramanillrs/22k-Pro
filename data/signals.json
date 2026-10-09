@@ -1,39 +1,39 @@
 {
-  "calculated_at": "2026-10-09T22:20:45.861081+05:30",
+  "calculated_at": "2026-10-10T02:53:39.056108+05:30",
   "price_points_used": 30,
   "rsi": {
-    "rsi_14": 38.32,
+    "rsi_14": 38.79,
     "rsi_zone": "neutral",
     "rsi_signal": "HOLD"
   },
   "ema_crossover": {
-    "ema_9": 13743.54,
-    "ema_21": 13842.82,
-    "momentum": -99.28,
-    "momentum_pct": -0.7172,
+    "ema_9": 13757.71,
+    "ema_21": 13834.56,
+    "momentum": -76.86,
+    "momentum_pct": -0.5555,
     "signal": "bearish"
   },
   "forecast": {
-    "forecast_1d": 13652,
-    "forecast_3d": 13620,
-    "forecast_7d": 13554,
+    "forecast_1d": 13700,
+    "forecast_3d": 13679,
+    "forecast_7d": 13639,
     "trend_direction": "down",
     "confidence": 0.82
   },
   "support_resistance": {
     "support": 13640,
-    "resistance": 14010,
-    "pivot": 13822,
+    "resistance": 14000,
+    "pivot": 13818,
     "near_support": false,
     "near_resistance": false
   },
   "sentiment": {
-    "sentiment_score": 43,
+    "sentiment_score": 44,
     "sentiment_label": "Neutral",
     "action_hint": "High consolidation; maintain disciplined stop levels.",
     "components": {
-      "rsi_score": 38.32,
-      "momentum_score": 39.24,
+      "rsi_score": 38.79,
+      "momentum_score": 41.67,
       "var_risk_score": 68.0,
       "spread_score": 40.0
     }
