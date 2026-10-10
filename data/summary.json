@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-10T07:01:14.866585+05:30",
+  "generated_at": "2026-10-10T13:19:21.572090+05:30",
   "all_time_high": {
     "rate_22k": 16800,
     "date": "2026-01-29"
@@ -10,63 +10,63 @@
   },
   "current_month": {
     "month": "2026-10",
-    "average_22k": 13711,
-    "high": 13815,
+    "average_22k": 13716,
+    "high": 13880,
     "low": 13660
   },
   "current_year": {
     "year": "2026",
-    "average_22k": 14068,
+    "average_22k": 14067,
     "high": 16800,
     "low": 12440
   },
   "last_30_records": {
-    "average_22k": 13942,
+    "average_22k": 13944,
     "high": 14285,
     "low": 13640
   },
-  "total_records": 1268,
+  "total_records": 1269,
   "quant": {
-    "calculated_at": "2026-10-10T07:01:14.851573+05:30",
-    "rate_22k": 13815,
-    "rate_8g": 110520,
-    "volatility_30d_annualized": 0.1025,
-    "volatility_30d_pct": 10.25,
-    "volatility_daily_pct": 0.646,
-    "var_95_1d_amount": 146.77,
-    "var_95_1d_pct": 1.06,
-    "var_95_1d_8g_amount": 1174.18,
-    "var_95_1d_lower_bound": 13668,
-    "var_95_1d_upper_bound": 13962,
+    "calculated_at": "2026-10-10T13:19:21.557351+05:30",
+    "rate_22k": 13880,
+    "rate_8g": 111040,
+    "volatility_30d_annualized": 0.1038,
+    "volatility_30d_pct": 10.38,
+    "volatility_daily_pct": 0.654,
+    "var_95_1d_amount": 149.35,
+    "var_95_1d_pct": 1.08,
+    "var_95_1d_8g_amount": 1194.78,
+    "var_95_1d_lower_bound": 13731,
+    "var_95_1d_upper_bound": 14029,
     "max_drawdown_30d_pct": 4.52,
-    "chennai_premium_amount": -1032,
-    "chennai_premium_pct": -6.95,
-    "sowcarpet_wholesale_22k": 13770,
-    "sowcarpet_discount_pct": -0.33,
+    "chennai_premium_amount": -967,
+    "chennai_premium_pct": -6.51,
+    "sowcarpet_wholesale_22k": 13835,
+    "sowcarpet_discount_pct": -0.32,
     "retail_showroom_spread": 180,
-    "retail_showroom_rate_22k": 13995,
+    "retail_showroom_rate_22k": 14060,
     "retail_showroom_markup_pct": 1.3,
     "submarket_spreads": {
-      "calculated_at": "2026-10-10T07:01:14.852149+05:30",
-      "reference_mjdma_22k": 13815,
-      "reference_mjdma_24k": 15071,
+      "calculated_at": "2026-10-10T13:19:21.557994+05:30",
+      "reference_mjdma_22k": 13880,
+      "reference_mjdma_24k": 15142,
       "sowcarpet": {
         "hub_name": "Sowcarpet Wholesale Bullion",
         "locality": "Mint Street / NSC Bose Road",
         "market_type": "wholesale_bullion",
-        "rate_22k": 13770,
-        "rate_24k": 15022,
-        "rate_8g": 110160,
+        "rate_22k": 13835,
+        "rate_24k": 15093,
+        "rate_8g": 110680,
         "discount_per_g": -45,
-        "discount_pct": -0.33,
+        "discount_pct": -0.32,
         "discount_range": {
           "min_discount": -65,
           "max_discount": -35,
           "benchmark_discount": -45
         },
         "rate_range": {
-          "min_rate_22k": 13750,
-          "max_rate_22k": 13780
+          "min_rate_22k": 13815,
+          "max_rate_22k": 13845
         },
         "notes": "Raw bullion cast bars traded wholesale ex-GST, ex-making charges"
       },
@@ -74,9 +74,9 @@
         "hub_name": "T. Nagar Showroom Retail",
         "locality": "Usman Road / Panagal Park",
         "market_type": "retail_showroom",
-        "rate_22k": 13995,
-        "rate_24k": 15267,
-        "rate_8g": 111960,
+        "rate_22k": 14060,
+        "rate_24k": 15338,
+        "rate_8g": 112480,
         "retail_showroom_spread": 180,
         "markup_pct": 1.3,
         "markup_range": {
@@ -91,8 +91,8 @@
           "city": "Coimbatore",
           "region": "Western Tamil Nadu",
           "cluster_role": "Industrial Jewelry Manufacturing & Casting Cluster",
-          "rate_22k": 13800,
-          "rate_8g": 110400,
+          "rate_22k": 13865,
+          "rate_8g": 110920,
           "basis_spread": -15,
           "basis_pct": -0.11,
           "basis_range": [
@@ -105,8 +105,8 @@
           "city": "Madurai",
           "region": "Southern Tamil Nadu",
           "cluster_role": "Temple Jewelry & Southern Cultural Retail Hub",
-          "rate_22k": 13830,
-          "rate_8g": 110640,
+          "rate_22k": 13895,
+          "rate_8g": 111160,
           "basis_spread": 15,
           "basis_pct": 0.11,
           "basis_range": [
@@ -119,8 +119,8 @@
           "city": "Tiruchirappalli",
           "region": "Central Tamil Nadu",
           "cluster_role": "Central Transit & Regional Distribution Corridor",
-          "rate_22k": 13810,
-          "rate_8g": 110480,
+          "rate_22k": 13875,
+          "rate_8g": 111000,
           "basis_spread": -5,
           "basis_pct": -0.04,
           "basis_range": [
@@ -133,8 +133,8 @@
           "city": "Salem",
           "region": "North-Western Tamil Nadu",
           "cluster_role": "Bullion Refining & Goldsmithing Cluster",
-          "rate_22k": 13805,
-          "rate_8g": 110440,
+          "rate_22k": 13870,
+          "rate_8g": 110960,
           "basis_spread": -10,
           "basis_pct": -0.07,
           "basis_range": [
@@ -152,25 +152,25 @@
     },
     "ibja_benchmark_rate": 14847,
     "macro_parity": {
-      "implied_comex_usd_oz": 4648.8,
+      "implied_comex_usd_oz": 4670.7,
       "usd_inr_benchmark": 87.8,
       "customs_duty_pct": 11.5,
       "gst_pct": 3.0,
-      "import_parity_22k": 13815,
+      "import_parity_22k": 13880,
       "physical_premium_amount": 0,
       "physical_premium_pct": 0.0,
       "parity_status": "Parity Aligned"
     },
     "volatility_cone": {
       "horizon_7d": {
-        "lower": 13432,
-        "upper": 14209
+        "lower": 13490,
+        "upper": 14281
       },
       "horizon_30d": {
-        "lower": 13034,
-        "upper": 14643
+        "lower": 13086,
+        "upper": 14723
       },
-      "prob_test_upper_pct": 1.0,
+      "prob_test_upper_pct": 1.5,
       "prob_test_lower_pct": 5.0
     },
     "trade_standards": {
