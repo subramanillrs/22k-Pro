@@ -1014,46 +1014,68 @@ def extract_ibja_rates_from_soup(soup):
     Extract 24K (999) and 22K (916) AM & PM fix rates from IBJA HTML soup.
     IBJA rates are quoted per 10 grams ex-GST.
     """
-    tbl = soup.find("table", {"id": re.compile(r"TodayRatesTableDataYes|ctrate", re.I)})
-    if not tbl:
-        for t in soup.find_all("table"):
-            txt = t.get_text()
-            if "999" in txt and "916" in txt:
-                tbl = t
-                break
-    if not tbl:
-        return None
-
     rates = {}
-    for tr in tbl.find_all("tr"):
-        cells = [td.get_text(strip=True) for td in tr.find_all(["td", "th"])]
-        if not cells or len(cells) < 2:
-            continue
-        row_str = " ".join(cells).upper()
-        nums = []
-        for c in cells[1:]:
-            clean_c = re.sub(r"[^\d.]", "", c)
-            if clean_c:
+    # Current IBJA markup puts purity in column headings and fixes in separate
+    # AM/PM tables. Match columns by header so Silver 999 cannot be read as gold.
+    session_tables = []
+    for session, container_id in (("am", "tab-am"), ("pm", "tab-pm")):
+        container = soup.find(id=container_id)
+        table = container.find("table") if container else None
+        if table:
+            session_tables.append((session, table))
+    if session_tables:
+        for session, table in session_tables:
+            rows = table.find_all("tr")
+            headers = [cell.get_text(" ", strip=True).lower() for cell in rows[0].find_all(["th", "td"])] if rows else []
+            col_24 = next((i for i, h in enumerate(headers) if h == "999" or "gold 999" in h), None)
+            col_22 = next((i for i, h in enumerate(headers) if h == "916" or "gold 916" in h), None)
+            if col_24 is None or col_22 is None:
+                continue
+            for row in rows[1:]:
+                cells = row.find_all(["td", "th"])
+                if len(cells) <= max(col_24, col_22):
+                    continue
+                values = []
+                for index in (col_24, col_22):
+                    raw = re.sub(r"[^\d.]", "", cells[index].get_text(strip=True))
+                    try:
+                        value = float(raw)
+                    except ValueError:
+                        values.append(None)
+                        continue
+                    values.append(value if 10000 <= value <= 300000 else None)
+                if all(values):
+                    rates[f"24k_{session}_10g"], rates[f"22k_{session}_10g"] = values
+                    break
+    # Legacy table fallback requires explicit purity row labels. Do not match
+    # purity text anywhere in a row: the Silver 999 column is unrelated.
+    if not rates:
+        table = soup.find("table", {"id": re.compile(r"TodayRatesTableDataYes|ctrate", re.I)})
+        if not table:
+            table = next((t for t in soup.find_all("table") if "999" in t.get_text() and "916" in t.get_text()), None)
+        if not table:
+            return None
+        for row in table.find_all("tr"):
+            cells = [cell.get_text(" ", strip=True) for cell in row.find_all(["td", "th"])]
+            if len(cells) < 2:
+                continue
+            label = cells[0].lower()
+            if not re.search(r"\b(?:gold\s*)?(?:999|916|24k|22k)\b", label):
+                continue
+            nums = []
+            for cell in cells[1:]:
+                clean = re.sub(r"[^\d.]", "", cell)
                 try:
-                    val = float(clean_c)
-                    if 10000 <= val <= 300000:
-                        nums.append(val)
+                    value = float(clean)
                 except ValueError:
-                    pass
-        if not nums:
-            continue
-
-        if "999" in row_str or "24" in row_str:
-            rates["24k_am_10g"] = nums[0]
-            rates["24k_pm_10g"] = nums[1] if len(nums) > 1 else nums[0]
-        elif "916" in row_str or "22" in row_str:
-            rates["22k_am_10g"] = nums[0]
-            rates["22k_pm_10g"] = nums[1] if len(nums) > 1 else nums[0]
-
-    if "22k_am_10g" in rates or "22k_pm_10g" in rates:
-        return rates
-    return None
-
+                    continue
+                if 10000 <= value <= 300000:
+                    nums.append(value)
+            if nums:
+                key = "24k" if re.search(r"999|24k", label) else "22k"
+                rates[f"{key}_am_10g"] = nums[0]
+                rates[f"{key}_pm_10g"] = nums[1] if len(nums) > 1 else nums[0]
+    return rates if ("22k_am_10g" in rates or "22k_pm_10g" in rates) else None
 
 def extract_ibja_from_mirror(soup):
     """

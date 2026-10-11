@@ -24,6 +24,20 @@ sys.path.insert(0, str(PROJECT_DIR))
 import update_gold
 
 
+def test_ibja_parser_uses_purity_columns_not_silver_values():
+    html = """
+    <div id="tab-am"><table><tr><th>Date</th><th>999</th><th>995</th><th>916</th><th>Silver 999</th></tr>
+    <tr><td>11/10/2026</td><td>149614</td><td>149015</td><td>137046</td><td>221170</td></tr></table></div>
+    <div id="tab-pm"><table><tr><th>Date</th><th>999</th><th>995</th><th>916</th><th>Silver 999</th></tr>
+    <tr><td>11/10/2026</td><td>149430</td><td>148832</td><td>136878</td><td>221109</td></tr></table></div>
+    """
+    parsed = update_gold.extract_ibja_rates_from_soup(update_gold.BeautifulSoup(html, "html.parser"))
+    assert parsed == {
+        "24k_am_10g": 149614.0, "22k_am_10g": 137046.0,
+        "24k_pm_10g": 149430.0, "22k_pm_10g": 136878.0,
+    }, parsed
+
+
 def test_ibja_fetching_and_fallbacks():
     print("Testing IBJA fetching and fallbacks...")
     ibja_data = update_gold.fetch_ibja()

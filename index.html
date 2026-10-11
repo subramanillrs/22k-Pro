@@ -385,6 +385,11 @@ button, input, select { font-family: inherit; color: inherit; border: none; back
   color: var(--ink-soft); cursor: pointer; transition: all var(--transition);
   box-shadow: var(--elev-1);
 }
+.refresh-toggle { display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; flex-shrink:0; background:var(--glass-surface); border:1px solid var(--glass-border); border-radius:50%; color:var(--ink-soft); cursor:pointer; box-shadow:var(--elev-1); transition:all var(--transition); }
+.refresh-toggle:active { transform:scale(0.9); background:var(--paper-sunken); }
+.refresh-toggle svg { width:14px; height:14px; }
+.refresh-toggle.is-loading svg { animation:spin 0.8s linear infinite; }
+.refresh-toggle:disabled { opacity:0.65; cursor:wait; }
 .theme-toggle:active { transform: scale(0.9); background: var(--paper-sunken); }
 .theme-toggle svg { width: 13px; height: 13px; }
 .theme-toggle .icon-sun { display: none; }
@@ -2254,7 +2259,7 @@ footer { padding: 20px 0 8px; font-size: var(--fs-xs2); opacity: 0.7; }
   .masthead-title { font-size: clamp(15px, 4.2vw, 19px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .masthead-actions { display: flex; align-items: center; gap: 5px; flex-shrink: 0; margin-left: auto; }
   .status-pill { max-width: 100px; padding: 0 7px; font-size: 10px; }
-  .target-toggle, .theme-toggle { width: 30px; height: 30px; flex-shrink: 0; }
+  .target-toggle, .theme-toggle, .refresh-toggle { width: 30px; height: 30px; flex-shrink: 0; }
   .theme-toggle { display: inline-flex !important; visibility: visible !important; }
   .panel, .hero, details.collapsible, .last-box { padding: 12px; border-radius: 14px; }
   .hero-price { font-size: clamp(22px, 8vw, 29px); }
@@ -2271,7 +2276,7 @@ footer { padding: 20px 0 8px; font-size: var(--fs-xs2); opacity: 0.7; }
   .app { padding-left: 8px; padding-right: 8px; }
   .status-pill { max-width: 82px; padding: 0 5px; font-size: 9px; }
   .masthead-title { font-size: 14px; }
-  .target-toggle, .theme-toggle { width: 28px; height: 28px; }
+  .target-toggle, .theme-toggle, .refresh-toggle { width: 28px; height: 28px; }
 }
 </style>
 
@@ -2299,6 +2304,7 @@ footer { padding: 20px 0 8px; font-size: var(--fs-xs2); opacity: 0.7; }
         <span class="status-dot"></span>
         <span id="statusText">Live 19:57 IST</span>
       </div>
+      <button class="refresh-toggle" id="fetchNow" type="button" title="Refresh gold prices now" aria-label="Refresh gold prices now"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7v5h-5"/><path d="M4.93 4.93A9 9 0 0 1 20 12M4 17v-5h5"/><path d="M19.07 19.07A9 9 0 0 1 4 12"/></svg></button>
       <button class="target-toggle" id="targetToggleBtn" type="button" aria-label="Set price target alert">
         <svg class="icon-bell" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       </button>
@@ -2399,8 +2405,6 @@ footer { padding: 20px 0 8px; font-size: var(--fs-xs2); opacity: 0.7; }
       <p id="staleDesc">No new fix published yet today — next update expected during active trading window.</p>
     </div>
   </div>
-
-  <div hidden><button id="fetchNow"></button></div>
 
   <section class="hero" id="heroCard">
     <div class="hero-top-bar">
@@ -5419,6 +5423,8 @@ setTimeout(() => {
 async function manualFetch() {
   if (fetchBusy) return;
   fetchBusy = true;
+  const refreshButton = $("fetchNow");
+  if (refreshButton) { refreshButton.disabled = true; refreshButton.classList.add("is-loading"); }
   haptic(15);
   setStatus("Connecting to Edge Worker…", false, true);
   try {
@@ -5462,6 +5468,7 @@ async function manualFetch() {
     toast("Sync Failed");
   } finally {
     fetchBusy = false;
+    if (refreshButton) { refreshButton.disabled = false; refreshButton.classList.remove("is-loading"); }
   }
 }
 

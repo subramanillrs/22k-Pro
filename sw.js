@@ -13,7 +13,7 @@
 // 4. Lifecycle: `self.skipWaiting()` and `self.clients.claim()` ensure instant
 //    activation without waiting for tabs/PWA restart.
 
-const CACHE_NAME = "gold22k-shell-v7";
+const CACHE_NAME = "gold22k-shell-v8";
 
 const SHELL_FILES = [
   "./",
