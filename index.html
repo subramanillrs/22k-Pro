@@ -5,7 +5,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#f8f4ea" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#100e0a" media="(prefers-color-scheme: dark)">
 <meta name="description" content="Chennai 22K Gold Rate Today — Live Madras Jewellers & Diamond Merchants Association (MJDMA) benchmark, price charts, sovereign calculation & jewellery cost estimator.">
@@ -208,7 +208,7 @@ html {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow-x: hidden;
-  touch-action: pan-y;
+  touch-action: pan-y pinch-zoom;
 }
 
 body {
@@ -226,6 +226,12 @@ body {
 }
 input, select { user-select: auto; -webkit-user-select: auto; }
 button, input, select { font-family: inherit; color: inherit; border: none; background: none; outline: none; }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible,
+a:focus-visible, summary:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 4px var(--gold-tint);
+}
 
 .num, td, .amount { font-variant-numeric: tabular-nums lining-nums; }
 
@@ -2270,6 +2276,14 @@ footer { padding: 20px 0 8px; font-size: var(--fs-xs2); opacity: 0.7; }
   .chart-panel { padding: 10px 10px 8px; }
   .receipt-card { padding: 12px; }
   .port-summary-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Keep iOS Safari from zooming the page unexpectedly when a small form field is focused. */
+@media (max-width: 640px) {
+  input[type="text"], input[type="number"], input[type="search"], input[type="date"],
+  input[type="email"], input[type="tel"], input[type="password"], select, textarea {
+    font-size: 16px !important;
+  }
 }
 
 @media (max-width: 360px) {
