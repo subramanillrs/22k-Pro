@@ -1,5 +1,5 @@
 {
-  "calculated_at": "2026-10-11T19:16:00.623745+05:30",
+  "calculated_at": "2026-10-11T21:40:26.185371+05:30",
   "price_points_used": 30,
   "rsi": {
     "rsi_14": 43.26,
@@ -28,14 +28,14 @@
     "near_resistance": false
   },
   "sentiment": {
-    "sentiment_score": 55,
+    "sentiment_score": 53,
     "sentiment_label": "Neutral",
     "action_hint": "High consolidation; maintain disciplined stop levels.",
     "components": {
       "rsi_score": 43.26,
       "momentum_score": 44.33,
       "var_risk_score": 68.0,
-      "spread_score": 95.0
+      "spread_score": 78.0
     }
   }
 }
