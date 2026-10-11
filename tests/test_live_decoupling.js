@@ -183,9 +183,9 @@ async function runTests() {
   print("============================================================");
 
   assert(/<meta name="viewport" content="[^"]*width=device-width[^"]*"/.test(indexHtml) && !/maximum-scale=1|user-scalable=no/.test(indexHtml), "Mobile viewport keeps pinch-to-zoom available");
-  assert(/touch-action:\\s*pan-y pinch-zoom/.test(indexHtml), "Page touch handling preserves pinch zoom");
-  assert(/:focus-visible[\\s\\S]*?outline:\\s*2px solid var\\(--gold\\)/.test(indexHtml), "Keyboard focus has a visible gold focus ring");
-  assert(/@media\\s*\\(max-width:\\s*640px\\)[\\s\\S]*?font-size:\\s*16px !important/.test(indexHtml), "Mobile form controls use Safari-friendly 16px text");
+  assert(/touch-action:\s*pan-y pinch-zoom/.test(indexHtml), "Page touch handling preserves pinch zoom");
+  assert(/:focus-visible[\s\S]*?outline:\s*2px solid var\(--gold\)/.test(indexHtml), "Keyboard focus has a visible gold focus ring");
+  assert(/@media\s*\(max-width:\s*640px\)[\s\S]*?font-size:\s*16px !important/.test(indexHtml), "Mobile form controls use Safari-friendly 16px text");
 
   // TEST 1: loadLiveOnly execution and performance
   print("\n[TEST 1] Testing loadLiveOnly(silent=false)...");

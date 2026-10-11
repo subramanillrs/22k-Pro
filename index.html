@@ -391,11 +391,17 @@ a:focus-visible, summary:focus-visible {
   color: var(--ink-soft); cursor: pointer; transition: all var(--transition);
   box-shadow: var(--elev-1);
 }
-.refresh-toggle { display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; flex-shrink:0; background:var(--glass-surface); border:1px solid var(--glass-border); border-radius:50%; color:var(--ink-soft); cursor:pointer; box-shadow:var(--elev-1); transition:all var(--transition); }
-.refresh-toggle:active { transform:scale(0.9); background:var(--paper-sunken); }
-.refresh-toggle svg { width:14px; height:14px; }
-.refresh-toggle.is-loading svg { animation:spin 0.8s linear infinite; }
-.refresh-toggle:disabled { opacity:0.65; cursor:wait; }
+.refresh-toggle {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; flex-shrink: 0;
+  background: var(--glass-surface); border: 1px solid var(--glass-border);
+  border-radius: 50%; color: var(--ink-soft); cursor: pointer;
+  box-shadow: var(--elev-1); transition: all var(--transition);
+}
+.refresh-toggle:active { transform: scale(0.9); background: var(--paper-sunken); }
+.refresh-toggle svg { width: 14px; height: 14px; }
+.refresh-toggle.is-loading svg { animation: spin 0.8s linear infinite; }
+.refresh-toggle:disabled { opacity: 0.65; cursor: wait; }
 .theme-toggle:active { transform: scale(0.9); background: var(--paper-sunken); }
 .theme-toggle svg { width: 13px; height: 13px; }
 .theme-toggle .icon-sun { display: none; }
@@ -2292,6 +2298,11 @@ footer { padding: 20px 0 8px; font-size: var(--fs-xs2); opacity: 0.7; }
   .masthead-title { font-size: 14px; }
   .target-toggle, .theme-toggle, .refresh-toggle { width: 28px; height: 28px; }
 }
+.upgrade-nav{position:sticky;top:0;z-index:30;display:flex;gap:7px;align-items:center;overflow-x:auto;padding:8px 2px;margin:0 0 12px;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);scrollbar-width:none}
+.upgrade-nav::-webkit-scrollbar{display:none}.upgrade-nav a,.upgrade-nav button{flex:0 0 auto;border:1px solid var(--rule);border-radius:999px;padding:7px 12px;background:var(--paper-raised);color:var(--ink-soft);font:600 12px var(--font-sans);text-decoration:none}.upgrade-nav a:hover,.upgrade-nav button:hover{border-color:var(--gold);color:var(--ink)}
+.daily-snapshot{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0 16px;padding:14px 14px 26px;border:1px solid var(--rule);border-radius:16px;background:var(--paper-raised);box-shadow:0 4px 14px rgba(45,31,12,.04);scroll-margin-top:60px}.upgrade-nav a{scroll-margin-top:60px}.daily-snapshot>div{display:flex;flex-direction:column;gap:5px}.daily-snapshot span,.daily-snapshot small{font-size:11px;color:var(--ink-faint)}.daily-snapshot strong{font-size:15px;font-variant-numeric:tabular-nums;color:var(--ink)}.daily-snapshot small{position:absolute;bottom:8px;left:14px}
+.preset-tools,.portfolio-backup-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;border:1px solid var(--rule);border-radius:14px;background:var(--paper)}.preset-tools label{font-size:12px;color:var(--ink-soft);font-weight:600}.preset-tools select,.preset-tools input{flex:1 1 110px;min-width:0;max-width:180px;padding:8px}.portfolio-backup-tools{margin:12px 0}.portfolio-backup-tools span{flex:1 1 100%;font-size:11px;color:var(--ink-faint)}.portfolio-backup-tools label{cursor:pointer}
+@media(max-width:420px){.daily-snapshot{gap:5px;padding-left:10px;padding-right:10px}.daily-snapshot strong{font-size:13px}.daily-snapshot span{font-size:10px}.preset-tools select,.preset-tools input{max-width:none}}
 </style>
 
 </head>
@@ -2318,7 +2329,9 @@ footer { padding: 20px 0 8px; font-size: var(--fs-xs2); opacity: 0.7; }
         <span class="status-dot"></span>
         <span id="statusText">Live 19:57 IST</span>
       </div>
-      <button class="refresh-toggle" id="fetchNow" type="button" title="Refresh gold prices now" aria-label="Refresh gold prices now"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7v5h-5"/><path d="M4.93 4.93A9 9 0 0 1 20 12M4 17v-5h5"/><path d="M19.07 19.07A9 9 0 0 1 4 12"/></svg></button>
+      <button class="refresh-toggle" id="fetchNow" type="button" title="Refresh gold prices now" aria-label="Refresh gold prices now">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7v5h-5"/><path d="M4.93 4.93A9 9 0 0 1 20 12M4 17v-5h5"/><path d="M19.07 19.07A9 9 0 0 1 4 12"/></svg>
+      </button>
       <button class="target-toggle" id="targetToggleBtn" type="button" aria-label="Set price target alert">
         <svg class="icon-bell" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       </button>
@@ -2328,6 +2341,11 @@ footer { padding: 20px 0 8px; font-size: var(--fs-xs2); opacity: 0.7; }
       </button>
     </div>
   </header>
+
+  <nav class="upgrade-nav" aria-label="Quick navigation">
+    <a href="#heroCard">Rates</a><a href="#historicalLog">Trend</a><a href="#calculator">Calculator</a><a href="#portfolioBlock">Portfolio</a>
+    <button type="button" id="languageToggle" aria-label="Switch language">தமிழ்</button>
+  </nav>
 
   <div class="target-card" id="targetCard" hidden>
     <div class="target-card-inner">
@@ -2446,6 +2464,13 @@ footer { padding: 20px 0 8px; font-size: var(--fs-xs2); opacity: 0.7; }
         <span class="hero-foot-sub" id="todayTime">22:40 PM</span>
       </div>
     </div>
+  </section>
+
+  <section class="daily-snapshot" aria-label="Today's recorded price range">
+    <div><span>Today’s low</span><strong id="dailyLow">—</strong></div>
+    <div><span>Today’s high</span><strong id="dailyHigh">—</strong></div>
+    <div><span>vs previous close</span><strong id="dailyChange">—</strong></div>
+    <small id="dailyRangeNote">Updates when today’s fixes are published</small>
   </section>
 
   <div class="panel purity-row">
@@ -2837,6 +2862,13 @@ footer { padding: 20px 0 8px; font-size: var(--fs-xs2); opacity: 0.7; }
     <div class="panel">
       <div class="calc-suite">
 
+        <div class="preset-tools" aria-label="Saved calculator setups">
+          <label for="calcPreset">Saved setup</label>
+          <select id="calcPreset" class="calc-input"><option value="">Choose a setup…</option></select>
+          <input id="calcPresetName" class="calc-input" type="text" maxlength="32" placeholder="Name this setup">
+          <button id="saveCalcPreset" type="button" class="chip">Save setup</button>
+        </div>
+
         <div class="calc-segmented-mode">
           <div class="calc-segmented-mode-thumb" id="calcModeThumb"></div>
           <button class="calc-mode-btn active" type="button" data-mode="value">By Weight</button>
@@ -3209,6 +3241,13 @@ footer { padding: 20px 0 8px; font-size: var(--fs-xs2); opacity: 0.7; }
           </div>
           <button class="btn-gold" id="portAddBtn" type="button">+ Save to Portfolio</button>
         </div>
+      </div>
+
+      <div class="portfolio-backup-tools">
+        <span>Holdings stay on this device. Import adds new lots; it never replaces existing ones.</span>
+        <button type="button" class="chip" id="exportPortfolio">Export backup</button>
+        <label class="chip" for="importPortfolioFile">Import backup</label>
+        <input id="importPortfolioFile" type="file" accept="application/json,.json" hidden>
       </div>
 
       <div class="port-table-wrap">
@@ -4138,6 +4177,7 @@ function isLiveDataFresh(d) {
 function renderLive(d) {
   if (!d) return;
   live = d;
+  updateDailySnapshot(d);
   const rate = Number(d.rate_22k);
   const rate8 = Number.isFinite(Number(d.rate_8g)) ? Number(d.rate_8g) : rate * 8;
 
@@ -4205,6 +4245,25 @@ function renderLive(d) {
   if (typeof window.calculateGoldSchemeVsSip === "function") window.calculateGoldSchemeVsSip();
   if (typeof auditJewellerBill === "function") auditJewellerBill();
   if (typeof calculateOldGoldMelt === "function") calculateOldGoldMelt();
+}
+
+function updateDailySnapshot(record) {
+  const historyRows = Array.isArray(history) ? history.filter(row => row && row.date === record?.date && Number.isFinite(Number(row.rate_22k))) : [];
+  const rates = historyRows.map(row => Number(row.rate_22k));
+  if (record && Number.isFinite(Number(record.rate_22k)) && !rates.includes(Number(record.rate_22k))) rates.push(Number(record.rate_22k));
+  const low = rates.length ? Math.min(...rates) : null;
+  const high = rates.length ? Math.max(...rates) : null;
+  if ($("dailyLow")) $("dailyLow").textContent = low == null ? "—" : money(low) + "/g";
+  if ($("dailyHigh")) $("dailyHigh").textContent = high == null ? "—" : money(high) + "/g";
+  const close = Number(record?.previous_close_22k || (typeof getPreviousClose === "function" ? getPreviousClose(record?.date) : 0));
+  const change = low != null && close > 0 ? (Number(record.rate_22k) - close) : null;
+  const changeEl = $("dailyChange");
+  if (changeEl) {
+    changeEl.textContent = change == null ? "—" : (change > 0 ? "+" : "") + money(change) + "/g";
+    changeEl.style.color = change == null ? "" : change > 0 ? "var(--bad)" : change < 0 ? "var(--good)" : "";
+  }
+  const note = $("dailyRangeNote");
+  if (note) note.textContent = rates.length > 1 ? `${rates.length} recorded fix${rates.length === 1 ? "" : "es"} · not an intraday live quote` : "Range expands as today’s fixes are published";
 }
 
 function renderTodayTimeline() {
@@ -5013,6 +5072,7 @@ async function loadPublishedData(silent = false) {
     .then(historical => {
       if (historical) {
         history = normalize(historical);
+        if (typeof updateDailySnapshot === "function") updateDailySnapshot(live || latest);
         localStorage.setItem("gold_history_backup", JSON.stringify(history));
         if (typeof saveCacheToIndexedDB === "function") saveCacheToIndexedDB("gold_history", history);
         renderStats();
@@ -5824,8 +5884,8 @@ function scheduleAdaptivePoll() {
           await loadPublishedData(true);
         }
       } catch (_) {}
-      // Re-check recovery on each visible poll so an open app can request an early refresh
-      // when GitHub's scheduled run is delayed. The Worker call remains throttled per device.
+      // Re-check the recovery bridge on every visible poll. If GitHub's scheduled
+      // run is delayed, an open app can ask the existing Worker to refresh sooner.
       if (typeof checkAndAutoTriggerWorker === "function") {
         checkAndAutoTriggerWorker(live).catch(() => {});
       }
@@ -7558,6 +7618,39 @@ let chartViewMode = "spline";
     renderPortfolio();
   }
 
+  const exportBtn = document.getElementById("exportPortfolio");
+  const importInput = document.getElementById("importPortfolioFile");
+  if (exportBtn) exportBtn.addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify({ format: "22k-pro-portfolio", version: 1, exportedAt: new Date().toISOString(), lots }, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a"); link.href = url; link.download = `22k-pro-portfolio-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url);
+    if (typeof toast === "function") toast("Portfolio backup downloaded");
+  });
+  if (importInput) importInput.addEventListener("change", async () => {
+    const file = importInput.files && importInput.files[0]; importInput.value = "";
+    if (!file) return;
+    try {
+      if (file.size > 512000) throw new Error("Backup is too large (maximum 500 KB)");
+      const parsed = JSON.parse(await file.text());
+      const incoming = Array.isArray(parsed) ? parsed : parsed && parsed.format === "22k-pro-portfolio" && parsed.version === 1 ? parsed.lots : null;
+      if (!Array.isArray(incoming) || incoming.length > 500) throw new Error("This is not a supported portfolio backup");
+      const validDate = value => /^\d{4}-\d{2}-\d{2}$/.test(String(value || "")) && !Number.isNaN(Date.parse(value));
+      const clean = incoming.filter(lot => lot && validDate(lot.date) && Number.isFinite(Number(lot.weight)) && Number(lot.weight) > 0 && Number(lot.weight) <= 10000 && Number.isFinite(Number(lot.rate)) && Number(lot.rate) > 0 && Number(lot.rate) <= 10000000).map(lot => ({
+        id: String(lot.id || "").slice(0, 64) || Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
+        date: String(lot.date), weight: Number(lot.weight), rate: Number(lot.rate),
+        note: String(lot.note || "Purchase lot").replace(/[<>\u0000-\u001f]/g, "").slice(0, 80),
+        createdAt: typeof lot.createdAt === "string" && !Number.isNaN(Date.parse(lot.createdAt)) ? lot.createdAt : new Date().toISOString()
+      }));
+      if (!clean.length) throw new Error("No valid purchase lots found in this backup");
+      const fingerprints = new Set(lots.map(lot => `${lot.date}|${Number(lot.weight)}|${Number(lot.rate)}|${String(lot.note || "")}`));
+      const additions = clean.filter(lot => { const key = `${lot.date}|${lot.weight}|${lot.rate}|${lot.note}`; if (fingerprints.has(key)) return false; fingerprints.add(key); return true; });
+      if (!additions.length) { if (typeof toast === "function") toast("All backup lots already exist; nothing changed"); return; }
+      lots.push(...additions); saveLots();
+      if (typeof toast === "function") toast(`Added ${additions.length} lot${additions.length === 1 ? "" : "s"}; existing holdings kept`);
+    } catch (error) { if (typeof toast === "function") toast(error.message || "Could not read portfolio backup"); }
+  });
+
   function renderPortfolio() {
     if (!tableBody) return;
     const currentRate = (typeof live !== "undefined" && live && Number(live.rate_22k)) ? Number(live.rate_22k) : 6850;
@@ -7601,7 +7694,7 @@ let chartViewMode = "spline";
 
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td><strong>${lot.date || "—"}</strong><br><small style="color:var(--ink-faint);">${lot.note || "Holding lot"}</small></td>
+        <td><strong>${esc(lot.date || "—")}</strong><br><small style="color:var(--ink-faint);">${esc(lot.note || "Holding lot")}</small></td>
         <td><b>${w.toFixed(2)}g</b><br><small style="color:var(--ink-soft);">${(w / 8).toFixed(2)} Sov</small></td>
         <td>₹ ${r.toLocaleString("en-IN")}<br><small style="color:var(--ink-faint);">₹ ${Math.round(cost).toLocaleString("en-IN")}</small></td>
         <td><b>₹ ${Math.round(cur).toLocaleString("en-IN")}</b></td>
@@ -8924,6 +9017,60 @@ html{scroll-behavior:smooth;scroll-padding-top:84px}
     window.calculateGoldSchemeVsSip = calculateGoldSchemeVsSip;
   }
 
+})();
+</script>
+<script>
+(() => {
+  const presetFields = ["calcMode", "weight", "budget", "making", "gstRate", "flatFee", "oldWeight", "oldPurity"];
+  const presetSelect = document.getElementById("calcPreset");
+  const presetName = document.getElementById("calcPresetName");
+  const presetKey = "gold_calc_presets_v1";
+  const readPresets = () => { try { const v = JSON.parse(localStorage.getItem(presetKey) || "[]"); return Array.isArray(v) ? v.filter(x => x && typeof x.name === "string" && x.values && typeof x.values === "object").slice(0, 30) : []; } catch (_) { return []; } };
+  const renderPresets = () => {
+    if (!presetSelect) return;
+    const selected = presetSelect.value;
+    presetSelect.innerHTML = '<option value="">Choose a setup…</option>';
+    readPresets().forEach((preset, index) => { const option = document.createElement("option"); option.value = String(index); option.textContent = preset.name; presetSelect.appendChild(option); });
+    if (selected && Number(selected) < presetSelect.options.length - 1) presetSelect.value = selected;
+  };
+  renderPresets();
+  document.getElementById("saveCalcPreset")?.addEventListener("click", () => {
+    const name = (presetName?.value || "").trim().slice(0, 32);
+    if (!name) { toast("Enter a name for this calculator setup"); presetName?.focus(); return; }
+    const values = Object.fromEntries(presetFields.map(id => [id, document.getElementById(id)?.value ?? ""]));
+    const presets = readPresets(); const existing = presets.findIndex(item => item.name.toLowerCase() === name.toLowerCase());
+    if (existing >= 0) presets[existing] = { name, values }; else if (presets.length < 30) presets.push({ name, values }); else { toast("Maximum of 30 saved setups reached"); return; }
+    localStorage.setItem(presetKey, JSON.stringify(presets)); renderPresets(); presetSelect.value = String(Math.max(0, existing >= 0 ? existing : presets.length - 1));
+    toast(`Saved “${name}” on this device`);
+  });
+  presetSelect?.addEventListener("change", () => {
+    const item = readPresets()[Number(presetSelect.value)]; if (!item) return;
+    presetFields.forEach(id => { const field = document.getElementById(id); if (field && item.values[id] !== undefined) field.value = String(item.values[id]); });
+    document.querySelectorAll(".calc-mode-btn").forEach(button => button.classList.toggle("active", button.dataset.mode === (item.values.calcMode || "value")));
+    positionCalcModeThumb(); calculate();
+    toast(`Applied “${item.name}”`);
+  });
+
+  const translations = {
+    "Rates": "விலை", "Trend": "போக்கு", "Calculator": "கணிப்பான்", "Portfolio": "சேமிப்பு",
+    "Gold 22k rate": "22K தங்க விலை", "Jewellery calculator": "நகைக் கணிப்பான்", "Gold portfolio & ROI": "தங்க சேமிப்பு & வருமானம்",
+    "Historical Log": "விலை வரலாறு", "Today’s low": "இன்றைய குறைந்த விலை", "Today’s high": "இன்றைய அதிக விலை", "vs previous close": "முந்தைய விலையுடன்",
+    "By Weight": "எடையின்படி", "By Budget": "பட்ஜெட்டின்படி", "Making charge": "செய்கூலி", "GST (%)": "GST (%)",
+    "+ Save to Portfolio": "+ சேமிக்க", "Save setup": "அமைப்பைச் சேமி", "Export backup": "காப்புப் பிரதியை ஏற்று", "Import backup": "காப்புப் பிரதியை இறக்கு"
+  };
+  const languageButton = document.getElementById("languageToggle");
+  const applyLanguage = tamil => {
+    document.documentElement.lang = tamil ? "ta" : "en";
+    document.querySelectorAll(".upgrade-nav a").forEach(link => { const en = link.dataset.en || link.textContent.trim(); link.dataset.en = en; link.textContent = tamil ? translations[en] || en : en; });
+    document.querySelectorAll("h3, .calc-mode-btn, .calc-group-label, .port-form-title, .daily-snapshot span, .portfolio-backup-tools button, .portfolio-backup-tools label").forEach(el => {
+      const en = el.dataset.en || el.textContent.trim(); el.dataset.en = en; if (translations[en]) el.textContent = tamil ? translations[en] : en;
+    });
+    if (languageButton) languageButton.textContent = tamil ? "English" : "தமிழ்";
+    localStorage.setItem("gold_ui_language", tamil ? "ta" : "en");
+  };
+  const isTamil = () => localStorage.getItem("gold_ui_language") === "ta";
+  applyLanguage(isTamil());
+  languageButton?.addEventListener("click", () => applyLanguage(!isTamil()));
 })();
 </script>
 

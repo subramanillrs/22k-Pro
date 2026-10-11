@@ -124,7 +124,7 @@ function assert(cond, msg) {
 
 async function runTests() {
   print("[TEST 1] CACHE_NAME and Lifecycle registration");
-  assert(CACHE_NAME === "gold22k-shell-v9", "CACHE_NAME is gold22k-shell-v9");
+  assert(CACHE_NAME === "gold22k-shell-v10", "CACHE_NAME is gold22k-shell-v10");
 
   // Trigger install
   const installEvent = { waitUntil: (p) => p };
