@@ -4248,6 +4248,14 @@ function renderLive(d) {
 }
 
 function updateDailySnapshot(record) {
+  const today = typeof getTodayISTDateStr === "function" ? getTodayISTDateStr() : new Date().toISOString().slice(0, 10);
+  if (!record || record.date !== today) {
+    $("dailyLow") && ($("dailyLow").textContent = "—");
+    $("dailyHigh") && ($("dailyHigh").textContent = "—");
+    $("dailyChange") && ($("dailyChange").textContent = "—");
+    $("dailyRangeNote") && ($("dailyRangeNote").textContent = record?.date ? `No fixes recorded today · latest benchmark ${dateText(record.date)}` : "Waiting for today’s published fixes");
+    return;
+  }
   const historyRows = Array.isArray(history) ? history.filter(row => row && row.date === record?.date && Number.isFinite(Number(row.rate_22k))) : [];
   const rates = historyRows.map(row => Number(row.rate_22k));
   if (record && Number.isFinite(Number(record.rate_22k)) && !rates.includes(Number(record.rate_22k))) rates.push(Number(record.rate_22k));
