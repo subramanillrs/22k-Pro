@@ -31,8 +31,8 @@ let live = null;
 // AGENT 5 CODE TO TEST
 // ============================================================
 const WORKER_AUTO_TRIGGER_KEY = "last_worker_auto_trigger";
-const WORKER_AUTO_TRIGGER_COOLDOWN_MS = 10 * 60 * 1000; // 10 minutes debounce
-const WORKER_STALE_THRESHOLD_MS = 20 * 60 * 1000; // 20 minutes stale threshold
+const WORKER_AUTO_TRIGGER_COOLDOWN_MS = 4 * 60 * 1000; // 4 minutes debounce
+const WORKER_STALE_THRESHOLD_MS = 2 * 60 * 1000; // 2 minutes stale threshold
 
 let workerAutoTriggerInProgress = false;
 
@@ -97,14 +97,14 @@ async function checkAndAutoTriggerWorker(targetLive, customNow) {
     return false;
   }
 
-  // 2. Check if live rate timestamp is older than 20 minutes (meaning no fix has landed yet)
+  // 2. Check if live rate timestamp is older than 2 minutes (meaning no recent update has landed yet)
   const rateTs = getLiveSnapshotTimestamp(currentLive);
-  const isOlderThan20Min = !rateTs || ((now - rateTs) > WORKER_STALE_THRESHOLD_MS);
-  if (!isOlderThan20Min) {
+  const isStale = !rateTs || ((now - rateTs) > WORKER_STALE_THRESHOLD_MS);
+  if (!isStale) {
     return false;
   }
 
-  // 3. Debounce/throttle: fire at most once every 10 minutes per device
+  // 3. Debounce/throttle: fire at most once every 4 minutes per device
   let lastTrigger = 0;
   try {
     const lastStr = localStorage.getItem(WORKER_AUTO_TRIGGER_KEY);
@@ -194,17 +194,17 @@ async function runTests() {
   assert(resMidday === false, "Does not trigger outside fix hours (14:00 IST)");
   assert(fetchCalls.length === 0, "No worker fetch called");
 
-  // Case B: During fix hours, but fresh rate (<20 mins) -> should NOT trigger
+  // Case B: During fix hours, but fresh rate (<2 mins) -> should NOT trigger
   const eveningNow = makeISTDate(18, 0).getTime();
-  const freshLive = { timestamp: new Date("2026-09-08T17:50:00+05:30").toISOString() }; // 10 mins old
+  const freshLive = { timestamp: new Date("2026-09-08T17:59:00+05:30").toISOString() }; // 1 minute old
   const resFresh = await checkAndAutoTriggerWorker(freshLive, eveningNow);
-  assert(resFresh === false, "Does not trigger when rate is fresh (10 mins old)");
+  assert(resFresh === false, "Does not trigger when rate is fresh (1 minute old)");
   assert(fetchCalls.length === 0, "No worker fetch called");
 
-  // Case C: During fix hours, rate is older than 20 mins (e.g. 25 mins old) -> SHOULD trigger!
-  const staleLive = { timestamp: new Date("2026-09-08T17:35:00+05:30").toISOString() }; // 25 mins old
+  // Case C: During fix hours, rate is older than 2 mins -> SHOULD trigger!
+  const staleLive = { timestamp: new Date("2026-09-08T17:55:00+05:30").toISOString() }; // 5 mins old
   const resStale = await checkAndAutoTriggerWorker(staleLive, eveningNow);
-  assert(resStale === true, "Triggers when rate is >20 mins old during active fix hours");
+  assert(resStale === true, "Triggers when rate is >2 mins old during active fix hours");
   assert(fetchCalls.length === 1, "Dispatched 1 worker fetch");
   assert(fetchCalls[0].url === WORKER_URL, "Target URL matches WORKER_URL");
   assert(fetchCalls[0].options.method === "POST", "Method is POST");
@@ -212,25 +212,25 @@ async function runTests() {
   assert(parsedBody.force === true, "Body is { force: true }");
   assert(localStorage.getItem("last_worker_auto_trigger") === String(eveningNow), "Records last_worker_auto_trigger in localStorage");
 
-  print("[TEST 4] 10-Minute Debounce / Throttle Protection");
-  // Try triggering again 2 minutes later (18:02) -> should be throttled
+  print("[TEST 4] 4-Minute Debounce / Throttle Protection");
+  // Try triggering again 2 minutes later -> should be throttled
   const twoMinsLater = eveningNow + 2 * 60 * 1000;
   const resThrottled = await checkAndAutoTriggerWorker(staleLive, twoMinsLater);
-  assert(resThrottled === false, "Throttled: Does not fire within 10 minutes");
+  assert(resThrottled === false, "Throttled: Does not fire within 4 minutes");
   assert(fetchCalls.length === 1, "Fetch count remains 1 (no extra call)");
 
-  // Try triggering 9 minutes later (18:09) -> still throttled
-  const nineMinsLater = eveningNow + 9 * 60 * 1000;
-  const resStillThrottled = await checkAndAutoTriggerWorker(staleLive, nineMinsLater);
-  assert(resStillThrottled === false, "Still throttled at 9 minutes");
+  // Try triggering 3 minutes later -> still throttled
+  const threeMinsLater = eveningNow + 3 * 60 * 1000;
+  const resStillThrottled = await checkAndAutoTriggerWorker(staleLive, threeMinsLater);
+  assert(resStillThrottled === false, "Still throttled at 3 minutes");
   assert(fetchCalls.length === 1, "Fetch count remains 1");
 
-  // Try triggering 11 minutes later (18:11) -> should fire!
-  const elevenMinsLater = eveningNow + 11 * 60 * 1000;
-  const resAllowed = await checkAndAutoTriggerWorker(staleLive, elevenMinsLater);
-  assert(resAllowed === true, "Allows new trigger after 10 minute debounce window expires");
+  // Try triggering 4 minutes later -> should fire!
+  const fourMinsLater = eveningNow + 4 * 60 * 1000;
+  const resAllowed = await checkAndAutoTriggerWorker(staleLive, fourMinsLater);
+  assert(resAllowed === true, "Allows new trigger after 4 minute debounce window expires");
   assert(fetchCalls.length === 2, "Fetch count increased to 2");
-  assert(localStorage.getItem("last_worker_auto_trigger") === String(elevenMinsLater), "Updates last_worker_auto_trigger timestamp");
+  assert(localStorage.getItem("last_worker_auto_trigger") === String(fourMinsLater), "Updates last_worker_auto_trigger timestamp");
 
   print("============================================================");
   print("ALL AGENT 5 WATCHDOG TESTS PASSED PERFECTLY!");

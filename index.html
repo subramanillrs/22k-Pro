@@ -5478,8 +5478,8 @@ if ($("fetchNow")) $("fetchNow").onclick = manualFetch;
 // AGENT 5: EDGE WORKER AUTO-HEAL & STALE DATA TRIGGER BRIDGE
 // ============================================================
 const WORKER_AUTO_TRIGGER_KEY = "last_worker_auto_trigger";
-const WORKER_AUTO_TRIGGER_COOLDOWN_MS = 10 * 60 * 1000; // 10 minutes debounce
-const WORKER_STALE_THRESHOLD_MS = 20 * 60 * 1000; // 20 minutes stale threshold
+const WORKER_AUTO_TRIGGER_COOLDOWN_MS = 4 * 60 * 1000; // Keep recovery attempts within the 5-minute freshness target
+const WORKER_STALE_THRESHOLD_MS = 2 * 60 * 1000; // Recover as soon as the published feed is >2 minutes old
 
 let workerAutoTriggerInProgress = false;
 
@@ -5544,9 +5544,9 @@ function getLiveSnapshotTimestamp(liveData = live) {
 /**
  * Auto-Heal Watchdog:
  * When the app is opened during active fix hours (09:30 - 11:30 IST or 17:00 - 20:00 IST):
- * If the live rate timestamp is older than 20 minutes (meaning no fix has landed yet),
+ * If the live rate timestamp is older than 2 minutes (meaning no recent update has landed yet),
  * automatically trigger a background fetch to WORKER_URL with { method: "POST", body: JSON.stringify({ force: true }) }.
- * Throttled/debounced to fire at most once every 10 minutes per device via localStorage.
+ * Throttled/debounced to fire at most once every 4 minutes per device via localStorage.
  */
 async function checkAndAutoTriggerWorker(targetLive) {
   const currentLive = targetLive || live || (() => {
@@ -5562,14 +5562,14 @@ async function checkAndAutoTriggerWorker(targetLive) {
     return false;
   }
 
-  // 2. Check if live rate timestamp is older than 20 minutes (meaning no fix has landed yet)
+  // 2. Check if live rate timestamp is older than 2 minutes (meaning no recent update has landed yet)
   const rateTs = getLiveSnapshotTimestamp(currentLive);
-  const isOlderThan20Min = !rateTs || ((now - rateTs) > WORKER_STALE_THRESHOLD_MS);
-  if (!isOlderThan20Min) {
+  const isStale = !rateTs || ((now - rateTs) > WORKER_STALE_THRESHOLD_MS);
+  if (!isStale) {
     return false;
   }
 
-  // 3. Debounce/throttle: fire at most once every 10 minutes per device
+  // 3. Debounce/throttle: fire at most once every 4 minutes per device
   let lastTrigger = 0;
   try {
     const lastStr = localStorage.getItem(WORKER_AUTO_TRIGGER_KEY);
@@ -5810,6 +5810,11 @@ function scheduleAdaptivePoll() {
           await loadPublishedData(true);
         }
       } catch (_) {}
+      // Re-check recovery on each visible poll so an open app can request an early refresh
+      // when GitHub's scheduled run is delayed. The Worker call remains throttled per device.
+      if (typeof checkAndAutoTriggerWorker === "function") {
+        checkAndAutoTriggerWorker(live).catch(() => {});
+      }
     }
     // Only continue polling if document is still visible
     if (document.visibilityState === "visible") {
