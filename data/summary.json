@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-19T22:20:18.143385+05:30",
+  "generated_at": "2026-10-20T02:47:19.682835+05:30",
   "all_time_high": {
     "rate_22k": 16800,
     "date": "2026-01-29"
@@ -10,24 +10,24 @@
   },
   "current_month": {
     "month": "2026-10",
-    "average_22k": 13682,
+    "average_22k": 13680,
     "high": 13880,
     "low": 13515
   },
   "current_year": {
     "year": "2026",
-    "average_22k": 14037,
+    "average_22k": 14036,
     "high": 16800,
     "low": 12440
   },
   "last_30_records": {
-    "average_22k": 13790,
-    "high": 14285,
+    "average_22k": 13766,
+    "high": 14270,
     "low": 13515
   },
-  "total_records": 1298,
+  "total_records": 1299,
   "quant": {
-    "calculated_at": "2026-10-19T22:20:18.123778+05:30",
+    "calculated_at": "2026-10-20T02:47:19.669069+05:30",
     "rate_22k": 13570,
     "rate_8g": 108560,
     "volatility_30d_annualized": 0.0978,
@@ -39,15 +39,15 @@
     "var_95_1d_lower_bound": 13433,
     "var_95_1d_upper_bound": 13707,
     "max_drawdown_30d_pct": 5.39,
-    "chennai_premium_amount": 157,
-    "chennai_premium_pct": 1.17,
+    "chennai_premium_amount": 149,
+    "chennai_premium_pct": 1.11,
     "sowcarpet_wholesale_22k": 13525,
     "sowcarpet_discount_pct": -0.33,
     "retail_showroom_spread": 180,
     "retail_showroom_rate_22k": 13750,
     "retail_showroom_markup_pct": 1.33,
     "submarket_spreads": {
-      "calculated_at": "2026-10-19T22:20:18.124639+05:30",
+      "calculated_at": "2026-10-20T02:47:19.669726+05:30",
       "reference_mjdma_22k": 13570,
       "reference_mjdma_24k": 14804,
       "sowcarpet": {
@@ -150,7 +150,7 @@
         "description": "Gross margin between Sowcarpet wholesale raw bar cash rate and T. Nagar showroom retail price"
       }
     },
-    "ibja_benchmark_rate": 13413,
+    "ibja_benchmark_rate": 13421,
     "macro_parity": {
       "implied_comex_usd_oz": 4566.4,
       "usd_inr_benchmark": 87.8,
