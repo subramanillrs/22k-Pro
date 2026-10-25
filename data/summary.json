@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-25T23:08:43.128150+05:30",
+  "generated_at": "2026-10-26T00:56:40.720018+05:30",
   "all_time_high": {
     "rate_22k": 16800,
     "date": "2026-01-29"
@@ -10,44 +10,44 @@
   },
   "current_month": {
     "month": "2026-10",
-    "average_22k": 13587,
+    "average_22k": 13581,
     "high": 13880,
     "low": 13060
   },
   "current_year": {
     "year": "2026",
-    "average_22k": 14004,
+    "average_22k": 14002,
     "high": 16800,
     "low": 12440
   },
   "last_30_records": {
-    "average_22k": 13604,
+    "average_22k": 13573,
     "high": 14000,
     "low": 13060
   },
-  "total_records": 1316,
+  "total_records": 1317,
   "quant": {
-    "calculated_at": "2026-10-25T23:08:43.114109+05:30",
+    "calculated_at": "2026-10-26T00:56:40.641601+05:30",
     "rate_22k": 13070,
     "rate_8g": 104560,
-    "volatility_30d_annualized": 0.1058,
-    "volatility_30d_pct": 10.58,
+    "volatility_30d_annualized": 0.106,
+    "volatility_30d_pct": 10.6,
     "volatility_daily_pct": 0.667,
-    "var_95_1d_amount": 143.34,
+    "var_95_1d_amount": 143.5,
     "var_95_1d_pct": 1.1,
-    "var_95_1d_8g_amount": 1146.75,
+    "var_95_1d_8g_amount": 1147.98,
     "var_95_1d_lower_bound": 12927,
     "var_95_1d_upper_bound": 13213,
-    "max_drawdown_30d_pct": 6.78,
-    "chennai_premium_amount": 97,
-    "chennai_premium_pct": 0.75,
+    "max_drawdown_30d_pct": 6.71,
+    "chennai_premium_amount": 113,
+    "chennai_premium_pct": 0.87,
     "sowcarpet_wholesale_22k": 13025,
     "sowcarpet_discount_pct": -0.34,
     "retail_showroom_spread": 180,
     "retail_showroom_rate_22k": 13250,
     "retail_showroom_markup_pct": 1.38,
     "submarket_spreads": {
-      "calculated_at": "2026-10-25T23:08:43.114771+05:30",
+      "calculated_at": "2026-10-26T00:56:40.642096+05:30",
       "reference_mjdma_22k": 13070,
       "reference_mjdma_24k": 14258,
       "sowcarpet": {
@@ -150,7 +150,7 @@
         "description": "Gross margin between Sowcarpet wholesale raw bar cash rate and T. Nagar showroom retail price"
       }
     },
-    "ibja_benchmark_rate": 12973,
+    "ibja_benchmark_rate": 12957,
     "macro_parity": {
       "implied_comex_usd_oz": 4398.1,
       "usd_inr_benchmark": 87.8,
@@ -167,8 +167,8 @@
         "upper": 13455
       },
       "horizon_30d": {
-        "lower": 12308,
-        "upper": 13879
+        "lower": 12307,
+        "upper": 13880
       },
       "prob_test_upper_pct": 0.0,
       "prob_test_lower_pct": 5.0
