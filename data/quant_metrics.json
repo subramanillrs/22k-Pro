@@ -1,34 +1,34 @@
 {
-  "calculated_at": "2026-10-27T12:26:07.179742+05:30",
-  "rate_22k": 13085,
-  "rate_8g": 104680,
-  "volatility_30d_annualized": 0.1062,
-  "volatility_30d_pct": 10.62,
-  "volatility_daily_pct": 0.669,
-  "var_95_1d_amount": 144.02,
-  "var_95_1d_pct": 1.1,
-  "var_95_1d_8g_amount": 1152.2,
-  "var_95_1d_lower_bound": 12941,
-  "var_95_1d_upper_bound": 13229,
+  "calculated_at": "2026-10-27T18:28:25.032200+05:30",
+  "rate_22k": 13135,
+  "rate_8g": 105080,
+  "volatility_30d_annualized": 0.1075,
+  "volatility_30d_pct": 10.75,
+  "volatility_daily_pct": 0.677,
+  "var_95_1d_amount": 146.3,
+  "var_95_1d_pct": 1.11,
+  "var_95_1d_8g_amount": 1170.44,
+  "var_95_1d_lower_bound": 12989,
+  "var_95_1d_upper_bound": 13281,
   "max_drawdown_30d_pct": 6.71,
-  "chennai_premium_amount": 143,
-  "chennai_premium_pct": 1.1,
-  "sowcarpet_wholesale_22k": 13040,
+  "chennai_premium_amount": 154,
+  "chennai_premium_pct": 1.19,
+  "sowcarpet_wholesale_22k": 13090,
   "sowcarpet_discount_pct": -0.34,
   "retail_showroom_spread": 180,
-  "retail_showroom_rate_22k": 13265,
-  "retail_showroom_markup_pct": 1.38,
+  "retail_showroom_rate_22k": 13315,
+  "retail_showroom_markup_pct": 1.37,
   "submarket_spreads": {
-    "calculated_at": "2026-10-27T12:26:07.180453+05:30",
-    "reference_mjdma_22k": 13085,
-    "reference_mjdma_24k": 14275,
+    "calculated_at": "2026-10-27T18:28:25.032837+05:30",
+    "reference_mjdma_22k": 13135,
+    "reference_mjdma_24k": 14329,
     "sowcarpet": {
       "hub_name": "Sowcarpet Wholesale Bullion",
       "locality": "Mint Street / NSC Bose Road",
       "market_type": "wholesale_bullion",
-      "rate_22k": 13040,
-      "rate_24k": 14225,
-      "rate_8g": 104320,
+      "rate_22k": 13090,
+      "rate_24k": 14280,
+      "rate_8g": 104720,
       "discount_per_g": -45,
       "discount_pct": -0.34,
       "discount_range": {
@@ -37,8 +37,8 @@
         "benchmark_discount": -45
       },
       "rate_range": {
-        "min_rate_22k": 13020,
-        "max_rate_22k": 13050
+        "min_rate_22k": 13070,
+        "max_rate_22k": 13100
       },
       "notes": "Raw bullion cast bars traded wholesale ex-GST, ex-making charges"
     },
@@ -46,11 +46,11 @@
       "hub_name": "T. Nagar Showroom Retail",
       "locality": "Usman Road / Panagal Park",
       "market_type": "retail_showroom",
-      "rate_22k": 13265,
-      "rate_24k": 14471,
-      "rate_8g": 106120,
+      "rate_22k": 13315,
+      "rate_24k": 14525,
+      "rate_8g": 106520,
       "retail_showroom_spread": 180,
-      "markup_pct": 1.38,
+      "markup_pct": 1.37,
       "markup_range": {
         "min_spread": 150,
         "max_spread": 220,
@@ -63,8 +63,8 @@
         "city": "Coimbatore",
         "region": "Western Tamil Nadu",
         "cluster_role": "Industrial Jewelry Manufacturing & Casting Cluster",
-        "rate_22k": 13070,
-        "rate_8g": 104560,
+        "rate_22k": 13120,
+        "rate_8g": 104960,
         "basis_spread": -15,
         "basis_pct": -0.11,
         "basis_range": [
@@ -77,8 +77,8 @@
         "city": "Madurai",
         "region": "Southern Tamil Nadu",
         "cluster_role": "Temple Jewelry & Southern Cultural Retail Hub",
-        "rate_22k": 13100,
-        "rate_8g": 104800,
+        "rate_22k": 13150,
+        "rate_8g": 105200,
         "basis_spread": 15,
         "basis_pct": 0.11,
         "basis_range": [
@@ -91,8 +91,8 @@
         "city": "Tiruchirappalli",
         "region": "Central Tamil Nadu",
         "cluster_role": "Central Transit & Regional Distribution Corridor",
-        "rate_22k": 13080,
-        "rate_8g": 104640,
+        "rate_22k": 13130,
+        "rate_8g": 105040,
         "basis_spread": -5,
         "basis_pct": -0.04,
         "basis_range": [
@@ -105,8 +105,8 @@
         "city": "Salem",
         "region": "North-Western Tamil Nadu",
         "cluster_role": "Bullion Refining & Goldsmithing Cluster",
-        "rate_22k": 13075,
-        "rate_8g": 104600,
+        "rate_22k": 13125,
+        "rate_8g": 105000,
         "basis_spread": -10,
         "basis_pct": -0.08,
         "basis_range": [
@@ -118,29 +118,29 @@
     },
     "value_chain_arbitrage": {
       "gross_spread_amount": 225,
-      "gross_spread_pct": 1.73,
+      "gross_spread_pct": 1.72,
       "description": "Gross margin between Sowcarpet wholesale raw bar cash rate and T. Nagar showroom retail price"
     }
   },
-  "ibja_benchmark_rate": 12942,
+  "ibja_benchmark_rate": 12981,
   "macro_parity": {
-    "implied_comex_usd_oz": 4403.2,
+    "implied_comex_usd_oz": 4420.0,
     "usd_inr_benchmark": 87.8,
     "customs_duty_pct": 11.5,
     "gst_pct": 3.0,
-    "import_parity_22k": 13085,
+    "import_parity_22k": 13135,
     "physical_premium_amount": 0,
     "physical_premium_pct": 0.0,
     "parity_status": "Parity Aligned"
   },
   "volatility_cone": {
     "horizon_7d": {
-      "lower": 12709,
-      "upper": 13472
+      "lower": 12754,
+      "upper": 13528
     },
     "horizon_30d": {
-      "lower": 12319,
-      "upper": 13898
+      "lower": 12358,
+      "upper": 13961
     },
     "prob_test_upper_pct": 0.0,
     "prob_test_lower_pct": 5.0
