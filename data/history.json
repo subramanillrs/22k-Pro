@@ -15945,5 +15945,30 @@
     "chennai_premium_pct": 1.64,
     "sowcarpet_wholesale_22k": 13090,
     "retail_showroom_spread": 180
+  },
+  {
+    "date": "2026-10-28",
+    "time": "13:08:34",
+    "timestamp": "2026-10-28T13:08:34.373774+05:30",
+    "session": "AM",
+    "rate_22k": 13195,
+    "rate_24k": 14395,
+    "weight_1g": 13195,
+    "weight_8g": 105560,
+    "rate_8g": 105560,
+    "previous_close_22k": 13135,
+    "change": 60,
+    "changed": true,
+    "source": "GoodReturns (Fallback)",
+    "source_url": "https://www.goodreturns.in/gold-rates/chennai.html",
+    "type": "intraday",
+    "agreement": null,
+    "livechennai_rate": null,
+    "goodreturns_rate": 13195,
+    "ibja_rate_22k": 12923,
+    "chennai_premium_amount": 272,
+    "chennai_premium_pct": 2.1,
+    "sowcarpet_wholesale_22k": 13150,
+    "retail_showroom_spread": 180
   }
 ]
