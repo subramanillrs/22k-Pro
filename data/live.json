@@ -1,29 +1,29 @@
 {
-  "rate_22k": 13195,
-  "rate_8g": 105560,
+  "rate_22k": 13040,
+  "rate_8g": 104320,
   "currency": "INR",
   "city": "Chennai",
   "purity": "22K",
   "date": "2026-10-30",
-  "time": "07:01:58",
-  "timestamp": "2026-10-30T07:01:58.906915+05:30",
-  "changed": false,
+  "time": "13:19:44",
+  "timestamp": "2026-10-30T13:19:44.258645+05:30",
+  "changed": true,
   "previous_rate_22k": 13195,
-  "change": 0,
+  "change": -155,
   "sources": {
     "livechennai": {
       "source": "LiveChennai",
-      "rate_22k": 13195,
-      "rate_24k": 14395,
-      "rate_8g": 105560,
+      "rate_22k": 13040,
+      "rate_24k": 14225,
+      "rate_8g": 104320,
       "url": "https://www.livechennai.com/gold_silverrate.asp",
-      "fetched_at": "2026-10-30T07:01:58.045595+05:30"
+      "fetched_at": "2026-10-30T13:19:43.385133+05:30"
     },
     "goodreturns": {
       "source": "GoodReturns",
-      "rate_22k": 13194,
+      "rate_22k": 13040,
       "url": "https://www.goodreturns.in/gold-rates/chennai.html",
-      "fetched_at": "2026-10-30T07:01:57.752887+05:30"
+      "fetched_at": "2026-10-30T13:19:42.929813+05:30"
     },
     "ibja": {
       "date": "2026-10-30",
@@ -44,38 +44,38 @@
       "purity_24k": "999",
       "source": "IBJA Official (ibjarates.com)",
       "url": "https://ibjarates.com",
-      "fetched_at": "2026-10-30T07:01:57.550529+05:30",
+      "fetched_at": "2026-10-30T13:19:42.686478+05:30",
       "status": "success",
       "is_fallback": false
     }
   },
   "source_update_times": [
-    "2026-10-30T07:01:58.045595+05:30",
-    "2026-10-30T07:01:57.752887+05:30",
-    "2026-10-30T07:01:57.550529+05:30"
+    "2026-10-30T13:19:43.385133+05:30",
+    "2026-10-30T13:19:42.929813+05:30",
+    "2026-10-30T13:19:42.686478+05:30"
   ],
   "source_rates": [
-    13195,
-    13194,
+    13040,
+    13040,
     13020
   ],
   "sources_agree": true,
-  "last_checked_at": "2026-10-30T07:01:58.906915+05:30",
+  "last_checked_at": "2026-10-30T13:19:44.258645+05:30",
   "source": "LiveChennai (MJDMA verified)",
-  "last_checked": "2026-10-30T07:01:58.906915+05:30",
+  "last_checked": "2026-10-30T13:19:44.258645+05:30",
   "agreement": true,
   "session": "AM",
-  "rate_24k": 14395,
-  "weight_1g": 13195,
-  "weight_8g": 105560,
-  "livechennai_rate": 13195,
-  "goodreturns_rate": 13194,
-  "livechennai_fetched_at": "2026-10-30T07:01:58.045595+05:30",
-  "goodreturns_fetched_at": "2026-10-30T07:01:57.752887+05:30",
+  "rate_24k": 14225,
+  "weight_1g": 13040,
+  "weight_8g": 104320,
+  "livechennai_rate": 13040,
+  "goodreturns_rate": 13040,
+  "livechennai_fetched_at": "2026-10-30T13:19:43.385133+05:30",
+  "goodreturns_fetched_at": "2026-10-30T13:19:42.929813+05:30",
   "livechennai_url": "https://www.livechennai.com/gold_silverrate.asp",
   "goodreturns_url": "https://www.goodreturns.in/gold-rates/chennai.html",
-  "updated_at": "2026-10-30T07:01:58.906915+05:30",
-  "verified_at": "2026-10-30T07:01:58.906915+05:30",
+  "updated_at": "2026-10-30T13:19:44.258645+05:30",
+  "verified_at": "2026-10-30T13:19:44.258645+05:30",
   "ibja": {
     "date": "2026-10-30",
     "rate_22k": 13020,
@@ -95,78 +95,78 @@
     "purity_24k": "999",
     "source": "IBJA Official (ibjarates.com)",
     "url": "https://ibjarates.com",
-    "fetched_at": "2026-10-30T07:01:57.550529+05:30",
+    "fetched_at": "2026-10-30T13:19:42.686478+05:30",
     "status": "success",
     "is_fallback": false
   },
   "ibja_rate_22k": 13020,
   "ibja_rate_24k": 14214,
-  "chennai_premium_amount": 175,
-  "chennai_premium_pct": 1.34,
+  "chennai_premium_amount": 20,
+  "chennai_premium_pct": 0.15,
   "consensus": {
-    "consensus_rate": 13195,
-    "confidence": 100,
-    "sources_count": 3,
+    "consensus_rate": 13040,
+    "confidence": 90,
+    "sources_count": 2,
     "breakdown": {
       "livechennai": {
-        "rate": 13195,
+        "rate": 13040,
         "modified_z": 0.0,
         "is_outlier": false,
         "base_weight": 0.4,
         "reliability_weight": 0.4,
         "deviation": 0,
         "deviation_pct": 0.0,
-        "effective_weight": 0.5
+        "effective_weight": 0.615
       },
       "goodreturns": {
-        "rate": 13194,
-        "modified_z": 0.03,
+        "rate": 13040,
+        "modified_z": 0.0,
         "is_outlier": false,
         "base_weight": 0.25,
         "reliability_weight": 0.25,
-        "deviation": -1,
-        "deviation_pct": -0.01,
-        "effective_weight": 0.312
+        "deviation": 0,
+        "deviation_pct": 0.0,
+        "effective_weight": 0.385
       },
       "ibja": {
         "rate": 13195,
-        "modified_z": 0.0,
-        "is_outlier": false,
+        "modified_z": 4.01,
+        "is_outlier": true,
         "base_weight": 0.15,
         "reliability_weight": 0.15,
-        "deviation": 0,
-        "deviation_pct": 0.0,
-        "effective_weight": 0.187
+        "deviation": 155,
+        "deviation_pct": 1.19,
+        "effective_weight": 0.0
       }
     },
     "valid": true
   },
-  "sowcarpet_wholesale_22k": 13150,
-  "sowcarpet_discount_pct": -0.34,
+  "sowcarpet_wholesale_22k": 12995,
+  "sowcarpet_discount_pct": -0.35,
   "retail_showroom_spread": 180,
-  "retail_showroom_rate_22k": 13375,
-  "retail_showroom_markup_pct": 1.36,
+  "retail_showroom_rate_22k": 13220,
+  "retail_showroom_markup_pct": 1.38,
   "submarket_spreads": {
-    "calculated_at": "2026-10-30T07:01:58.906898+05:30",
-    "reference_mjdma_22k": 13195,
-    "reference_mjdma_24k": 14395,
+    "calculated_at": "2026-10-30T13:19:44.258622+05:30",
+    "reference_mjdma_22k": 13040,
+    "reference_mjdma_24k": 14225,
     "sowcarpet": {
       "hub_name": "Sowcarpet Wholesale Bullion",
       "locality": "Mint Street / NSC Bose Road",
       "market_type": "wholesale_bullion",
-      "rate_22k": 13150,
-      "rate_24k": 14345,
-      "rate_8g": 105200,
+      "rate_22k": 12995,
+      "rate_24k": 14176,
+      "rate_8g": 103960,
       "discount_per_g": -45,
-      "discount_pct": -0.34,
+      "discount_pct": -0.35,
       "discount_range": {
         "min_discount": -65,
         "max_discount": -35,
         "benchmark_discount": -45
       },
       "rate_range": {
-        "min_rate_22k": 13130,
-        "max_rate_22k": 13160
+        "min_rate_22k": 12975,
+        "max_rate_22k": 13005
       },
       "notes": "Raw bullion cast bars traded wholesale ex-GST, ex-making charges"
     },
@@ -174,11 +174,11 @@
       "hub_name": "T. Nagar Showroom Retail",
       "locality": "Usman Road / Panagal Park",
       "market_type": "retail_showroom",
-      "rate_22k": 13375,
-      "rate_24k": 14591,
-      "rate_8g": 107000,
+      "rate_22k": 13220,
+      "rate_24k": 14422,
+      "rate_8g": 105760,
       "retail_showroom_spread": 180,
-      "markup_pct": 1.36,
+      "markup_pct": 1.38,
       "markup_range": {
         "min_spread": 150,
         "max_spread": 220,
@@ -191,10 +191,10 @@
         "city": "Coimbatore",
         "region": "Western Tamil Nadu",
         "cluster_role": "Industrial Jewelry Manufacturing & Casting Cluster",
-        "rate_22k": 13180,
-        "rate_8g": 105440,
+        "rate_22k": 13025,
+        "rate_8g": 104200,
         "basis_spread": -15,
-        "basis_pct": -0.11,
+        "basis_pct": -0.12,
         "basis_range": [
           -15,
           15
@@ -205,10 +205,10 @@
         "city": "Madurai",
         "region": "Southern Tamil Nadu",
         "cluster_role": "Temple Jewelry & Southern Cultural Retail Hub",
-        "rate_22k": 13210,
-        "rate_8g": 105680,
+        "rate_22k": 13055,
+        "rate_8g": 104440,
         "basis_spread": 15,
-        "basis_pct": 0.11,
+        "basis_pct": 0.12,
         "basis_range": [
           -15,
           15
@@ -219,8 +219,8 @@
         "city": "Tiruchirappalli",
         "region": "Central Tamil Nadu",
         "cluster_role": "Central Transit & Regional Distribution Corridor",
-        "rate_22k": 13190,
-        "rate_8g": 105520,
+        "rate_22k": 13035,
+        "rate_8g": 104280,
         "basis_spread": -5,
         "basis_pct": -0.04,
         "basis_range": [
@@ -233,8 +233,8 @@
         "city": "Salem",
         "region": "North-Western Tamil Nadu",
         "cluster_role": "Bullion Refining & Goldsmithing Cluster",
-        "rate_22k": 13185,
-        "rate_8g": 105480,
+        "rate_22k": 13030,
+        "rate_8g": 104240,
         "basis_spread": -10,
         "basis_pct": -0.08,
         "basis_range": [
@@ -246,14 +246,14 @@
     },
     "value_chain_arbitrage": {
       "gross_spread_amount": 225,
-      "gross_spread_pct": 1.71,
+      "gross_spread_pct": 1.73,
       "description": "Gross margin between Sowcarpet wholesale raw bar cash rate and T. Nagar showroom retail price"
     }
   },
   "previous_close_22k": 13195,
   "previous_close_date": "2026-10-29",
-  "change_8g": 0,
-  "change_pct": 0.0,
-  "intraday_change": 0,
-  "intraday_changed": false
+  "change_8g": -1240,
+  "change_pct": -1.17,
+  "intraday_change": -155,
+  "intraday_changed": true
 }
