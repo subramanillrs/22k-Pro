@@ -5,8 +5,8 @@
   "city": "Chennai",
   "purity": "22K",
   "date": "2026-10-31",
-  "time": "02:31:14",
-  "timestamp": "2026-10-31T02:31:14.564909+05:30",
+  "time": "02:52:28",
+  "timestamp": "2026-10-31T02:52:28.597322+05:30",
   "changed": false,
   "previous_rate_22k": 13040,
   "change": 0,
@@ -17,13 +17,13 @@
       "rate_24k": 14225,
       "rate_8g": 104320,
       "url": "https://www.livechennai.com/gold_silverrate.asp",
-      "fetched_at": "2026-10-31T02:31:14.402260+05:30"
+      "fetched_at": "2026-10-31T02:52:26.910291+05:30"
     },
     "goodreturns": {
       "source": "GoodReturns",
       "rate_22k": 13040,
       "url": "https://www.goodreturns.in/gold-rates/chennai.html",
-      "fetched_at": "2026-10-31T02:31:12.894701+05:30"
+      "fetched_at": "2026-10-31T02:52:26.739428+05:30"
     },
     "ibja": {
       "date": "2026-10-31",
@@ -44,15 +44,15 @@
       "purity_24k": "999",
       "source": "IBJA Official (ibjarates.com)",
       "url": "https://ibjarates.com",
-      "fetched_at": "2026-10-31T02:31:12.629011+05:30",
+      "fetched_at": "2026-10-31T02:52:26.497563+05:30",
       "status": "success",
       "is_fallback": false
     }
   },
   "source_update_times": [
-    "2026-10-31T02:31:14.402260+05:30",
-    "2026-10-31T02:31:12.894701+05:30",
-    "2026-10-31T02:31:12.629011+05:30"
+    "2026-10-31T02:52:26.910291+05:30",
+    "2026-10-31T02:52:26.739428+05:30",
+    "2026-10-31T02:52:26.497563+05:30"
   ],
   "source_rates": [
     13040,
@@ -60,9 +60,9 @@
     13020
   ],
   "sources_agree": true,
-  "last_checked_at": "2026-10-31T02:31:14.564909+05:30",
+  "last_checked_at": "2026-10-31T02:52:28.597322+05:30",
   "source": "LiveChennai (MJDMA verified)",
-  "last_checked": "2026-10-31T02:31:14.564909+05:30",
+  "last_checked": "2026-10-31T02:52:28.597322+05:30",
   "agreement": true,
   "session": "PM",
   "rate_24k": 14225,
@@ -70,12 +70,12 @@
   "weight_8g": 104320,
   "livechennai_rate": 13040,
   "goodreturns_rate": 13040,
-  "livechennai_fetched_at": "2026-10-31T02:31:14.402260+05:30",
-  "goodreturns_fetched_at": "2026-10-31T02:31:12.894701+05:30",
+  "livechennai_fetched_at": "2026-10-31T02:52:26.910291+05:30",
+  "goodreturns_fetched_at": "2026-10-31T02:52:26.739428+05:30",
   "livechennai_url": "https://www.livechennai.com/gold_silverrate.asp",
   "goodreturns_url": "https://www.goodreturns.in/gold-rates/chennai.html",
-  "updated_at": "2026-10-31T02:31:14.564909+05:30",
-  "verified_at": "2026-10-31T02:31:14.564909+05:30",
+  "updated_at": "2026-10-31T02:52:28.597322+05:30",
+  "verified_at": "2026-10-31T02:52:28.597322+05:30",
   "ibja": {
     "date": "2026-10-31",
     "rate_22k": 13020,
@@ -95,7 +95,7 @@
     "purity_24k": "999",
     "source": "IBJA Official (ibjarates.com)",
     "url": "https://ibjarates.com",
-    "fetched_at": "2026-10-31T02:31:12.629011+05:30",
+    "fetched_at": "2026-10-31T02:52:26.497563+05:30",
     "status": "success",
     "is_fallback": false
   },
@@ -147,7 +147,7 @@
   "retail_showroom_rate_22k": 13220,
   "retail_showroom_markup_pct": 1.38,
   "submarket_spreads": {
-    "calculated_at": "2026-10-31T02:31:14.564887+05:30",
+    "calculated_at": "2026-10-31T02:52:28.597305+05:30",
     "reference_mjdma_22k": 13040,
     "reference_mjdma_24k": 14225,
     "sowcarpet": {
