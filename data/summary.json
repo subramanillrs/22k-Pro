@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-04T23:19:07.432658+05:30",
+  "generated_at": "2026-11-05T03:54:44.255242+05:30",
   "all_time_high": {
     "rate_22k": 16800,
     "date": "2026-01-29"
@@ -10,44 +10,44 @@
   },
   "current_month": {
     "month": "2026-11",
-    "average_22k": 12817,
+    "average_22k": 12837,
     "high": 13100,
     "low": 12730
   },
   "current_year": {
     "year": "2026",
-    "average_22k": 13928,
+    "average_22k": 13926,
     "high": 16800,
     "low": 12440
   },
   "last_30_records": {
-    "average_22k": 13347,
+    "average_22k": 13329,
     "high": 13880,
     "low": 12730
   },
-  "total_records": 1351,
+  "total_records": 1352,
   "quant": {
-    "calculated_at": "2026-11-04T23:19:07.418417+05:30",
+    "calculated_at": "2026-11-05T03:54:44.240681+05:30",
     "rate_22k": 13100,
     "rate_8g": 104800,
     "volatility_30d_annualized": 0.131,
     "volatility_30d_pct": 13.1,
     "volatility_daily_pct": 0.825,
-    "var_95_1d_amount": 177.79,
+    "var_95_1d_amount": 177.88,
     "var_95_1d_pct": 1.36,
-    "var_95_1d_8g_amount": 1422.35,
+    "var_95_1d_8g_amount": 1423.03,
     "var_95_1d_lower_bound": 12922,
     "var_95_1d_upper_bound": 13278,
     "max_drawdown_30d_pct": 8.29,
-    "chennai_premium_amount": 498,
-    "chennai_premium_pct": 3.95,
+    "chennai_premium_amount": 448,
+    "chennai_premium_pct": 3.54,
     "sowcarpet_wholesale_22k": 13055,
     "sowcarpet_discount_pct": -0.34,
     "retail_showroom_spread": 180,
     "retail_showroom_rate_22k": 13280,
     "retail_showroom_markup_pct": 1.37,
     "submarket_spreads": {
-      "calculated_at": "2026-11-04T23:19:07.419016+05:30",
+      "calculated_at": "2026-11-05T03:54:44.241378+05:30",
       "reference_mjdma_22k": 13100,
       "reference_mjdma_24k": 14291,
       "sowcarpet": {
@@ -150,7 +150,7 @@
         "description": "Gross margin between Sowcarpet wholesale raw bar cash rate and T. Nagar showroom retail price"
       }
     },
-    "ibja_benchmark_rate": 12602,
+    "ibja_benchmark_rate": 12652,
     "macro_parity": {
       "implied_comex_usd_oz": 4408.2,
       "usd_inr_benchmark": 87.8,
@@ -167,7 +167,7 @@
         "upper": 13579
       },
       "horizon_30d": {
-        "lower": 12162,
+        "lower": 12161,
         "upper": 14111
       },
       "prob_test_upper_pct": 0.1,
