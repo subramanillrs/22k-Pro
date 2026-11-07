@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-07T21:38:12.200185+05:30",
+  "generated_at": "2026-11-08T01:43:39.141994+05:30",
   "all_time_high": {
     "rate_22k": 16800,
     "date": "2026-01-29"
@@ -10,44 +10,44 @@
   },
   "current_month": {
     "month": "2026-11",
-    "average_22k": 12963,
+    "average_22k": 12972,
     "high": 13385,
     "low": 12730
   },
   "current_year": {
     "year": "2026",
-    "average_22k": 13916,
+    "average_22k": 13914,
     "high": 16800,
     "low": 12440
   },
   "last_30_records": {
-    "average_22k": 13301,
+    "average_22k": 13279,
     "high": 13880,
     "low": 12730
   },
-  "total_records": 1359,
+  "total_records": 1360,
   "quant": {
-    "calculated_at": "2026-11-07T21:38:12.186132+05:30",
+    "calculated_at": "2026-11-08T01:43:39.130511+05:30",
     "rate_22k": 13160,
     "rate_8g": 105280,
-    "volatility_30d_annualized": 0.1552,
-    "volatility_30d_pct": 15.52,
-    "volatility_daily_pct": 0.978,
-    "var_95_1d_amount": 211.65,
-    "var_95_1d_pct": 1.61,
-    "var_95_1d_8g_amount": 1693.18,
-    "var_95_1d_lower_bound": 12948,
-    "var_95_1d_upper_bound": 13372,
+    "volatility_30d_annualized": 0.1529,
+    "volatility_30d_pct": 15.29,
+    "volatility_daily_pct": 0.963,
+    "var_95_1d_amount": 208.53,
+    "var_95_1d_pct": 1.58,
+    "var_95_1d_8g_amount": 1668.27,
+    "var_95_1d_lower_bound": 12951,
+    "var_95_1d_upper_bound": 13369,
     "max_drawdown_30d_pct": 8.29,
-    "chennai_premium_amount": 203,
-    "chennai_premium_pct": 1.57,
+    "chennai_premium_amount": 242,
+    "chennai_premium_pct": 1.87,
     "sowcarpet_wholesale_22k": 13115,
     "sowcarpet_discount_pct": -0.34,
     "retail_showroom_spread": 180,
     "retail_showroom_rate_22k": 13340,
     "retail_showroom_markup_pct": 1.37,
     "submarket_spreads": {
-      "calculated_at": "2026-11-07T21:38:12.186778+05:30",
+      "calculated_at": "2026-11-08T01:43:39.130999+05:30",
       "reference_mjdma_22k": 13160,
       "reference_mjdma_24k": 14356,
       "sowcarpet": {
@@ -150,7 +150,7 @@
         "description": "Gross margin between Sowcarpet wholesale raw bar cash rate and T. Nagar showroom retail price"
       }
     },
-    "ibja_benchmark_rate": 12957,
+    "ibja_benchmark_rate": 12918,
     "macro_parity": {
       "implied_comex_usd_oz": 4428.4,
       "usd_inr_benchmark": 87.8,
@@ -163,12 +163,12 @@
     },
     "volatility_cone": {
       "horizon_7d": {
-        "lower": 12612,
-        "upper": 13732
+        "lower": 12620,
+        "upper": 13723
       },
       "horizon_30d": {
-        "lower": 12050,
-        "upper": 14372
+        "lower": 12066,
+        "upper": 14353
       },
       "prob_test_upper_pct": 0.7,
       "prob_test_lower_pct": 5.0
