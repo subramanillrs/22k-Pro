@@ -1,5 +1,5 @@
 {
-  "calculated_at": "2026-11-20T00:23:28.690333+05:30",
+  "calculated_at": "2026-11-20T04:53:44.571965+05:30",
   "rate_22k": 11980,
   "rate_8g": 95840,
   "volatility_30d_annualized": 0.1754,
@@ -11,15 +11,15 @@
   "var_95_1d_lower_bound": 11762,
   "var_95_1d_upper_bound": 12198,
   "max_drawdown_30d_pct": 10.53,
-  "chennai_premium_amount": -66,
-  "chennai_premium_pct": -0.55,
+  "chennai_premium_amount": 73,
+  "chennai_premium_pct": 0.61,
   "sowcarpet_wholesale_22k": 11935,
   "sowcarpet_discount_pct": -0.38,
   "retail_showroom_spread": 180,
   "retail_showroom_rate_22k": 12160,
   "retail_showroom_markup_pct": 1.5,
   "submarket_spreads": {
-    "calculated_at": "2026-11-20T00:23:28.690990+05:30",
+    "calculated_at": "2026-11-20T04:53:44.572368+05:30",
     "reference_mjdma_22k": 11980,
     "reference_mjdma_24k": 13069,
     "sowcarpet": {
@@ -122,7 +122,7 @@
       "description": "Gross margin between Sowcarpet wholesale raw bar cash rate and T. Nagar showroom retail price"
     }
   },
-  "ibja_benchmark_rate": 12046,
+  "ibja_benchmark_rate": 11907,
   "macro_parity": {
     "implied_comex_usd_oz": 4031.3,
     "usd_inr_benchmark": 87.8,
