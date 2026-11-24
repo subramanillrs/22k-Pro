@@ -1,41 +1,41 @@
 {
-  "calculated_at": "2026-11-24T17:13:30.149081+05:30",
+  "calculated_at": "2026-11-25T00:08:04.387742+05:30",
   "price_points_used": 30,
   "rsi": {
-    "rsi_14": 12.53,
+    "rsi_14": 13.89,
     "rsi_zone": "oversold",
     "rsi_signal": "BUY"
   },
   "ema_crossover": {
-    "ema_9": 11877.65,
-    "ema_21": 12294.85,
-    "momentum": -417.2,
-    "momentum_pct": -3.3933,
+    "ema_9": 11845.18,
+    "ema_21": 12245.0,
+    "momentum": -399.82,
+    "momentum_pct": -3.2652,
     "signal": "bearish"
   },
   "forecast": {
-    "forecast_1d": 11436,
-    "forecast_3d": 11253,
-    "forecast_7d": 10888,
+    "forecast_1d": 11438,
+    "forecast_3d": 11272,
+    "forecast_7d": 10940,
     "trend_direction": "down",
     "confidence": 0.82
   },
   "support_resistance": {
     "support": 11465,
-    "resistance": 13210,
-    "pivot": 12130,
+    "resistance": 13015,
+    "pivot": 12065,
     "near_support": false,
     "near_resistance": false
   },
   "sentiment": {
-    "sentiment_score": 26,
+    "sentiment_score": 27,
     "sentiment_label": "Bearish",
     "action_hint": "Bearish drift; wait for support stabilization before buying.",
     "components": {
-      "rsi_score": 12.53,
-      "momentum_score": 0.0,
+      "rsi_score": 13.89,
+      "momentum_score": 1.02,
       "var_risk_score": 68.0,
-      "spread_score": 73.2
+      "spread_score": 73.9
     }
   }
 }
