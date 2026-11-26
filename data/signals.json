@@ -1,5 +1,5 @@
 {
-  "calculated_at": "2026-11-26T01:17:30.977848+05:30",
+  "calculated_at": "2026-11-26T07:03:47.083114+05:30",
   "price_points_used": 30,
   "rsi": {
     "rsi_14": 13.19,
@@ -28,14 +28,14 @@
     "near_resistance": false
   },
   "sentiment": {
-    "sentiment_score": 28,
+    "sentiment_score": 25,
     "sentiment_label": "Bearish",
     "action_hint": "Bearish drift; wait for support stabilization before buying.",
     "components": {
       "rsi_score": 13.19,
       "momentum_score": 0.0,
       "var_risk_score": 68.0,
-      "spread_score": 86.8
+      "spread_score": 71.15
     }
   }
 }
