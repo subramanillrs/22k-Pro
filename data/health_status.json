@@ -1,14 +1,14 @@
 {
   "status": "ok",
-  "checked_at": "2026-11-28T00:52:30.636049+05:30",
-  "updated_at": "2026-11-28T00:52:30.602377+05:30",
-  "verified_at": "2026-11-28T00:52:30.602377+05:30",
+  "checked_at": "2026-11-28T06:35:38.812618+05:30",
+  "updated_at": "2026-11-28T06:35:38.770069+05:30",
+  "verified_at": "2026-11-28T06:35:38.770069+05:30",
   "age_hours": 0.0,
   "source_count": 3,
   "single_source": false,
   "agreement": true,
   "livechennai_rate": 11770,
-  "goodreturns_rate": 11770,
+  "goodreturns_rate": 11771,
   "rate_22k": 11770,
   "webhook_configured": false
 }
