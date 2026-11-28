@@ -1,6 +1,6 @@
 {
   "timezone": "Asia/Kolkata",
-  "updated_at": "2026-11-28T15:02:24.581173+05:30",
+  "updated_at": "2026-11-28T21:27:26.052943+05:30",
   "windows": {
     "AM": {
       "predicted_fix_time": "09:53",
@@ -13,14 +13,14 @@
       "kde_bandwidth_minutes": 40.51
     },
     "PM": {
-      "predicted_fix_time": "16:29",
+      "predicted_fix_time": "16:12",
       "arrival_window_90": [
-        "14:31",
-        "20:22"
+        "14:27",
+        "20:19"
       ],
       "polling_starts": "15 min before",
       "duration_minutes": 85,
-      "kde_bandwidth_minutes": 76.75
+      "kde_bandwidth_minutes": 75.96
     }
   },
   "active_window": null,
